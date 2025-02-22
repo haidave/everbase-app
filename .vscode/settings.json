@@ -1,4 +1,25 @@
 {
+  // Custom Application window title ❤️
+  "window.title": "${dirty} ${activeEditorShort} ${separator} ${rootName}",
+  // On save actions and formatting
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "prettier.documentSelectors": ["**/*.mdx"],
+  "[mdx]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  // Hide unnecessary filer/folders in the tree
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/*.log": true,
+    ".eslintcache": true,
+    "tsconfig.tsbuildinfo": true
+  },
+  // TanStack Router generated file settings
   "files.watcherExclude": {
     "**/routeTree.gen.ts": true
   },
