@@ -1,0 +1,37 @@
+/** @type {import("prettier").Config} */
+module.exports = {
+  endOfLine: 'lf',
+  trailingComma: 'es5',
+  semi: false,
+  singleQuote: true,
+  tabWidth: 2,
+  proseWrap: 'always',
+  importOrder: [
+    '^(react/(.*)$)|^(react$)',
+    '<THIRD_PARTY_MODULES>',
+    '',
+    '^types$',
+    '^@/env(.*)$',
+    '^@/types/(.*)$',
+    '^@/config/(.*)$',
+    '^@/lib/(.*)$',
+    '^@/hooks/(.*)$',
+    '^@/modules/(.*)$',
+    '^@/styles/(.*)$',
+    '^@/app/(.*)$',
+    '',
+    '^[./]',
+  ],
+  plugins: [
+    require.resolve('@ianvs/prettier-plugin-sort-imports'),
+    {
+      importOrderSeparation: false,
+      importOrderSortSpecifiers: true,
+      importOrderBuiltinModulesToTop: true,
+      importOrderParserPlugins: ['typescript', 'jsx', 'decorators-legacy'],
+      importOrderMergeDuplicateImports: true,
+      importOrderCombineTypeAndValueImports: true,
+    },
+    'prettier-plugin-tailwindcss',
+  ],
+}
