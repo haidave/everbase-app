@@ -41,7 +41,7 @@ if (!rootElement.innerHTML) {
         <AuthProvider>
           <RouterProvider router={router} />
         </AuthProvider>
-        <ReactQueryDevtools initialIsOpen={false} />
+        {process.env.SHOW_DEVTOOLS === 'true' && <ReactQueryDevtools initialIsOpen={false} />}
       </QueryClientProvider>
     </StrictMode>
   )

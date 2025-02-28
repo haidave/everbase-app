@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react'
+import { LoadingScreen } from '@/components/ui/loading-screen'
 import { createRootRoute, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 
@@ -6,10 +8,25 @@ export const Route = createRootRoute({
 })
 
 function RootLayout() {
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    // Simulate a minimum loading time to prevent flickering
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 500) // 500ms minimum loading time
+
+    return () => clearTimeout(timer)
+  }, [])
+
+  if (isLoading) {
+    return <LoadingScreen />
+  }
+
   return (
     <>
       <Outlet />
-      {process.env.NODE_ENV === 'development' && <TanStackRouterDevtools />}
+      {process.env.SHOW_DEVTOOLS === 'true' && <TanStackRouterDevtools />}
     </>
   )
 }
