@@ -16,11 +16,11 @@ function AuthCallback() {
 
       if (error) {
         console.error('Error during auth callback:', error)
-        navigate({ to: '/login' })
+        navigate({ to: '/sign-in' })
         return
       }
 
-      navigate({ to: '/' })
+      navigate({ to: '/dashboard' })
     }
 
     handleAuthCallback()
