@@ -7,6 +7,7 @@ import tseslint from 'typescript-eslint'
 
 export default tseslint.config({ ignores: ['dist'] }, prettier, {
   files: ['**/*.{ts,tsx}'],
+  ignores: ['src/routeTree.gen.ts'],
   extends: [...tseslint.configs.recommended, react.configs.flat.recommended, jsxA11y.flatConfigs.recommended],
   languageOptions: {
     parserOptions: {
