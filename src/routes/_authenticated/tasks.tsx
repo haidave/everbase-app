@@ -3,7 +3,7 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { useCreateTask, useDeleteTask, useTasks, useUpdateTask } from '@/hooks/use-tasks'
 
-export const Route = createFileRoute('/tasks')({
+export const Route = createFileRoute('/_authenticated/tasks')({
   component: Tasks,
 })
 
@@ -51,8 +51,9 @@ function Tasks() {
   if (error) return <div className="p-4 text-red-500">Error loading tasks: {error.message}</div>
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="mb-4 text-2xl font-bold">Your Tasks</h1>
+    <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
+      <h1 className="mb-4 text-2xl font-bold">Tasks</h1>
+      <p className="mb-6 text-zinc-400">Manage your tasks and track your progress here.</p>
 
       {/* Create task form */}
       <form onSubmit={handleSubmit} className="mb-6">

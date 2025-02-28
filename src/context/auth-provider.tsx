@@ -41,6 +41,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut()
+    // The auth state change listener will update the state
+    // and the protected routes will redirect to login
+
+    // Force navigation to login page
+    window.location.href = '/sign-in'
   }
 
   const ensureUserInDatabase = async (user: User) => {
