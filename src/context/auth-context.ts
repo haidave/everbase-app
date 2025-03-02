@@ -5,7 +5,6 @@ export type AuthContextType = {
   session: Session | null
   user: User | null
   signIn: () => Promise<void>
-  signOut: () => Promise<void>
   loading: boolean
 }
 

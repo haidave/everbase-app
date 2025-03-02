@@ -1,9 +1,11 @@
 import { Link } from '@tanstack/react-router'
 
 import { useAuth } from '@/hooks/use-auth'
+import { useSignOut } from '@/hooks/use-sign-out'
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
-  const { user, signOut } = useAuth()
+  const { user } = useAuth()
+  const signOut = useSignOut()
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
