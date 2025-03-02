@@ -39,15 +39,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
   }
 
-  const signOut = async () => {
-    await supabase.auth.signOut()
-    // The auth state change listener will update the state
-    // and the protected routes will redirect to login
-
-    // Force navigation to login page
-    window.location.href = '/sign-in'
-  }
-
   const ensureUserInDatabase = async (user: User) => {
     // Check if user exists in public.users table
     const { data: existingUser } = await supabase.from('users').select('*').eq('id', user.id).single()
@@ -78,7 +69,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     session,
     user,
     signIn,
-    signOut,
     loading,
   }
 

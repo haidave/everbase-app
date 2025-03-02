@@ -1,21 +1,32 @@
-import { useEffect } from 'react'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { LoadingScreen } from '@/components/ui/loading-screen'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 
-import { useAuth } from '@/hooks/use-auth'
+import { getSession, useAuth } from '@/hooks/use-auth'
 
 export const Route = createFileRoute('/sign-in')({
+  // Loader provides data to the component and runs before rendering
+  loader: async () => {
+    const session = await getSession()
+    return { isAuthenticated: !!session }
+  },
+  // This runs before the loader and can redirect immediately
+  beforeLoad: async () => {
+    const session = await getSession()
+    if (session) {
+      throw redirect({ to: '/dashboard' })
+    }
+  },
   component: SignIn,
 })
 
 function SignIn() {
-  const { user, loading, signIn } = useAuth()
-  const navigate = useNavigate()
+  const { isAuthenticated } = Route.useLoaderData()
+  const { loading, signIn } = useAuth()
 
-  useEffect(() => {
-    if (!loading && user) {
-      navigate({ to: '/dashboard' })
-    }
-  }, [user, loading, navigate])
+  // Show loading screen if we're still checking auth status
+  if (loading && !isAuthenticated) {
+    return <LoadingScreen />
+  }
 
   return (
     <div className="grid min-h-screen place-items-center bg-zinc-950 text-white">

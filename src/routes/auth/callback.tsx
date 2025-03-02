@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { LoadingScreen } from '@/components/ui/loading-screen'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 
 import { supabase } from '@/lib/supabase'
@@ -26,5 +27,5 @@ function AuthCallback() {
     handleAuthCallback()
   }, [navigate])
 
-  return <div className="grid min-h-screen place-items-center">Logging you in...</div>
+  return <LoadingScreen />
 }
