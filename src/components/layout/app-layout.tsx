@@ -1,5 +1,5 @@
-import { SidebarInset, SidebarProvider, SidebarTrigger } from '../ui/sidebar'
-import { ThemeToggle } from '../ui/theme-toggle'
+import { SidebarInset, SidebarProvider } from '../ui/sidebar'
+import { AppHeader } from './app-header'
 import { AppSidebar } from './app-sidebar'
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
@@ -8,10 +8,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <AppSidebar />
 
       <SidebarInset>
-        <header className="flex items-center justify-between p-4">
-          <SidebarTrigger />
-          <ThemeToggle />
-        </header>
+        <AppHeader />
 
         <div className="p-4">{children}</div>
       </SidebarInset>
