@@ -10,6 +10,7 @@ import { routeTree } from './routeTree.gen'
 import './styles/global.css'
 
 import { AuthProvider } from './context/auth-provider'
+import { ThemeProvider } from './context/theme-provider'
 
 // Create a new query client
 const queryClient = new QueryClient({
@@ -38,9 +39,11 @@ if (!rootElement.innerHTML) {
   root.render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <RouterProvider router={router} />
-        </AuthProvider>
+        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+          <AuthProvider>
+            <RouterProvider router={router} />
+          </AuthProvider>
+        </ThemeProvider>
         {process.env.SHOW_DEVTOOLS === 'true' && <ReactQueryDevtools initialIsOpen={false} />}
       </QueryClientProvider>
     </StrictMode>
