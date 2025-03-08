@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
+import { Pencil, Save, X } from 'lucide-react'
 
+import { type Task } from '@/lib/api'
 import { useCreateTask, useDeleteTask, useTasks, useUpdateTask } from '@/hooks/use-tasks'
 
 export const Route = createFileRoute('/_authenticated/tasks')({
@@ -8,7 +10,9 @@ export const Route = createFileRoute('/_authenticated/tasks')({
 })
 
 function Tasks() {
-  const [newTaskTitle, setNewTaskTitle] = useState('')
+  const [newTaskText, setNewTaskText] = useState('')
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
+  const [editText, setEditText] = useState('')
 
   // Use the custom hooks
   const { data: tasks, isLoading, error } = useTasks()
@@ -19,16 +23,13 @@ function Tasks() {
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!newTaskTitle.trim()) return
+    if (!newTaskText.trim()) return
 
     createTask.mutate(
-      {
-        title: newTaskTitle,
-        description: null,
-      },
+      { text: newTaskText },
       {
         onSuccess: () => {
-          setNewTaskTitle('')
+          setNewTaskText('')
         },
       }
     )
@@ -36,10 +37,53 @@ function Tasks() {
 
   // Toggle task completion
   const toggleTaskCompletion = (id: string, currentStatus: string) => {
-    updateTask.mutate({
-      id,
-      completed: currentStatus === 'true' ? 'false' : 'true',
-    })
+    const newStatus = currentStatus === 'true' ? 'false' : 'true'
+    console.log(`Toggling task ${id} from ${currentStatus} to ${newStatus}`)
+
+    updateTask.mutate(
+      {
+        id,
+        completed: newStatus,
+      },
+      {
+        onSuccess: (updatedTask) => {
+          console.log('Task updated successfully:', updatedTask)
+        },
+        onError: (error) => {
+          console.error('Error updating task:', error)
+        },
+      }
+    )
+  }
+
+  // Start editing a task
+  const startEditing = (task: Task) => {
+    setEditingTaskId(task.id)
+    setEditText(task.text)
+  }
+
+  // Cancel editing
+  const cancelEditing = () => {
+    setEditingTaskId(null)
+    setEditText('')
+  }
+
+  // Save edited task
+  const saveEdit = (id: string) => {
+    if (!editText.trim()) return
+
+    updateTask.mutate(
+      {
+        id,
+        text: editText,
+      },
+      {
+        onSuccess: () => {
+          setEditingTaskId(null)
+          setEditText('')
+        },
+      }
+    )
   }
 
   // Delete a task
@@ -60,8 +104,8 @@ function Tasks() {
         <div className="flex gap-2">
           <input
             type="text"
-            value={newTaskTitle}
-            onChange={(e) => setNewTaskTitle(e.target.value)}
+            value={newTaskText}
+            onChange={(e) => setNewTaskText(e.target.value)}
             placeholder="Add a new task..."
             className="flex-1 rounded-lg border border-zinc-700 px-4 py-2"
           />
@@ -83,24 +127,58 @@ function Tasks() {
           {tasks?.map((task) => (
             <li key={task.id} className="rounded-lg p-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+                <div className="flex flex-1 items-center gap-3">
                   <input
                     type="checkbox"
                     checked={task.completed === 'true'}
                     onChange={() => toggleTaskCompletion(task.id, task.completed ?? 'false')}
                     className="h-5 w-5 rounded border-zinc-600"
                   />
-                  <div className={task.completed === 'true' ? 'text-zinc-400 line-through' : ''}>
-                    <h3 className="font-medium">{task.title}</h3>
-                    {task.description && <p className="text-zinc-400">{task.description}</p>}
-                  </div>
+
+                  {editingTaskId === task.id ? (
+                    <div className="flex flex-1 gap-2">
+                      <input
+                        type="text"
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                        className="flex-1 rounded-lg border border-zinc-700 px-3 py-1"
+                      />
+                      <button
+                        onClick={() => saveEdit(task.id)}
+                        className="rounded px-2 py-1 text-sm text-green-400 hover:bg-zinc-700"
+                      >
+                        <Save size={16} />
+                      </button>
+                      <button
+                        onClick={cancelEditing}
+                        className="rounded px-2 py-1 text-sm text-red-400 hover:bg-zinc-700"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className={`flex-1 ${task.completed === 'true' ? 'text-zinc-400 line-through' : ''}`}>
+                      {task.text}
+                    </div>
+                  )}
                 </div>
-                <button
-                  onClick={() => handleDeleteTask(task.id)}
-                  className="rounded px-2 py-1 text-sm text-red-400 hover:bg-zinc-700"
-                >
-                  Delete
-                </button>
+
+                <div className="flex gap-2">
+                  {editingTaskId !== task.id && (
+                    <button
+                      onClick={() => startEditing(task)}
+                      className="rounded px-2 py-1 text-sm text-blue-400 hover:bg-zinc-700"
+                    >
+                      <Pencil size={16} />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleDeleteTask(task.id)}
+                    className="rounded px-2 py-1 text-sm text-red-400 hover:bg-zinc-700"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </li>
           ))}
