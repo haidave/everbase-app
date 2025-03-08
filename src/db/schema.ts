@@ -8,14 +8,13 @@ export const users = pgTable('users', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })
 
-// Example of another table you might add
+// Tasks table with simplified schema
 export const tasks = pgTable('tasks', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id')
     .notNull()
     .references(() => users.id),
-  title: text('title').notNull(),
-  description: text('description'),
+  text: text('text').notNull(),
   completed: text('completed').default('false'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),

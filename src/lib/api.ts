@@ -6,20 +6,15 @@ import { supabase } from './supabase'
 // Use types inferred from your Drizzle schema
 export type Task = InferSelectModel<typeof tasks>
 export type NewTask = {
-  title: string
-  description?: string | null
+  text: string
   completed?: string
-  userId: string // This will be mapped to user_id
+  userId: string
 }
 
 export const api = {
   tasks: {
-    getAll: async (userId: string): Promise<Task[]> => {
-      const { data, error } = await supabase
-        .from('tasks')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
+    getAll: async (): Promise<Task[]> => {
+      const { data, error } = await supabase.from('tasks').select('*').order('created_at', { ascending: false })
 
       if (error) throw error
       return data || []
@@ -32,12 +27,12 @@ export const api = {
       return data
     },
 
-    create: async (task: NewTask): Promise<Task> => {
-      // Map camelCase to snake_case for Supabase
-      const { userId, ...rest } = task
+    create: async (task: Omit<NewTask, 'userId'>): Promise<Task> => {
+      const { data: userData } = await supabase.auth.getUser()
+
       const supabaseTask = {
-        ...rest,
-        user_id: userId,
+        text: task.text,
+        user_id: userData.user?.id,
       }
 
       const { data, error } = await supabase.from('tasks').insert(supabaseTask).select().single()
@@ -46,10 +41,7 @@ export const api = {
       return data
     },
 
-    update: async (
-      id: string,
-      updates: Partial<Omit<Task, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>
-    ): Promise<Task> => {
+    update: async (id: string, updates: Partial<Pick<Task, 'text' | 'completed'>>): Promise<Task> => {
       const { data, error } = await supabase.from('tasks').update(updates).eq('id', id).select().single()
 
       if (error) throw error
@@ -58,7 +50,6 @@ export const api = {
 
     delete: async (id: string): Promise<void> => {
       const { error } = await supabase.from('tasks').delete().eq('id', id)
-
       if (error) throw error
     },
   },
