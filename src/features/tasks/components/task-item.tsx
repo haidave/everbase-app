@@ -1,12 +1,15 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { TextInput } from '@/components/ui/text-input'
 import { useForm } from '@tanstack/react-form'
-import { XIcon } from 'lucide-react'
+import { FolderIcon, XIcon } from 'lucide-react'
 
 import { type Task } from '@/lib/api'
 import { cn } from '@/lib/utils'
+import { useAddTaskToProject, useProjects } from '@/hooks/use-projects'
+import { useTaskProjects } from '@/hooks/use-task-projects'
 import { useDeleteTask, useUpdateTask } from '@/hooks/use-tasks'
 
 type TaskItemProps = {
@@ -18,14 +21,19 @@ const TaskItem = ({ task }: TaskItemProps) => {
   const updateTask = useUpdateTask()
   const deleteTask = useDeleteTask()
   const isCompleted = Boolean(task.completed)
+  const [showProjectSelect, setShowProjectSelect] = useState(false)
 
-  // Toggle task completion
-  const toggleCompletion = () => {
-    updateTask.mutate({
-      id: task.id,
-      completed: !isCompleted,
-    })
-  }
+  // Get projects for dropdown
+  const { data: projects } = useProjects()
+
+  // Get current project associations
+  const { data: taskProjects } = useTaskProjects(task.id)
+
+  // Add task to project
+  const addTaskToProject = useAddTaskToProject()
+
+  // Get current project (if any)
+  const currentProject = taskProjects && taskProjects.length > 0 ? taskProjects[0] : null
 
   const form = useForm({
     defaultValues: {
@@ -54,7 +62,15 @@ const TaskItem = ({ task }: TaskItemProps) => {
     <li>
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-1 items-center gap-3">
-          <Checkbox checked={isCompleted} onCheckedChange={toggleCompletion} />
+          <Checkbox
+            checked={isCompleted}
+            onCheckedChange={() => {
+              updateTask.mutate({
+                id: task.id,
+                completed: !isCompleted,
+              })
+            }}
+          />
 
           <div className="flex flex-1">
             <form.Field name="text">
@@ -101,6 +117,54 @@ const TaskItem = ({ task }: TaskItemProps) => {
           </div>
         </div>
 
+        {/* Project selection */}
+        <div className="ml-left flex items-center">
+          {currentProject && !showProjectSelect && (
+            <span className="mr-2 hidden text-xs sm:inline-block">{currentProject.name}</span>
+          )}
+
+          {showProjectSelect ? (
+            <Select
+              defaultOpen={true}
+              value={currentProject?.id || ''}
+              onValueChange={(value) => {
+                if (value) {
+                  addTaskToProject.mutate({
+                    taskId: task.id,
+                    projectId: value,
+                  })
+                }
+                setShowProjectSelect(false)
+              }}
+              onOpenChange={(open) => {
+                if (!open) {
+                  setShowProjectSelect(false)
+                }
+              }}
+            >
+              <SelectTrigger className="h-8 w-[140px]">
+                <SelectValue placeholder="Select project" />
+              </SelectTrigger>
+              <SelectContent>
+                {projects?.map((project) => (
+                  <SelectItem key={project.id} value={project.id}>
+                    {project.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowProjectSelect(true)}
+              className="text-muted-foreground hover:text-foreground"
+              aria-label="Assign to project"
+            >
+              <FolderIcon className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
         <Button
           variant="ghost"
           size="icon"

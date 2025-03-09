@@ -15,6 +15,13 @@
       "when": 1741529618507,
       "tag": "0001_yummy_zarda",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1741531756923,
+      "tag": "0002_brainy_slipstream",
+      "breakpoints": true
     }
   ]
 }
