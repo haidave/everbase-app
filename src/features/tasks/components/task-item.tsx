@@ -17,13 +17,13 @@ const TaskItem = ({ task }: TaskItemProps) => {
   const inputRef = useRef<HTMLInputElement>(null)
   const updateTask = useUpdateTask()
   const deleteTask = useDeleteTask()
-  const isCompleted = task.completed === 'true'
+  const isCompleted = Boolean(task.completed)
 
   // Toggle task completion
   const toggleCompletion = () => {
     updateTask.mutate({
       id: task.id,
-      completed: isCompleted ? 'false' : 'true',
+      completed: !isCompleted,
     })
   }
 

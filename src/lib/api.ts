@@ -7,7 +7,7 @@ import { supabase } from './supabase'
 export type Task = InferSelectModel<typeof tasks>
 export type NewTask = {
   text: string
-  completed?: string
+  completed?: boolean
   userId: string
 }
 
