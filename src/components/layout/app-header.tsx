@@ -14,7 +14,7 @@ const AppHeader = () => {
       <div className="flex items-center gap-2">
         <SidebarTrigger />
         <Separator orientation="vertical" className="mr-2 h-4" />
-        <span className="text-sm font-medium">{currentPageTitle}</span>
+        <span className="text-sm">{currentPageTitle}</span>
       </div>
 
       <div className="flex items-center gap-2">
