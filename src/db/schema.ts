@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { boolean, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 
 // Users table - will be managed by Supabase Auth
 export const users = pgTable('users', {
@@ -15,7 +15,7 @@ export const tasks = pgTable('tasks', {
     .notNull()
     .references(() => users.id),
   text: text('text').notNull(),
-  completed: text('completed').default('false'),
+  completed: boolean('completed').default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })
