@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react'
 import { LoadingScreen } from '@/components/ui/loading-screen'
-import { createRootRoute, Outlet } from '@tanstack/react-router'
+import { createRootRoute, HeadContent, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 
 import { useAuth } from '@/hooks/use-auth'
 
 export const Route = createRootRoute({
-  component: RootLayout,
+  component: () => (
+    <>
+      <HeadContent />
+      <RootLayout />
+    </>
+  ),
 })
 
 function RootLayout() {
