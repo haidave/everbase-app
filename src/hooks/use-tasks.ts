@@ -32,7 +32,13 @@ export function useCreateTask() {
   return useMutation({
     mutationFn: (task: { text: string }) => api.tasks.create(task),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks', user?.id] })
+      // Invalidate all tasks queries
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+
+      // Also invalidate user-specific tasks if you have them
+      if (user?.id) {
+        queryClient.invalidateQueries({ queryKey: ['tasks', user.id] })
+      }
     },
   })
 }
@@ -76,7 +82,14 @@ export function useUpdateTask() {
 
     // Always refetch after error or success
     onSettled: () => {
+      // Invalidate user tasks
       queryClient.invalidateQueries({ queryKey: ['tasks', user?.id] })
+
+      // Also invalidate any project-related task queries
+      // This will update task lists in project views
+      queryClient.invalidateQueries({
+        queryKey: ['tasks', 'project'],
+      })
     },
   })
 }
@@ -89,7 +102,22 @@ export function useDeleteTask() {
   return useMutation({
     mutationFn: api.tasks.delete,
     onSuccess: () => {
+      // Invalidate user tasks
       queryClient.invalidateQueries({ queryKey: ['tasks', user?.id] })
+
+      // Invalidate all project-related task queries
+      queryClient.invalidateQueries({ queryKey: ['tasks', 'project'] })
+
+      // Also invalidate task-project relationships
+      queryClient.invalidateQueries({ queryKey: ['tasks', 'projects'] })
     },
+  })
+}
+
+export function useGetTasksByProject(projectId: string) {
+  return useQuery({
+    queryKey: ['tasks', 'project', projectId],
+    queryFn: () => api.projects.getTasks(projectId),
+    enabled: !!projectId,
   })
 }
