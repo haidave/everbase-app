@@ -8,7 +8,7 @@ import { FolderIcon, XIcon } from 'lucide-react'
 
 import { type Task } from '@/lib/api'
 import { cn } from '@/lib/utils'
-import { useAddTaskToProject, useProjects } from '@/hooks/use-projects'
+import { useAddTaskToProject, useProjects, useRemoveTaskFromProject } from '@/hooks/use-projects'
 import { useTaskProjects } from '@/hooks/use-task-projects'
 import { useDeleteTask, useUpdateTask } from '@/hooks/use-tasks'
 
@@ -29,8 +29,9 @@ const TaskItem = ({ task }: TaskItemProps) => {
   // Get current project associations
   const { data: taskProjects } = useTaskProjects(task.id)
 
-  // Add task to project
+  // Project mutations
   const addTaskToProject = useAddTaskToProject()
+  const removeTaskFromProject = useRemoveTaskFromProject()
 
   // Get current project (if any)
   const currentProject = taskProjects && taskProjects.length > 0 ? taskProjects[0] : null
@@ -57,6 +58,39 @@ const TaskItem = ({ task }: TaskItemProps) => {
       updateTask.mutate({ id: task.id, text: value.text }, { onSuccess: () => inputRef.current?.blur() })
     },
   })
+
+  const handleProjectChange = (projectId: string) => {
+    // If there's a current project and it's different from the selected one
+    if (currentProject && currentProject.id !== projectId) {
+      // Use the mutation hook instead of direct API call
+      removeTaskFromProject.mutate(
+        { taskId: task.id, projectId: currentProject.id },
+        {
+          // Add the task to the new project once removal is complete
+          onSuccess: () => {
+            addTaskToProject.mutate(
+              { taskId: task.id, projectId },
+              {
+                onSuccess: () => {
+                  setShowProjectSelect(false)
+                },
+              }
+            )
+          },
+        }
+      )
+    } else {
+      // If there's no current project, just add to the new one
+      addTaskToProject.mutate(
+        { taskId: task.id, projectId },
+        {
+          onSuccess: () => {
+            setShowProjectSelect(false)
+          },
+        }
+      )
+    }
+  }
 
   return (
     <li>
@@ -127,15 +161,7 @@ const TaskItem = ({ task }: TaskItemProps) => {
             <Select
               defaultOpen={true}
               value={currentProject?.id || ''}
-              onValueChange={(value) => {
-                if (value) {
-                  addTaskToProject.mutate({
-                    taskId: task.id,
-                    projectId: value,
-                  })
-                }
-                setShowProjectSelect(false)
-              }}
+              onValueChange={handleProjectChange}
               onOpenChange={(open) => {
                 if (!open) {
                   setShowProjectSelect(false)

@@ -1,5 +1,6 @@
 import { type Project, type ProjectStatus, type Task, type TaskProject } from '@/db/schema'
 
+import { snakeToCamelCase, transformArraySnakeToCamel } from './formatters'
 import { supabase } from './supabase'
 
 // Define API-specific types
@@ -24,14 +25,14 @@ export const api = {
       const { data, error } = await supabase.from('tasks').select('*').order('created_at', { ascending: false })
 
       if (error) throw error
-      return data || []
+      return transformArraySnakeToCamel<Task>(data)
     },
 
     getById: async (id: string): Promise<Task> => {
       const { data, error } = await supabase.from('tasks').select('*').eq('id', id).single()
 
       if (error) throw error
-      return data
+      return snakeToCamelCase<Task>(data)
     },
 
     create: async (task: Omit<NewTask, 'userId'>): Promise<Task> => {
@@ -39,20 +40,21 @@ export const api = {
 
       const supabaseTask = {
         text: task.text,
+        completed: task.completed,
         user_id: userData.user?.id,
       }
 
       const { data, error } = await supabase.from('tasks').insert(supabaseTask).select().single()
 
       if (error) throw error
-      return data
+      return snakeToCamelCase<Task>(data)
     },
 
     update: async (id: string, updates: Partial<Pick<Task, 'text' | 'completed'>>): Promise<Task> => {
       const { data, error } = await supabase.from('tasks').update(updates).eq('id', id).select().single()
 
       if (error) throw error
-      return data
+      return snakeToCamelCase<Task>(data)
     },
 
     delete: async (id: string): Promise<void> => {
@@ -72,14 +74,14 @@ export const api = {
       const { data, error } = await supabase.from('projects').select('*').order('created_at', { ascending: false })
 
       if (error) throw error
-      return data || []
+      return transformArraySnakeToCamel<Project>(data)
     },
 
     getById: async (id: string): Promise<Project> => {
       const { data, error } = await supabase.from('projects').select('*').eq('id', id).single()
 
       if (error) throw error
-      return data
+      return snakeToCamelCase<Project>(data)
     },
 
     create: async (project: Omit<NewProject, 'userId'>): Promise<Project> => {
@@ -94,14 +96,14 @@ export const api = {
       const { data, error } = await supabase.from('projects').insert(supabaseProject).select().single()
 
       if (error) throw error
-      return data
+      return snakeToCamelCase<Project>(data)
     },
 
     update: async (id: string, updates: Partial<Pick<Project, 'name' | 'status'>>): Promise<Project> => {
       const { data, error } = await supabase.from('projects').update(updates).eq('id', id).select().single()
 
       if (error) throw error
-      return data
+      return snakeToCamelCase<Project>(data)
     },
 
     delete: async (id: string): Promise<void> => {
@@ -121,7 +123,7 @@ export const api = {
       const { data: tasks, error: tasksError } = await supabase.from('tasks').select('*').in('id', taskIds)
 
       if (tasksError) throw tasksError
-      return tasks || []
+      return transformArraySnakeToCamel<Task>(tasks)
     },
   },
 
@@ -155,7 +157,7 @@ export const api = {
       const { data: projects, error: projectsError } = await supabase.from('projects').select('*').in('id', projectIds)
 
       if (projectsError) throw projectsError
-      return projects || []
+      return transformArraySnakeToCamel<Project>(projects)
     },
   },
 }
