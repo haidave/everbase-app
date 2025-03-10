@@ -11,7 +11,7 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar'
 import { Link } from '@tanstack/react-router'
-import { Home, LogOutIcon } from 'lucide-react'
+import { LayoutDashboardIcon, ListTodoIcon, LogOutIcon } from 'lucide-react'
 
 import { useAuth } from '@/hooks/use-auth'
 import { useSignOut } from '@/hooks/use-sign-out'
@@ -20,7 +20,12 @@ const items = [
   {
     title: 'Dashboard',
     url: '/dashboard',
-    icon: Home,
+    icon: LayoutDashboardIcon,
+  },
+  {
+    title: 'Tasks',
+    url: '/tasks',
+    icon: ListTodoIcon,
   },
 ]
 
