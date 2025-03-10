@@ -43,8 +43,7 @@ const ProjectList = () => {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground text-sm">
-                {/* @ts-expect-error - need to transform data  */}
-                Created on {new Date(project.created_at).toLocaleDateString()}
+                Created on {new Date(project.createdAt).toLocaleDateString()}
               </p>
             </CardContent>
             <CardFooter className="flex justify-end">
