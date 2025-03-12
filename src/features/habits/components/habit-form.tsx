@@ -52,6 +52,7 @@ export function HabitForm({ open, onOpenChange, habit }: HabitFormProps) {
           {
             name: value.name,
             description: value.description,
+            active: true,
           },
           {
             onSuccess: () => {

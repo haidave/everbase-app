@@ -69,7 +69,7 @@ export function useCreateHabit() {
   const { user } = useAuth()
 
   return useMutation({
-    mutationFn: (habit: Omit<Habit, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => api.habits.create(habit),
+    mutationFn: (habit: { name: string; description?: string; active: boolean }) => api.habits.create(habit),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['habits', user?.id] })
     },
@@ -82,7 +82,12 @@ export function useUpdateHabit() {
   const { user } = useAuth()
 
   return useMutation({
-    mutationFn: (habit: Partial<Habit> & { id: string }) => api.habits.update(habit),
+    mutationFn: (habit: { id: string } & Partial<Pick<Habit, 'name' | 'description' | 'active'>>) =>
+      api.habits.update(habit.id, {
+        name: habit.name,
+        description: habit.description,
+        active: habit.active,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['habits', user?.id] })
     },
