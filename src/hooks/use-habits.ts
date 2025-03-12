@@ -28,10 +28,21 @@ export function useHabit(id: string) {
 export function useTodayHabitCompletions() {
   const { user } = useAuth()
 
+  // Calculate time until midnight for refetch interval
+  const now = new Date()
+  const tomorrow = new Date(now)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  tomorrow.setHours(0, 0, 0, 0)
+  const timeUntilMidnight = tomorrow.getTime() - now.getTime()
+
   return useQuery({
     queryKey: ['habitCompletions', 'today', user?.id],
     queryFn: () => api.habitCompletions.getTodayCompletions(),
     enabled: !!user,
+    // This will automatically refetch at midnight
+    refetchInterval: timeUntilMidnight,
+    // Only refetch once at midnight, then recalculate the interval
+    refetchIntervalInBackground: true,
   })
 }
 
