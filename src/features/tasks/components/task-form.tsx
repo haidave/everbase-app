@@ -1,14 +1,27 @@
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useForm } from '@tanstack/react-form'
-import { LoaderCircleIcon, PlusIcon } from 'lucide-react'
+import { LoaderCircleIcon } from 'lucide-react'
 
 import { useAddTaskToProject, useProjects } from '@/hooks/use-projects'
 import { useCreateTask } from '@/hooks/use-tasks'
 
-const TaskForm = () => {
+type TaskFormProps = {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+const TaskForm = ({ open, onOpenChange }: TaskFormProps) => {
   const createTask = useCreateTask()
   const { data: projects } = useProjects()
   const addTaskToProject = useAddTaskToProject()
@@ -32,12 +45,16 @@ const TaskForm = () => {
                 },
                 {
                   // Reset form only after both operations complete
-                  onSuccess: () => form.reset(),
+                  onSuccess: () => {
+                    form.reset()
+                    onOpenChange(false)
+                  },
                 }
               )
             } else {
               // Reset immediately if no project association
               form.reset()
+              onOpenChange(false)
             }
           },
         }
@@ -46,75 +63,85 @@ const TaskForm = () => {
   })
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault()
-        form.handleSubmit()
-      }}
-    >
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-1 flex-col gap-2">
-          <form.Field
-            name="text"
-            validators={{
-              onSubmit: ({ value }) => (!value ? 'Cannot be empty' : null),
-            }}
-          >
-            {(field) => (
-              <>
-                <Label>Title</Label>
-                <Input
-                  placeholder="Add new task"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  onBlur={field.handleBlur}
-                  aria-invalid={!!field.state.meta.errors?.length}
-                  className="bg-card"
-                />
-                {field.state.meta.errors.length > 0 ? (
-                  <em role="alert" className="text-destructive text-sm">
-                    {field.state.meta.errors.join(', ')}
-                  </em>
-                ) : null}
-              </>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Add New Task</DialogTitle>
+          <DialogDescription>Add a new task to your list. Fill out the details below.</DialogDescription>
+        </DialogHeader>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            form.handleSubmit()
+          }}
+        >
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <form.Field
+                name="text"
+                validators={{
+                  onSubmit: ({ value }) => (!value ? 'Task title cannot be empty' : null),
+                }}
+              >
+                {(field) => (
+                  <>
+                    <Label htmlFor="text">Title</Label>
+                    <Input
+                      id="text"
+                      placeholder="Add new task"
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      aria-invalid={!!field.state.meta.errors?.length}
+                    />
+                    {field.state.meta.errors.length > 0 ? (
+                      <em role="alert" className="text-destructive text-sm">
+                        {field.state.meta.errors.join(', ')}
+                      </em>
+                    ) : null}
+                  </>
+                )}
+              </form.Field>
+            </div>
+
+            {projects && projects.length > 0 && (
+              <div className="grid gap-2">
+                <form.Field name="projectId">
+                  {(field) => (
+                    <>
+                      <Label htmlFor="projectId">Project (optional)</Label>
+                      <Select value={field.state.value} onValueChange={(value) => field.handleChange(value)}>
+                        <SelectTrigger id="projectId">
+                          <SelectValue placeholder="Select project" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {projects.map((project) => (
+                            <SelectItem key={project.id} value={project.id}>
+                              {project.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </>
+                  )}
+                </form.Field>
+              </div>
             )}
-          </form.Field>
-        </div>
-
-        {projects && projects.length > 0 && (
-          <div className="flex flex-1 flex-col gap-2">
-            <form.Field name="projectId">
-              {(field) => (
-                <>
-                  <Label>Project (optional)</Label>
-                  <Select value={field.state.value} onValueChange={(value) => field.handleChange(value)}>
-                    <SelectTrigger className="bg-card">
-                      <SelectValue placeholder="Select project" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {projects.map((project) => (
-                        <SelectItem key={project.id} value={project.id}>
-                          {project.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </>
-              )}
-            </form.Field>
           </div>
-        )}
 
-        <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
-          {([canSubmit, isSubmitting]) => (
-            <Button variant="secondary" type="submit" disabled={!canSubmit}>
-              {isSubmitting ? <LoaderCircleIcon className="animate-spin" /> : <PlusIcon className="mr-2" />}
-              Add Task
-            </Button>
-          )}
-        </form.Subscribe>
-      </div>
-    </form>
+          <DialogFooter>
+            <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
+              {([canSubmit, isSubmitting]) => (
+                <Button type="submit" disabled={!canSubmit}>
+                  {isSubmitting ? <LoaderCircleIcon className="animate-spin" /> : 'Add Task'}
+                </Button>
+              )}
+            </form.Subscribe>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   )
 }
 
