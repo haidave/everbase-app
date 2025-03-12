@@ -66,7 +66,7 @@ const TaskForm = ({ open, onOpenChange }: TaskFormProps) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New Task</DialogTitle>
+          <DialogTitle>Add Task</DialogTitle>
           <DialogDescription>Add a new task to your list. Fill out the details below.</DialogDescription>
         </DialogHeader>
 
@@ -89,7 +89,7 @@ const TaskForm = ({ open, onOpenChange }: TaskFormProps) => {
                     <Label htmlFor="text">Title</Label>
                     <Input
                       id="text"
-                      placeholder="Add new task"
+                      placeholder="Task title"
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
