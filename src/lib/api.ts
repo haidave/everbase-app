@@ -1,4 +1,11 @@
-import { type Project, type ProjectStatus, type Task, type TaskProject } from '@/db/schema'
+import {
+  type Habit,
+  type HabitCompletion,
+  type Project,
+  type ProjectStatus,
+  type Task,
+  type TaskProject,
+} from '@/db/schema'
 
 import { snakeToCamelCase, transformArraySnakeToCamel } from './formatters'
 import { supabase } from './supabase'
@@ -16,8 +23,14 @@ export type NewProject = {
   userId: string
 }
 
+export type NewHabit = {
+  name: string
+  description?: string
+  userId: string
+}
+
 // Re-export schema types for convenience
-export type { Project, ProjectStatus, Task, TaskProject }
+export type { Project, ProjectStatus, Task, TaskProject, Habit, HabitCompletion }
 
 export const api = {
   tasks: {
@@ -158,6 +171,107 @@ export const api = {
 
       if (projectsError) throw projectsError
       return transformArraySnakeToCamel<Project>(projects)
+    },
+  },
+
+  habits: {
+    getAll: async (): Promise<Habit[]> => {
+      const { data, error } = await supabase.from('habits').select('*').order('created_at', { ascending: false })
+
+      if (error) throw error
+      return transformArraySnakeToCamel<Habit>(data)
+    },
+
+    getById: async (id: string): Promise<Habit> => {
+      const { data, error } = await supabase.from('habits').select('*').eq('id', id).single()
+
+      if (error) throw error
+      return snakeToCamelCase<Habit>(data)
+    },
+
+    create: async (habit: Omit<NewHabit, 'userId'>): Promise<Habit> => {
+      const { data: userData } = await supabase.auth.getUser()
+
+      const supabaseHabit = {
+        name: habit.name,
+        description: habit.description,
+        user_id: userData.user?.id,
+      }
+
+      const { data, error } = await supabase.from('habits').insert(supabaseHabit).select().single()
+
+      if (error) throw error
+      return snakeToCamelCase<Habit>(data)
+    },
+
+    update: async (id: string, updates: Partial<Pick<Habit, 'name' | 'description' | 'active'>>): Promise<Habit> => {
+      const { data, error } = await supabase.from('habits').update(updates).eq('id', id).select().single()
+
+      if (error) throw error
+      return snakeToCamelCase<Habit>(data)
+    },
+
+    delete: async (id: string): Promise<void> => {
+      const { error } = await supabase.from('habits').delete().eq('id', id)
+      if (error) throw error
+    },
+  },
+
+  habitCompletions: {
+    // Get completions for a specific date range
+    getCompletions: async (habitId: string, startDate: Date, endDate: Date): Promise<HabitCompletion[]> => {
+      const { data, error } = await supabase
+        .from('habit_completions')
+        .select('*')
+        .eq('habit_id', habitId)
+        .gte('completed_at', startDate.toISOString())
+        .lte('completed_at', endDate.toISOString())
+
+      if (error) throw error
+      return transformArraySnakeToCamel<HabitCompletion>(data)
+    },
+
+    // Get today's completions for all habits
+    getTodayCompletions: async (): Promise<HabitCompletion[]> => {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const tomorrow = new Date(today)
+      tomorrow.setDate(tomorrow.getDate() + 1)
+
+      const { data, error } = await supabase
+        .from('habit_completions')
+        .select('*')
+        .gte('completed_at', today.toISOString())
+        .lt('completed_at', tomorrow.toISOString())
+
+      if (error) throw error
+      return transformArraySnakeToCamel<HabitCompletion>(data)
+    },
+
+    // Mark a habit as completed for today
+    completeHabit: async (habitId: string): Promise<HabitCompletion> => {
+      const { data, error } = await supabase.from('habit_completions').insert({ habit_id: habitId }).select().single()
+
+      if (error) throw error
+      return snakeToCamelCase<HabitCompletion>(data)
+    },
+
+    // Remove a completion (unmark a habit)
+    removeCompletion: async (habitId: string): Promise<void> => {
+      // Get today's date range
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const tomorrow = new Date(today)
+      tomorrow.setDate(tomorrow.getDate() + 1)
+
+      const { error } = await supabase
+        .from('habit_completions')
+        .delete()
+        .eq('habit_id', habitId)
+        .gte('completed_at', today.toISOString())
+        .lt('completed_at', tomorrow.toISOString())
+
+      if (error) throw error
     },
   },
 }
