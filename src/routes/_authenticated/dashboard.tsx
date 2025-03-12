@@ -22,7 +22,6 @@ function DashboardPage() {
       </section>
 
       <section className="bg-card break-inside-avoid rounded-lg border p-4">
-        <h2 className="mb-4">Recent Tasks</h2>
         <RecentTaskList limit={5} />
       </section>
 
