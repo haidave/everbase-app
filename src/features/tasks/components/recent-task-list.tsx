@@ -32,7 +32,7 @@ const RecentTaskList = ({ limit = 5 }: RecentTaskListProps) => {
     <>
       <div className="grid gap-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Recent Tasks</h2>
+          <h2>Recent Tasks</h2>
           <Button variant="secondary" size="sm" onClick={() => setIsAddDialogOpen(true)}>
             <PlusIcon className="mr-2 h-4 w-4" /> Add Task
           </Button>
