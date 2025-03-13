@@ -4,16 +4,19 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSkeleton,
   SidebarRail,
 } from '@/components/ui/sidebar'
 import { Link } from '@tanstack/react-router'
-import { LayoutDashboardIcon, ListTodoIcon, LogOutIcon, SproutIcon } from 'lucide-react'
+import { FolderIcon, LayoutDashboardIcon, ListTodoIcon, LogOutIcon, SproutIcon } from 'lucide-react'
 
 import { useAuth } from '@/hooks/use-auth'
+import { useProjects } from '@/hooks/use-projects'
 import { useSignOut } from '@/hooks/use-sign-out'
 
 const items = [
@@ -37,6 +40,7 @@ const items = [
 export function AppSidebar() {
   const { user } = useAuth()
   const signOut = useSignOut()
+  const { data: projects, isLoading: isLoadingProjects } = useProjects()
 
   return (
     <Sidebar>
@@ -58,6 +62,30 @@ export function AppSidebar() {
             ))}
           </SidebarMenu>
         </SidebarGroup>
+
+        {isLoadingProjects || (projects && projects.length > 0) ? (
+          <SidebarGroup>
+            <SidebarGroupLabel>Projects</SidebarGroupLabel>
+            <SidebarMenu>
+              {isLoadingProjects ? (
+                <>
+                  <SidebarMenuSkeleton showIcon />
+                  <SidebarMenuSkeleton showIcon />
+                  <SidebarMenuSkeleton showIcon />
+                </>
+              ) : (
+                projects?.map((project) => (
+                  <SidebarMenuItem key={project.id}>
+                    <SidebarMenuButton>
+                      <FolderIcon className="shrink-0" />
+                      <span>{project.name}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))
+              )}
+            </SidebarMenu>
+          </SidebarGroup>
+        ) : null}
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
