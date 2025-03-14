@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import {
   Dialog,
   DialogContent,
@@ -9,22 +11,24 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useForm } from '@tanstack/react-form'
-import { LoaderCircleIcon } from 'lucide-react'
+import { Check, ChevronsUpDown, LoaderCircleIcon } from 'lucide-react'
 
+import { cn } from '@/lib/utils'
 import { useAddTaskToProject, useProjects } from '@/hooks/use-projects'
 import { useCreateTask } from '@/hooks/use-tasks'
 
-type TaskFormProps = {
+type AddTaskFormProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-const TaskForm = ({ open, onOpenChange }: TaskFormProps) => {
+const AddTaskForm = ({ open, onOpenChange }: AddTaskFormProps) => {
   const createTask = useCreateTask()
   const { data: projects } = useProjects()
   const addTaskToProject = useAddTaskToProject()
+  const [projectPopoverOpen, setProjectPopoverOpen] = useState(false)
 
   const form = useForm({
     defaultValues: {
@@ -111,18 +115,53 @@ const TaskForm = ({ open, onOpenChange }: TaskFormProps) => {
                   {(field) => (
                     <>
                       <Label htmlFor="projectId">Project (optional)</Label>
-                      <Select value={field.state.value} onValueChange={(value) => field.handleChange(value)}>
-                        <SelectTrigger id="projectId">
-                          <SelectValue placeholder="Select project" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {projects.map((project) => (
-                            <SelectItem key={project.id} value={project.id}>
-                              {project.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Popover open={projectPopoverOpen} onOpenChange={setProjectPopoverOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={projectPopoverOpen}
+                            className="w-full justify-between"
+                          >
+                            {field.state.value
+                              ? projects.find((project) => project.id === field.state.value)?.name
+                              : 'Select project'}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          className="p-0"
+                          sideOffset={5}
+                          style={{ width: 'var(--radix-popover-trigger-width)' }}
+                        >
+                          <Command>
+                            <CommandInput placeholder="Search project..." />
+                            <CommandList>
+                              <CommandEmpty>No project found.</CommandEmpty>
+                              <CommandGroup>
+                                {projects.map((project) => (
+                                  <CommandItem
+                                    key={project.id}
+                                    value={project.name}
+                                    onSelect={() => {
+                                      field.handleChange(project.id)
+                                      setProjectPopoverOpen(false)
+                                    }}
+                                  >
+                                    {project.name}
+                                    <Check
+                                      className={cn(
+                                        'ml-auto h-4 w-4',
+                                        project.id === field.state.value ? 'opacity-100' : 'opacity-0'
+                                      )}
+                                    />
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                     </>
                   )}
                 </form.Field>
@@ -145,4 +184,4 @@ const TaskForm = ({ open, onOpenChange }: TaskFormProps) => {
   )
 }
 
-export { TaskForm }
+export { AddTaskForm }

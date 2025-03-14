@@ -5,7 +5,7 @@ import { PlusIcon } from 'lucide-react'
 
 import { useTasks } from '@/hooks/use-tasks'
 
-import { TaskForm } from './task-form'
+import { AddTaskForm } from './add-task-form'
 import { TaskItem } from './task-item'
 
 type RecentTaskListProps = {
@@ -49,7 +49,7 @@ const RecentTaskList = ({ limit = 5 }: RecentTaskListProps) => {
         </Button>
       </div>
 
-      <TaskForm open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />
+      <AddTaskForm open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />
     </>
   )
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { TaskForm } from '@/features/tasks/components/task-form'
+import { AddTaskForm } from '@/features/tasks/components/add-task-form'
 import { TaskList } from '@/features/tasks/components/task-list'
 import { createFileRoute } from '@tanstack/react-router'
 import { PlusIcon } from 'lucide-react'
@@ -27,7 +27,7 @@ function TasksPage() {
 
       <TaskList />
 
-      <TaskForm open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />
+      <AddTaskForm open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />
     </section>
   )
 }
