@@ -1,6 +1,5 @@
-import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { Combobox } from '@/components/ui/combobox'
 import {
   Dialog,
   DialogContent,
@@ -11,11 +10,9 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useForm } from '@tanstack/react-form'
-import { Check, ChevronsUpDown, LoaderCircleIcon } from 'lucide-react'
+import { LoaderCircleIcon } from 'lucide-react'
 
-import { cn } from '@/lib/utils'
 import { useAddTaskToProject, useProjects } from '@/hooks/use-projects'
 import { useCreateTask } from '@/hooks/use-tasks'
 
@@ -28,7 +25,6 @@ const AddTaskForm = ({ open, onOpenChange }: AddTaskFormProps) => {
   const createTask = useCreateTask()
   const { data: projects } = useProjects()
   const addTaskToProject = useAddTaskToProject()
-  const [projectPopoverOpen, setProjectPopoverOpen] = useState(false)
 
   const form = useForm({
     defaultValues: {
@@ -115,53 +111,17 @@ const AddTaskForm = ({ open, onOpenChange }: AddTaskFormProps) => {
                   {(field) => (
                     <>
                       <Label htmlFor="projectId">Project (optional)</Label>
-                      <Popover open={projectPopoverOpen} onOpenChange={setProjectPopoverOpen}>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            role="combobox"
-                            aria-expanded={projectPopoverOpen}
-                            className="w-full justify-between"
-                          >
-                            {field.state.value
-                              ? projects.find((project) => project.id === field.state.value)?.name
-                              : 'Select project'}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent
-                          className="p-0"
-                          sideOffset={5}
-                          style={{ width: 'var(--radix-popover-trigger-width)' }}
-                        >
-                          <Command>
-                            <CommandInput placeholder="Search project..." />
-                            <CommandList>
-                              <CommandEmpty>No project found.</CommandEmpty>
-                              <CommandGroup>
-                                {projects.map((project) => (
-                                  <CommandItem
-                                    key={project.id}
-                                    value={project.name}
-                                    onSelect={() => {
-                                      field.handleChange(project.id)
-                                      setProjectPopoverOpen(false)
-                                    }}
-                                  >
-                                    {project.name}
-                                    <Check
-                                      className={cn(
-                                        'ml-auto h-4 w-4',
-                                        project.id === field.state.value ? 'opacity-100' : 'opacity-0'
-                                      )}
-                                    />
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
+                      <Combobox
+                        options={projects.map((project) => ({
+                          value: project.id,
+                          label: project.name,
+                        }))}
+                        value={field.state.value}
+                        onValueChange={field.handleChange}
+                        placeholder="Select project"
+                        emptyMessage="No project found."
+                        searchPlaceholder="Search project..."
+                      />
                     </>
                   )}
                 </form.Field>
