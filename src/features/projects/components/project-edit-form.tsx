@@ -11,16 +11,22 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { PROJECT_STATUSES, type Project, type ProjectStatus } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
 import { AlertCircle, LoaderCircleIcon } from 'lucide-react'
 
 import { useDeleteProject, useUpdateProject } from '@/hooks/use-projects'
-import { useGetTasksByProject } from '@/hooks/use-tasks'
 
 type ProjectEditFormProps = {
   project: Project
@@ -32,9 +38,6 @@ export function ProjectEditForm({ project, open, onOpenChange }: ProjectEditForm
   const updateProject = useUpdateProject()
   const deleteProject = useDeleteProject()
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-
-  // Fetch tasks related to this project directly with the hook
-  const { data: relatedTasks, isLoading } = useGetTasksByProject(project.id)
 
   const form = useForm({
     defaultValues: {
@@ -67,21 +70,21 @@ export function ProjectEditForm({ project, open, onOpenChange }: ProjectEditForm
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="flex h-full flex-col sm:max-w-md">
-        <SheetHeader>
-          <SheetTitle>Edit Project</SheetTitle>
-          <SheetDescription className="sr-only">Edit the name and status of the project.</SheetDescription>
-        </SheetHeader>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Edit Project</DialogTitle>
+          <DialogDescription>Edit the name and status of the project.</DialogDescription>
+        </DialogHeader>
 
         <form
           onSubmit={(e) => {
             e.preventDefault()
             form.handleSubmit()
           }}
-          className="flex flex-1 flex-col gap-6"
+          className="space-y-4"
         >
-          <div className="flex flex-col gap-6">
+          <div className="grid gap-4">
             <form.Field
               name="name"
               validators={{
@@ -129,29 +132,7 @@ export function ProjectEditForm({ project, open, onOpenChange }: ProjectEditForm
             </form.Field>
           </div>
 
-          {/* Related Tasks Section */}
-          <div className="mt-6">
-            <h3 className="mb-2 font-medium">Related Tasks</h3>
-            {isLoading ? (
-              <div className="flex items-center justify-center py-4">
-                <LoaderCircleIcon className="text-muted-foreground h-5 w-5 animate-spin" />
-              </div>
-            ) : relatedTasks && relatedTasks.length > 0 ? (
-              <div className="max-h-40 overflow-y-auto rounded-md border">
-                <ul className="divide-y">
-                  {relatedTasks.map((task) => (
-                    <li key={task.id} className="flex items-center justify-between p-2 text-sm">
-                      <span className="truncate">{task.text}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : (
-              <p className="text-muted-foreground text-sm">No tasks associated with this project.</p>
-            )}
-          </div>
-
-          <SheetFooter className="mt-auto flex flex-row justify-between sm:justify-between">
+          <DialogFooter className="flex justify-between gap-2 sm:justify-between">
             <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive" type="button">
@@ -188,7 +169,6 @@ export function ProjectEditForm({ project, open, onOpenChange }: ProjectEditForm
               })}
             >
               {({ canSubmit, isSubmitting, values }) => {
-                // Calculate hasChanges inside the Subscribe component
                 const hasChanges = values.name !== project.name || values.status !== project.status
 
                 return (
@@ -199,9 +179,9 @@ export function ProjectEditForm({ project, open, onOpenChange }: ProjectEditForm
                 )
               }}
             </form.Subscribe>
-          </SheetFooter>
+          </DialogFooter>
         </form>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   )
 }

@@ -65,7 +65,9 @@ export function AppSidebar() {
 
         {isLoadingProjects || (projects && projects.length > 0) ? (
           <SidebarGroup>
-            <SidebarGroupLabel>Projects</SidebarGroupLabel>
+            <SidebarGroupLabel>
+              <Link to="/projects">Projects</Link>
+            </SidebarGroupLabel>
             <SidebarMenu>
               {isLoadingProjects ? (
                 <>
@@ -76,9 +78,11 @@ export function AppSidebar() {
               ) : (
                 projects?.map((project) => (
                   <SidebarMenuItem key={project.id}>
-                    <SidebarMenuButton>
-                      <FolderIcon className="shrink-0" />
-                      <span>{project.name}</span>
+                    <SidebarMenuButton asChild>
+                      <Link to="/projects/$projectId" params={{ projectId: project.id }}>
+                        <FolderIcon className="shrink-0" />
+                        <span>{project.name}</span>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))
