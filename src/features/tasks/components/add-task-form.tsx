@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { Combobox } from '@/components/ui/combobox'
 import {
   Dialog,
   DialogContent,
@@ -9,19 +10,18 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useForm } from '@tanstack/react-form'
 import { LoaderCircleIcon } from 'lucide-react'
 
 import { useAddTaskToProject, useProjects } from '@/hooks/use-projects'
 import { useCreateTask } from '@/hooks/use-tasks'
 
-type TaskFormProps = {
+type AddTaskFormProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-const TaskForm = ({ open, onOpenChange }: TaskFormProps) => {
+const AddTaskForm = ({ open, onOpenChange }: AddTaskFormProps) => {
   const createTask = useCreateTask()
   const { data: projects } = useProjects()
   const addTaskToProject = useAddTaskToProject()
@@ -111,18 +111,17 @@ const TaskForm = ({ open, onOpenChange }: TaskFormProps) => {
                   {(field) => (
                     <>
                       <Label htmlFor="projectId">Project (optional)</Label>
-                      <Select value={field.state.value} onValueChange={(value) => field.handleChange(value)}>
-                        <SelectTrigger id="projectId">
-                          <SelectValue placeholder="Select project" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {projects.map((project) => (
-                            <SelectItem key={project.id} value={project.id}>
-                              {project.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Combobox
+                        options={projects.map((project) => ({
+                          value: project.id,
+                          label: project.name,
+                        }))}
+                        value={field.state.value}
+                        onValueChange={field.handleChange}
+                        placeholder="Select project"
+                        emptyMessage="No project found."
+                        searchPlaceholder="Search project..."
+                      />
                     </>
                   )}
                 </form.Field>
@@ -145,4 +144,4 @@ const TaskForm = ({ open, onOpenChange }: TaskFormProps) => {
   )
 }
 
-export { TaskForm }
+export { AddTaskForm }
