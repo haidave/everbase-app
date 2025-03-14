@@ -1,5 +1,4 @@
 import { DashboardHabits } from '@/features/habits/components/dashboard-habits'
-import { ProjectList } from '@/features/projects/components/project-list'
 import { RecentTaskList } from '@/features/tasks/components/recent-task-list'
 import { createFileRoute } from '@tanstack/react-router'
 
@@ -23,11 +22,6 @@ function DashboardPage() {
 
       <section className="bg-card break-inside-avoid rounded-lg border p-4">
         <RecentTaskList limit={5} />
-      </section>
-
-      <section className="bg-card break-inside-avoid rounded-lg border p-4">
-        <h2 className="mb-4">Projects</h2>
-        <ProjectList />
       </section>
     </div>
   )
