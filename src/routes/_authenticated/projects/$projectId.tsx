@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { ProjectEditForm } from '@/features/projects/components/project-edit-form'
+import { EditProjectForm } from '@/features/projects/components/edit-project-form'
 import { createFileRoute } from '@tanstack/react-router'
 import { LoaderCircleIcon, Pencil } from 'lucide-react'
 
@@ -61,15 +61,15 @@ function ProjectDetailPage() {
             </p>
           </CardContent>
           <CardFooter className="flex justify-end">
-            <Button variant="secondary" size="sm" onClick={() => setEditingProject(true)}>
+            <Button onClick={() => setEditingProject(true)}>
               <Pencil className="mr-2 h-4 w-4" />
               Edit
             </Button>
           </CardFooter>
         </Card>
 
-        <div className="rounded-lg border p-4">
-          <h2 className="mb-4 text-lg font-medium">Project Tasks</h2>
+        <div className="bg-card rounded-lg border p-4">
+          <h2 className="text-foreground-primary mb-4 text-lg font-medium">Project Tasks</h2>
           {isLoadingTasks ? (
             <div className="flex items-center justify-center py-4">
               <LoaderCircleIcon className="text-muted-foreground h-5 w-5 animate-spin" />
@@ -90,7 +90,7 @@ function ProjectDetailPage() {
       </div>
 
       {displayProject && (
-        <ProjectEditForm
+        <EditProjectForm
           project={displayProject}
           open={editingProject}
           onOpenChange={(open) => {

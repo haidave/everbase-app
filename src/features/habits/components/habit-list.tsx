@@ -48,7 +48,7 @@ export function HabitList() {
     return (
       <div className="flex flex-col items-center gap-4">
         <p>No habits yet.</p>
-        <Button variant="secondary" onClick={() => setIsAddDialogOpen(true)}>
+        <Button onClick={() => setIsAddDialogOpen(true)}>
           <PlusIcon className="mr-2 h-4 w-4" />
           Create your first habit
         </Button>
@@ -60,9 +60,9 @@ export function HabitList() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">My Habits</h2>
+        <h2 className="text-foreground-primary">My Habits</h2>
 
-        <Button variant="secondary" size="sm" onClick={() => setIsAddDialogOpen(true)}>
+        <Button onClick={() => setIsAddDialogOpen(true)}>
           <PlusIcon className="mr-2 h-4 w-4" />
           Add Habit
         </Button>

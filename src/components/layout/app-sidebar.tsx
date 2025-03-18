@@ -1,21 +1,26 @@
-import { Button } from '@/components/ui/button'
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSkeleton,
   SidebarRail,
 } from '@/components/ui/sidebar'
-import { Link } from '@tanstack/react-router'
-import { FolderIcon, LayoutDashboardIcon, ListTodoIcon, LogOutIcon, SproutIcon } from 'lucide-react'
+import { Link, useMatches } from '@tanstack/react-router'
+import {
+  CircleHelpIcon,
+  FolderIcon,
+  KeyboardIcon,
+  LayoutDashboardIcon,
+  ListTodoIcon,
+  SproutIcon,
+  UserIcon,
+} from 'lucide-react'
 
-import { useAuth } from '@/hooks/use-auth'
 import { useProjects } from '@/hooks/use-projects'
 import { useSignOut } from '@/hooks/use-sign-out'
 
@@ -38,21 +43,23 @@ const items = [
 ]
 
 export function AppSidebar() {
-  const { user } = useAuth()
   const signOut = useSignOut()
   const { data: projects, isLoading: isLoadingProjects } = useProjects()
+  const matches = useMatches()
+
+  // Function to check if a path is active
+  const isPathActive = (path: string) => {
+    return matches.some((match) => match.pathname === path)
+  }
 
   return (
-    <Sidebar>
-      <SidebarHeader>
-        <span className="p-2 text-lg font-bold">everbase</span>
-      </SidebarHeader>
+    <Sidebar collapsible="icon" className="py-2">
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu>
             {items.map((item) => (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton asChild isActive={isPathActive(item.url)}>
                   <Link to={item.url}>
                     <item.icon />
                     <span>{item.title}</span>
@@ -63,10 +70,13 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
+        {/* Projects section */}
         {isLoadingProjects || (projects && projects.length > 0) ? (
           <SidebarGroup>
             <SidebarGroupLabel>
-              <Link to="/projects">Projects</Link>
+              <Link to="/projects" className="hover:text-muted-foreground">
+                Projects
+              </Link>
             </SidebarGroupLabel>
             <SidebarMenu>
               {isLoadingProjects ? (
@@ -78,7 +88,7 @@ export function AppSidebar() {
               ) : (
                 projects?.map((project) => (
                   <SidebarMenuItem key={project.id}>
-                    <SidebarMenuButton asChild>
+                    <SidebarMenuButton asChild isActive={isPathActive(`/projects/${project.id}`)}>
                       <Link to="/projects/$projectId" params={{ projectId: project.id }}>
                         <FolderIcon className="shrink-0" />
                         <span>{project.name}</span>
@@ -92,12 +102,23 @@ export function AppSidebar() {
         ) : null}
       </SidebarContent>
       <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem className="flex items-center justify-between gap-2 px-2">
-            <span className="truncate text-sm">{user?.email}</span>
-            <Button variant="ghost" size="icon" onClick={() => signOut()}>
-              <LogOutIcon />
-            </Button>
+        <SidebarMenu className="flex flex-row items-center justify-between">
+          <div className="flex gap-2 group-data-[collapsible=icon]:hidden">
+            <SidebarMenuItem>
+              <SidebarMenuButton>
+                <CircleHelpIcon />
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton>
+                <KeyboardIcon />
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </div>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={() => signOut()}>
+              <UserIcon />
+            </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
