@@ -8,7 +8,7 @@ const TextInput = React.forwardRef<HTMLInputElement, React.ComponentProps<'input
       <input
         type={type}
         className={cn(
-          'bg-background text-foreground placeholder:text-muted-foreground flex w-full py-2 text-base transition-colors',
+          'text-foreground placeholder:text-muted-foreground flex w-full py-2 text-base transition-colors',
           'hover:border-input border-b border-transparent',
           'focus-visible:border-primary focus-visible:outline-none',
           'disabled:cursor-not-allowed disabled:border-transparent disabled:opacity-50',

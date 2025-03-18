@@ -144,7 +144,7 @@ const TaskItem = ({ task }: TaskItemProps) => {
                   readOnly={isCompleted}
                   disabled={isCompleted}
                   aria-label={`${isCompleted ? 'View' : 'Edit'} task: ${task.text}`}
-                  className={cn(isCompleted && 'line-through', 'bg-card')}
+                  className={cn(isCompleted && 'line-through')}
                 />
               )}
             </form.Field>

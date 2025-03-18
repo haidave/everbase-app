@@ -28,13 +28,13 @@ import { AlertCircle, LoaderCircleIcon } from 'lucide-react'
 
 import { useDeleteProject, useUpdateProject } from '@/hooks/use-projects'
 
-type ProjectEditFormProps = {
+type EditProjectFormProps = {
   project: Project
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export function ProjectEditForm({ project, open, onOpenChange }: ProjectEditFormProps) {
+export function EditProjectForm({ project, open, onOpenChange }: EditProjectFormProps) {
   const updateProject = useUpdateProject()
   const deleteProject = useDeleteProject()
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)

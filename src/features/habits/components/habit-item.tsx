@@ -13,20 +13,13 @@ export function HabitItem({ habit, isCompleted }: HabitItemProps) {
   const completeHabit = useCompleteHabit()
   const uncompleteHabit = useUncompleteHabit()
   const [checked, setChecked] = useState(isCompleted)
-  const [isUpdating, setIsUpdating] = useState(false)
 
   const handleCheckChange = (checked: boolean) => {
     setChecked(checked)
-    setIsUpdating(true)
-
     if (checked) {
-      completeHabit.mutate(habit.id, {
-        onSettled: () => setIsUpdating(false),
-      })
+      completeHabit.mutate(habit.id)
     } else {
-      uncompleteHabit.mutate(habit.id, {
-        onSettled: () => setIsUpdating(false),
-      })
+      uncompleteHabit.mutate(habit.id)
     }
   }
 
@@ -35,7 +28,6 @@ export function HabitItem({ habit, isCompleted }: HabitItemProps) {
       <Checkbox
         checked={checked}
         onCheckedChange={handleCheckChange}
-        disabled={isUpdating}
         aria-label={`Mark habit ${habit.name} as ${checked ? 'incomplete' : 'complete'}`}
       />
       <div>

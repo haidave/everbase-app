@@ -15,7 +15,7 @@ export const Route = createFileRoute('/_authenticated/dashboard')({
 
 function DashboardPage() {
   return (
-    <div className="columns-1 gap-4 space-y-4 px-2 py-4 md:columns-2">
+    <div className="columns-1 gap-4 space-y-4 px-2 py-4 lg:columns-2">
       <section className="bg-card break-inside-avoid rounded-lg border p-4">
         <DashboardHabits />
       </section>

@@ -42,7 +42,7 @@ const ProjectList = () => {
               </p>
             </CardContent>
             <CardFooter className="flex justify-end">
-              <Button variant="secondary" size="sm" asChild>
+              <Button asChild>
                 <Link to="/projects/$projectId" params={{ projectId: project.id }}>
                   View
                 </Link>

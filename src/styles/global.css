@@ -13,79 +13,89 @@
 }
 
 :root {
-  --background: hsl(0 0% 100%);
-  --foreground: hsl(240 10% 3.9%);
-  --card: hsl(0 0% 98%);
-  --card-foreground: hsl(240 10% 3.9%);
-  --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(240 10% 3.9%);
-  --primary: hsl(240 5.9% 10%);
-  --primary-foreground: hsl(0 0% 98%);
-  --secondary: hsl(240 4.8% 95.9%);
-  --secondary-foreground: hsl(240 5.9% 10%);
-  --muted: hsl(240 4.8% 95.9%);
-  --muted-foreground: hsl(240 3.8% 46.1%);
-  --accent: hsl(240 4.8% 95.9%);
-  --accent-foreground: hsl(240 5.9% 10%);
-  --destructive: hsl(0 84.2% 60.2%);
-  --destructive-foreground: hsl(0 0% 98%);
-  --border: hsl(240 5.9% 90%);
-  --input: hsl(240 5.9% 90%);
-  --ring: hsl(240 4.9% 83.9%);
+  --background-app: radial-gradient(98.1% 98.1% at 51.25% 1.9%, #e9ebf3, #e7ebf3, #f5f5f5 50%, #e9ecf6 95%, #e2e8f5);
+  --background-main: #ffffff8c;
+  --foreground: rgba(82, 85, 93, 1);
+  --foreground-primary: rgba(26, 26, 26, 1);
+  --card: #ffffff80;
+  --card-foreground: rgba(82, 85, 93, 1);
+  --popover: rgba(245, 245, 245, 1);
+  --popover-foreground: rgba(82, 85, 93, 1);
+  --primary: rgba(82, 85, 93, 1);
+  --primary-foreground: #ffffff80;
+  --secondary: rgba(0, 0, 0, 0.05);
+  --secondary-foreground: rgba(82, 85, 93, 1);
+  --muted: rgba(0, 0, 0, 0.05);
+  --muted-foreground: rgba(120, 125, 139, 1);
+  --accent: rgba(0, 0, 0, 0.05);
+  --accent-foreground: rgba(82, 85, 93, 1);
+  --destructive: rgba(224, 86, 109, 1);
+  --border: rgba(0, 0, 0, 0.05);
+  --input: rgba(0, 0, 0, 0.05);
+  --checkbox: #d8d8d8;
+  --ring: rgba(82, 85, 93, 1);
   --radius: 0.5rem;
   --chart-1: hsl(12 76% 61%);
   --chart-2: hsl(173 58% 39%);
   --chart-3: hsl(197 37% 24%);
   --chart-4: hsl(43 74% 66%);
   --chart-5: hsl(27 87% 67%);
-  --sidebar: hsl(0 0% 98%);
-  --sidebar-foreground: hsl(240 5.3% 26.1%);
-  --sidebar-primary: hsl(240 5.9% 10%);
-  --sidebar-primary-foreground: hsl(0 0% 98%);
-  --sidebar-accent: hsl(240 4.8% 95.9%);
-  --sidebar-accent-foreground: hsl(240 5.9% 10%);
-  --sidebar-border: hsl(220 13% 91%);
-  --sidebar-ring: hsl(240 4.9% 83.9%);
+  --sidebar: #ffffff80;
+  --sidebar-foreground: rgba(82, 85, 93, 1);
+  --sidebar-accent: rgba(0, 0, 0, 0.05);
+  --sidebar-accent-foreground: rgba(82, 85, 93, 1);
+  --sidebar-border: rgba(0, 0, 0, 0.05);
+  --sidebar-ring: rgba(82, 85, 93, 1);
+  --active: rgba(255, 255, 255, 1);
+  --hover: rgba(235, 236, 238, 1);
+  --button: rgba(232, 232, 232, 1);
+  --button-top: #00000014;
+  --scrollbar: #76797c50;
 }
 
 .dark {
-  --background: hsl(0 0% 4%);
-  --foreground: hsl(0 0% 98%);
-  --card: hsl(240 5.9% 10%);
-  --card-foreground: hsl(0 0% 98%);
-  --popover: hsl(240 10% 3.9%);
-  --popover-foreground: hsl(0 0% 98%);
-  --primary: hsl(0 0% 98%);
-  --primary-foreground: hsl(240 5.9% 10%);
-  --secondary: hsl(240 3.7% 15.9%);
-  --secondary-foreground: hsl(0 0% 98%);
-  --muted: hsl(240 3.7% 15.9%);
-  --muted-foreground: hsl(240 5% 64.9%);
-  --accent: hsl(240 3.7% 15.9%);
-  --accent-foreground: hsl(0 0% 98%);
-  --destructive: hsl(0 62.8% 30.6%);
-  --destructive-foreground: hsl(0 0% 98%);
-  --border: hsl(240 3.7% 15.9%);
-  --input: hsl(240 3.7% 15.9%);
-  --ring: hsl(240 4.9% 83.9%);
+  --background-app: radial-gradient(98.1% 98.1% at 51.25% 1.9%, #17191c, #131518, #0f1012, #0e0e10, #0d0e11);
+  --background-main: radial-gradient(100% 100% at 50% 0%, #aaaaaa0a, #89929311);
+  --foreground: rgba(185, 186, 189, 1);
+  --foreground-primary: rgba(227, 229, 234, 1);
+  --card: #d9e6ff08;
+  --card-foreground: rgba(185, 186, 189, 1);
+  --popover: rgba(31, 33, 36, 1);
+  --popover-foreground: rgba(185, 186, 189, 1);
+  --primary: rgba(185, 186, 189, 1);
+  --primary-foreground: #d9e6ff08;
+  --secondary: rgba(255, 255, 255, 0.05);
+  --secondary-foreground: rgba(185, 186, 189, 1);
+  --muted: rgba(255, 255, 255, 0.05);
+  --muted-foreground: rgba(140, 143, 145, 1);
+  --accent: rgba(255, 255, 255, 0.05);
+  --accent-foreground: rgba(185, 186, 189, 1);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: rgba(255, 255, 255, 0.05);
+  --input: rgba(255, 255, 255, 0.05);
+  --checkbox: #4a4a4a;
+  --ring: rgba(185, 186, 189, 1);
   --chart-1: hsl(220 70% 50%);
   --chart-2: hsl(160 60% 45%);
   --chart-3: hsl(30 80% 55%);
   --chart-4: hsl(280 65% 60%);
   --chart-5: hsl(340 75% 55%);
-  --sidebar: hsl(240 5.9% 10%);
-  --sidebar-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-primary: hsl(224.3 76.3% 48%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(240 3.7% 15.9%);
-  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-border: hsl(240 3.7% 15.9%);
-  --sidebar-ring: hsl(240 4.9% 83.9%);
+  --sidebar: #d9e6ff08;
+  --sidebar-foreground: rgba(185, 186, 189, 1);
+  --sidebar-accent: rgba(255, 255, 255, 0.05);
+  --sidebar-accent-foreground: rgba(227, 229, 234, 1);
+  --sidebar-border: rgba(255, 255, 255, 0.05);
+  --sidebar-ring: rgba(185, 186, 189, 1);
+  --active: rgba(37, 39, 43, 1);
+  --hover: rgba(50, 52, 57, 1);
+  --button: rgba(44, 46, 51, 1);
+  --button-top: #ffffff12;
+  --scrollbar: #76797c50;
 }
 
 @theme inline {
-  --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-foreground-primary: var(--foreground-primary);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
@@ -99,9 +109,9 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
+  --color-checkbox: var(--checkbox);
   --color-ring: var(--ring);
   --radius-md: var(--radius);
   --radius-sm: calc(var(--radius) - 0.25rem);
@@ -113,12 +123,31 @@
   --color-chart-5: var(--chart-5);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
   --color-sidebar-accent: var(--sidebar-accent);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-active: var(--active);
+  --color-hover: var(--hover);
+  --color-button: var(--button);
+  --color-button-top: var(--button-top);
+  --color-scrollbar: var(--scrollbar);
+}
+
+@layer utilities {
+  .bg-main {
+    background: var(--background-main);
+  }
+
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    scrollbar-gutter: stable;
+  }
+
+  .custom-scrollbar:hover {
+    scrollbar-color: var(--color-scrollbar) transparent;
+  }
 }
 
 @layer base {
@@ -132,9 +161,10 @@
   }
 
   body {
-    @apply bg-background text-foreground;
-    /* https://www.joshwcomeau.com/css/custom-css-reset/#digit-tweaking-line-height */
-    line-height: calc(1em + 0.5rem);
+    @apply text-foreground;
+    background: var(--background-app);
+    line-height: calc(1em + 0.5rem); /* https://www.joshwcomeau.com/css/custom-css-reset/#digit-tweaking-line-height */
+    overflow: hidden;
   }
 
   button {

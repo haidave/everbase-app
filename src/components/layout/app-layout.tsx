@@ -10,7 +10,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <SidebarInset>
         <AppHeader />
 
-        <div className="p-4">{children}</div>
+        <div className="custom-scrollbar overflow-auto p-4">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   )

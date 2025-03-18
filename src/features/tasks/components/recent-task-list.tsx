@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Link } from '@tanstack/react-router'
-import { PlusIcon } from 'lucide-react'
 
 import { useTasks } from '@/hooks/use-tasks'
 
@@ -32,10 +31,8 @@ const RecentTaskList = ({ limit = 5 }: RecentTaskListProps) => {
     <>
       <div className="grid gap-4">
         <div className="flex items-center justify-between">
-          <h2>Recent Tasks</h2>
-          <Button variant="secondary" size="sm" onClick={() => setIsAddDialogOpen(true)}>
-            <PlusIcon className="mr-2 h-4 w-4" /> Add Task
-          </Button>
+          <h2 className="text-foreground-primary">Recent Tasks</h2>
+          <Button onClick={() => setIsAddDialogOpen(true)}>Add Task</Button>
         </div>
 
         <ul className="space-y-2">
@@ -44,7 +41,7 @@ const RecentTaskList = ({ limit = 5 }: RecentTaskListProps) => {
           ))}
         </ul>
 
-        <Button variant="link" size="sm" asChild className="justify-self-center">
+        <Button variant="link" asChild className="justify-self-center">
           <Link to="/tasks">View all tasks</Link>
         </Button>
       </div>
