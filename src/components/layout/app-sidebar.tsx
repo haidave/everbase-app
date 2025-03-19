@@ -17,6 +17,7 @@ import {
   KeyboardIcon,
   LayoutDashboardIcon,
   ListTodoIcon,
+  NotebookPenIcon,
   SproutIcon,
   UserIcon,
 } from 'lucide-react'
@@ -39,6 +40,11 @@ const items = [
     title: 'Habits',
     url: '/habits',
     icon: SproutIcon,
+  },
+  {
+    title: 'Journal',
+    url: '/journal',
+    icon: NotebookPenIcon,
   },
 ]
 

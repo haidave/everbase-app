@@ -16,6 +16,7 @@ import { Route as AuthenticatedImport } from './routes/_authenticated'
 import { Route as IndexImport } from './routes/index'
 import { Route as AuthCallbackImport } from './routes/auth/callback'
 import { Route as AuthenticatedTasksImport } from './routes/_authenticated/tasks'
+import { Route as AuthenticatedJournalImport } from './routes/_authenticated/journal'
 import { Route as AuthenticatedHabitsImport } from './routes/_authenticated/habits'
 import { Route as AuthenticatedDashboardImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedProjectsIndexImport } from './routes/_authenticated/projects/index'
@@ -49,6 +50,12 @@ const AuthCallbackRoute = AuthCallbackImport.update({
 const AuthenticatedTasksRoute = AuthenticatedTasksImport.update({
   id: '/tasks',
   path: '/tasks',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+
+const AuthenticatedJournalRoute = AuthenticatedJournalImport.update({
+  id: '/journal',
+  path: '/journal',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 
@@ -118,6 +125,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHabitsImport
       parentRoute: typeof AuthenticatedImport
     }
+    '/_authenticated/journal': {
+      id: '/_authenticated/journal'
+      path: '/journal'
+      fullPath: '/journal'
+      preLoaderRoute: typeof AuthenticatedJournalImport
+      parentRoute: typeof AuthenticatedImport
+    }
     '/_authenticated/tasks': {
       id: '/_authenticated/tasks'
       path: '/tasks'
@@ -154,6 +168,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedHabitsRoute: typeof AuthenticatedHabitsRoute
+  AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
   AuthenticatedTasksRoute: typeof AuthenticatedTasksRoute
   AuthenticatedProjectsProjectIdRoute: typeof AuthenticatedProjectsProjectIdRoute
   AuthenticatedProjectsIndexRoute: typeof AuthenticatedProjectsIndexRoute
@@ -162,6 +177,7 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedHabitsRoute: AuthenticatedHabitsRoute,
+  AuthenticatedJournalRoute: AuthenticatedJournalRoute,
   AuthenticatedTasksRoute: AuthenticatedTasksRoute,
   AuthenticatedProjectsProjectIdRoute: AuthenticatedProjectsProjectIdRoute,
   AuthenticatedProjectsIndexRoute: AuthenticatedProjectsIndexRoute,
@@ -177,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof SignInRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/habits': typeof AuthenticatedHabitsRoute
+  '/journal': typeof AuthenticatedJournalRoute
   '/tasks': typeof AuthenticatedTasksRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
@@ -189,6 +206,7 @@ export interface FileRoutesByTo {
   '/sign-in': typeof SignInRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/habits': typeof AuthenticatedHabitsRoute
+  '/journal': typeof AuthenticatedJournalRoute
   '/tasks': typeof AuthenticatedTasksRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
@@ -202,6 +220,7 @@ export interface FileRoutesById {
   '/sign-in': typeof SignInRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/habits': typeof AuthenticatedHabitsRoute
+  '/_authenticated/journal': typeof AuthenticatedJournalRoute
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
@@ -216,6 +235,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/dashboard'
     | '/habits'
+    | '/journal'
     | '/tasks'
     | '/auth/callback'
     | '/projects/$projectId'
@@ -227,6 +247,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/dashboard'
     | '/habits'
+    | '/journal'
     | '/tasks'
     | '/auth/callback'
     | '/projects/$projectId'
@@ -238,6 +259,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/_authenticated/dashboard'
     | '/_authenticated/habits'
+    | '/_authenticated/journal'
     | '/_authenticated/tasks'
     | '/auth/callback'
     | '/_authenticated/projects/$projectId'
@@ -283,6 +305,7 @@ export const routeTree = rootRoute
       "children": [
         "/_authenticated/dashboard",
         "/_authenticated/habits",
+        "/_authenticated/journal",
         "/_authenticated/tasks",
         "/_authenticated/projects/$projectId",
         "/_authenticated/projects/"
@@ -297,6 +320,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/habits": {
       "filePath": "_authenticated/habits.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/journal": {
+      "filePath": "_authenticated/journal.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/tasks": {
