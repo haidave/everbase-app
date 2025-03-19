@@ -1,6 +1,7 @@
 import {
   type Habit,
   type HabitCompletion,
+  type Journal,
   type Project,
   type ProjectStatus,
   type Task,
@@ -29,8 +30,13 @@ export type NewHabit = {
   userId: string
 }
 
+export type NewJournal = {
+  content: string
+  userId: string
+}
+
 // Re-export schema types for convenience
-export type { Project, ProjectStatus, Task, TaskProject, Habit, HabitCompletion }
+export type { Project, ProjectStatus, Task, TaskProject, Habit, HabitCompletion, Journal }
 
 export const api = {
   tasks: {
@@ -271,6 +277,47 @@ export const api = {
         .gte('completed_at', today.toISOString())
         .lt('completed_at', tomorrow.toISOString())
 
+      if (error) throw error
+    },
+  },
+  journals: {
+    getAll: async (): Promise<Journal[]> => {
+      const { data, error } = await supabase.from('journals').select('*').order('created_at', { ascending: false })
+
+      if (error) throw error
+      return transformArraySnakeToCamel<Journal>(data)
+    },
+
+    getById: async (id: string): Promise<Journal> => {
+      const { data, error } = await supabase.from('journals').select('*').eq('id', id).single()
+
+      if (error) throw error
+      return snakeToCamelCase<Journal>(data)
+    },
+
+    create: async (journal: Omit<NewJournal, 'userId'>): Promise<Journal> => {
+      const { data: userData } = await supabase.auth.getUser()
+
+      const supabaseJournal = {
+        content: journal.content,
+        user_id: userData.user?.id,
+      }
+
+      const { data, error } = await supabase.from('journals').insert(supabaseJournal).select().single()
+
+      if (error) throw error
+      return snakeToCamelCase<Journal>(data)
+    },
+
+    update: async (id: string, updates: { content: string }): Promise<Journal> => {
+      const { data, error } = await supabase.from('journals').update(updates).eq('id', id).select().single()
+
+      if (error) throw error
+      return snakeToCamelCase<Journal>(data)
+    },
+
+    delete: async (id: string): Promise<void> => {
+      const { error } = await supabase.from('journals').delete().eq('id', id)
       if (error) throw error
     },
   },

@@ -13,4 +13,10 @@ const copyToClipboard = async (text: string) => {
   }
 }
 
-export { cn, copyToClipboard }
+const moveCaretToEnd = <T extends HTMLInputElement | HTMLTextAreaElement>(e: React.FocusEvent<T>) => {
+  const tempValue = e.target.value
+  e.target.value = ''
+  e.target.value = tempValue
+}
+
+export { cn, copyToClipboard, moveCaretToEnd }
