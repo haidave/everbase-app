@@ -70,9 +70,21 @@ export const habitCompletions = pgTable('habit_completions', {
   completedAt: timestamp('completed_at', { withTimezone: true }).defaultNow().notNull(),
 })
 
+// Journal table
+export const journals = pgTable('journals', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id),
+  content: text('content').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+})
+
 export type Task = InferSelectModel<typeof tasks>
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number]
 export type Project = InferSelectModel<typeof projects>
 export type TaskProject = InferSelectModel<typeof taskProjects>
 export type Habit = InferSelectModel<typeof habits>
 export type HabitCompletion = InferSelectModel<typeof habitCompletions>
+export type Journal = InferSelectModel<typeof journals>
