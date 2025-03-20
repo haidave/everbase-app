@@ -2,6 +2,8 @@ import {
   type Habit,
   type HabitCompletion,
   type Journal,
+  type MonthlyChecklist,
+  type MonthlyChecklistCompletion,
   type Project,
   type ProjectStatus,
   type Task,
@@ -36,7 +38,17 @@ export type NewJournal = {
 }
 
 // Re-export schema types for convenience
-export type { Project, ProjectStatus, Task, TaskProject, Habit, HabitCompletion, Journal }
+export type {
+  Project,
+  ProjectStatus,
+  Task,
+  TaskProject,
+  Habit,
+  HabitCompletion,
+  Journal,
+  MonthlyChecklist,
+  MonthlyChecklistCompletion,
+}
 
 export const api = {
   tasks: {
@@ -319,6 +331,97 @@ export const api = {
     delete: async (id: string): Promise<void> => {
       const { error } = await supabase.from('journals').delete().eq('id', id)
       if (error) throw error
+    },
+  },
+
+  monthlyChecklist: {
+    getAll: async (): Promise<MonthlyChecklist[]> => {
+      const { data, error } = await supabase
+        .from('monthly_checklists')
+        .select('*')
+        .order('created_at', { ascending: true })
+
+      if (error) throw new Error(error.message)
+      return transformArraySnakeToCamel<MonthlyChecklist>(data)
+    },
+
+    create: async (monthlyChecklist: {
+      name: string
+      description?: string
+      active: boolean
+    }): Promise<MonthlyChecklist> => {
+      // Get the current user
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!user) throw new Error('User not authenticated')
+
+      // Add user_id to the checklist item
+      const checklistWithUserId = {
+        ...monthlyChecklist,
+        user_id: user.id,
+      }
+
+      const { data, error } = await supabase.from('monthly_checklists').insert(checklistWithUserId).select().single()
+
+      if (error) throw new Error(error.message)
+      return snakeToCamelCase<MonthlyChecklist>(data)
+    },
+
+    update: async (monthlyChecklist: {
+      id: string
+      name: string
+      description?: string
+      active?: boolean
+    }): Promise<MonthlyChecklist> => {
+      const { data, error } = await supabase
+        .from('monthly_checklists')
+        .update(monthlyChecklist)
+        .eq('id', monthlyChecklist.id)
+        .select()
+        .single()
+
+      if (error) throw new Error(error.message)
+      return snakeToCamelCase<MonthlyChecklist>(data)
+    },
+
+    delete: async (id: string): Promise<void> => {
+      const { error } = await supabase.from('monthly_checklists').delete().eq('id', id)
+
+      if (error) throw new Error(error.message)
+    },
+
+    // Get completions for the current month
+    getCompletions: async (month: string): Promise<MonthlyChecklistCompletion[]> => {
+      const { data, error } = await supabase.from('monthly_checklist_completions').select('*').eq('month', month)
+
+      if (error) throw new Error(error.message)
+      return transformArraySnakeToCamel<MonthlyChecklistCompletion>(data)
+    },
+
+    complete: async (monthlyChecklistId: string, month: string): Promise<MonthlyChecklistCompletion> => {
+      const { data, error } = await supabase
+        .from('monthly_checklist_completions')
+        .insert({
+          monthly_checklist_id: monthlyChecklistId,
+          month,
+        })
+        .select()
+        .single()
+
+      if (error) throw new Error(error.message)
+      return snakeToCamelCase<MonthlyChecklistCompletion>(data)
+    },
+
+    uncomplete: async (monthlyChecklistId: string, month: string): Promise<void> => {
+      const { error } = await supabase
+        .from('monthly_checklist_completions')
+        .delete()
+        .eq('monthly_checklist_id', monthlyChecklistId)
+        .eq('month', month)
+
+      if (error) throw new Error(error.message)
     },
   },
 }
