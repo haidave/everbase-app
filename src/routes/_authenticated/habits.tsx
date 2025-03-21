@@ -14,10 +14,8 @@ export const Route = createFileRoute('/_authenticated/habits')({
 
 function HabitsPage() {
   return (
-    <div className="flex flex-col gap-6 px-2 py-4">
-      <section className="bg-card relative flex-1 gap-6 rounded-lg border p-4">
-        <HabitList />
-      </section>
-    </div>
+    <section className="relative">
+      <HabitList />
+    </section>
   )
 }

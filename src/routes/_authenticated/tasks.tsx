@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { AddTaskForm } from '@/features/tasks/components/add-task-form'
 import { TaskList } from '@/features/tasks/components/task-list'
 import { createFileRoute } from '@tanstack/react-router'
+import { PlusIcon } from 'lucide-react'
 
 export const Route = createFileRoute('/_authenticated/tasks')({
   component: TasksPage,
@@ -19,8 +20,9 @@ function TasksPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
   return (
-    <section className="bg-card relative grid flex-1 gap-6 rounded-lg border p-4">
+    <section className="relative grid gap-6">
       <Button onClick={() => setIsAddDialogOpen(true)} className="w-fit">
+        <PlusIcon />
         Add Task
       </Button>
 
