@@ -16,6 +16,7 @@ import { Pencil, PlusIcon, Trash2 } from 'lucide-react'
 import { useDeleteHabit, useHabits } from '@/hooks/use-habits'
 
 import { HabitForm } from './habit-form'
+import { HabitProgress } from './habit-progress'
 
 export function HabitList() {
   const { data: habits, isLoading: isLoadingHabits } = useHabits()
@@ -59,41 +60,41 @@ export function HabitList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-foreground-primary">My Habits</h2>
+      <Button onClick={() => setIsAddDialogOpen(true)}>
+        <PlusIcon className="mr-2 h-4 w-4" />
+        Add Habit
+      </Button>
 
-        <Button onClick={() => setIsAddDialogOpen(true)}>
-          <PlusIcon className="mr-2 h-4 w-4" />
-          Add Habit
-        </Button>
-      </div>
-
-      <ul className="space-y-2">
+      <ul className="flex flex-wrap gap-4">
         {activeHabits.map((habit) => (
-          <li key={habit.id} className="flex items-center justify-between gap-3 rounded-md border p-3">
-            <div>
-              <p className="font-medium">{habit.name}</p>
-              {habit.description && <p className="text-muted-foreground text-sm">{habit.description}</p>}
+          <li key={habit.id} className="bg-card rounded-md border">
+            <div className="flex items-center justify-between gap-3 p-3">
+              <div>
+                <p className="font-medium">{habit.name}</p>
+                {habit.description && <p className="text-muted-foreground text-sm">{habit.description}</p>}
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleEditHabit(habit)}
+                  aria-label={`Edit habit ${habit.name}`}
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleDeleteHabit(habit)}
+                  aria-label={`Delete habit ${habit.name}`}
+                  className="text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleEditHabit(habit)}
-                aria-label={`Edit habit ${habit.name}`}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleDeleteHabit(habit)}
-                aria-label={`Delete habit ${habit.name}`}
-                className="text-destructive"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
+
+            <HabitProgress habit={habit} />
           </li>
         ))}
       </ul>

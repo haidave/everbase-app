@@ -238,12 +238,20 @@ export const api = {
   habitCompletions: {
     // Get completions for a specific date range
     getCompletions: async (habitId: string, startDate: Date, endDate: Date): Promise<HabitCompletion[]> => {
+      // Convert to UTC dates
+      const utcStartDate = new Date(
+        Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), 0, 0, 0)
+      )
+      const utcEndDate = new Date(
+        Date.UTC(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), 23, 59, 59, 999)
+      )
+
       const { data, error } = await supabase
         .from('habit_completions')
         .select('*')
         .eq('habit_id', habitId)
-        .gte('completed_at', startDate.toISOString())
-        .lte('completed_at', endDate.toISOString())
+        .gte('completed_at', utcStartDate.toISOString())
+        .lte('completed_at', utcEndDate.toISOString())
 
       if (error) throw error
       return transformArraySnakeToCamel<HabitCompletion>(data)
@@ -252,15 +260,14 @@ export const api = {
     // Get today's completions for all habits
     getTodayCompletions: async (): Promise<HabitCompletion[]> => {
       const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      const tomorrow = new Date(today)
-      tomorrow.setDate(tomorrow.getDate() + 1)
+      const utcStartDate = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0))
+      const utcEndDate = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999))
 
       const { data, error } = await supabase
         .from('habit_completions')
         .select('*')
-        .gte('completed_at', today.toISOString())
-        .lt('completed_at', tomorrow.toISOString())
+        .gte('completed_at', utcStartDate.toISOString())
+        .lte('completed_at', utcEndDate.toISOString())
 
       if (error) throw error
       return transformArraySnakeToCamel<HabitCompletion>(data)
@@ -268,26 +275,71 @@ export const api = {
 
     // Mark a habit as completed for today
     completeHabit: async (habitId: string): Promise<HabitCompletion> => {
-      const { data, error } = await supabase.from('habit_completions').insert({ habit_id: habitId }).select().single()
+      // Use noon of today to avoid timezone issues
+      const today = new Date()
+      // Create a date with just the year, month, and day components
+      const normalizedDate = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate(), 12, 0, 0))
+
+      const { data, error } = await supabase
+        .from('habit_completions')
+        .insert({
+          habit_id: habitId,
+          completed_at: normalizedDate.toISOString(),
+        })
+        .select()
+        .single()
 
       if (error) throw error
       return snakeToCamelCase<HabitCompletion>(data)
     },
 
-    // Remove a completion (unmark a habit)
+    // Remove a completion (unmark a habit for today)
     removeCompletion: async (habitId: string): Promise<void> => {
-      // Get today's date range
+      // Get today's date range using UTC
       const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      const tomorrow = new Date(today)
-      tomorrow.setDate(tomorrow.getDate() + 1)
+      const startDate = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0))
+      const endDate = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999))
 
       const { error } = await supabase
         .from('habit_completions')
         .delete()
         .eq('habit_id', habitId)
-        .gte('completed_at', today.toISOString())
-        .lt('completed_at', tomorrow.toISOString())
+        .gte('completed_at', startDate.toISOString())
+        .lte('completed_at', endDate.toISOString())
+
+      if (error) throw error
+    },
+
+    // Mark a habit as completed for a specific date
+    completeHabitForDate: async (habitId: string, date: Date): Promise<HabitCompletion> => {
+      // Create a date with just the year, month, and day components using UTC
+      const normalizedDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0))
+
+      const { data, error } = await supabase
+        .from('habit_completions')
+        .insert({
+          habit_id: habitId,
+          completed_at: normalizedDate.toISOString(),
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      return snakeToCamelCase<HabitCompletion>(data)
+    },
+
+    // Remove a completion for a specific date
+    removeCompletionForDate: async (habitId: string, date: Date): Promise<void> => {
+      // Create UTC dates for the start and end of the day
+      const startDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0))
+      const endDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999))
+
+      const { error } = await supabase
+        .from('habit_completions')
+        .delete()
+        .eq('habit_id', habitId)
+        .gte('completed_at', startDate.toISOString())
+        .lte('completed_at', endDate.toISOString())
 
       if (error) throw error
     },
