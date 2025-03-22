@@ -28,7 +28,7 @@ export function DashboardHabits() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-6">
         <h2 className="text-foreground-primary text-sm">Habits</h2>
         <p className="text-muted-foreground text-xs">{formattedDate}</p>
       </div>

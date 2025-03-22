@@ -48,7 +48,7 @@ export function DashboardMonthlyChecklist() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-6">
         <h2 className="text-foreground-primary text-sm">Monthly Checklist</h2>
         <span className="text-muted-foreground text-xs">{currentMonth}</span>
       </div>
