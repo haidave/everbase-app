@@ -11,14 +11,12 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
-import { Textarea } from '@/components/ui/textarea'
+import { TextareaAutosize } from '@/components/ui/textarea'
 import { type Journal } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
 import { format } from 'date-fns'
-import { LoaderCircleIcon, Pencil, Save, Trash2, X } from 'lucide-react'
-import { useHotkeys } from 'react-hotkeys-hook'
+import { Trash2 } from 'lucide-react'
 
-import { moveCaretToEnd } from '@/lib/utils'
 import { useDeleteJournal, useUpdateJournal } from '@/hooks/use-journals'
 
 type JournalItemProps = {
@@ -26,11 +24,9 @@ type JournalItemProps = {
 }
 
 export function JournalItem({ journal }: JournalItemProps) {
-  const [isEditing, setIsEditing] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const updateJournal = useUpdateJournal()
   const deleteJournal = useDeleteJournal()
-  const formRef = useRef<HTMLFormElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const form = useForm({
@@ -39,141 +35,52 @@ export function JournalItem({ journal }: JournalItemProps) {
     },
     onSubmit: async ({ value }) => {
       // Skip if content is unchanged
-      if (value.content.trim() === journal.content) {
-        setIsEditing(false)
-        return
-      }
+      if (value.content.trim() === journal.content) return
 
       // Handle empty input
       if (!value.content.trim()) {
         form.reset()
-        setIsEditing(false)
         return
       }
 
-      updateJournal.mutate(
-        {
-          id: journal.id,
-          content: value.content,
-        },
-        {
-          onSuccess: () => {
-            setIsEditing(false)
-          },
-        }
-      )
+      updateJournal.mutate({
+        id: journal.id,
+        content: value.content,
+      })
     },
   })
-
-  // Use hotkeys for Command+Enter to save when editing
-  useHotkeys(
-    'mod+enter',
-    () => {
-      if (isEditing && !updateJournal.isPending && formRef.current?.contains(document.activeElement)) {
-        formRef.current?.requestSubmit()
-      }
-    },
-    {
-      preventDefault: true,
-      enableOnFormTags: ['TEXTAREA'],
-      enabled: isEditing,
-    }
-  )
-
-  const handleDelete = () => {
-    deleteJournal.mutate(journal.id)
-    setIsDeleteDialogOpen(false)
-  }
-
-  const handleCancel = () => {
-    form.reset()
-    setIsEditing(false)
-  }
 
   const formattedTime = format(new Date(journal.createdAt), 'HH:mm')
 
   return (
     <Card>
-      {isEditing ? (
-        <form
-          ref={formRef}
-          onSubmit={(e) => {
-            e.preventDefault()
-            form.handleSubmit()
-          }}
-        >
-          <CardContent className="p-4">
-            <form.Field name="content">
-              {(field) => (
-                <Textarea
-                  ref={textareaRef}
-                  className="min-h-24 resize-none"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  disabled={updateJournal.isPending}
-                  // eslint-disable-next-line jsx-a11y/no-autofocus
-                  autoFocus
-                  onFocus={moveCaretToEnd}
-                  onBlur={() => {
-                    // If content is unchanged, exit edit mode
-                    if (field.state.value.trim() === journal.content) {
-                      setIsEditing(false)
-                    }
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Escape') {
-                      e.preventDefault()
-                      handleCancel()
-                    }
-                  }}
-                />
-              )}
-            </form.Field>
-          </CardContent>
-          <CardFooter className="flex justify-between p-4 pt-0">
-            <div className="text-muted-foreground text-sm">{formattedTime}</div>
-            <div className="flex gap-2">
-              <Button variant="ghost" onClick={handleCancel} disabled={updateJournal.isPending}>
-                <X />
-                Cancel
-              </Button>
-              <form.Subscribe
-                selector={(state) => ({
-                  value: state.values.content,
-                  isPending: updateJournal.isPending,
-                })}
-              >
-                {({ value, isPending }) => {
-                  const hasChanges = value.trim() !== journal.content
-                  return (
-                    <Button type="submit" disabled={!hasChanges || isPending}>
-                      {isPending ? <LoaderCircleIcon className="animate-spin" /> : <Save />}
-                      Save
-                    </Button>
-                  )
+      <form>
+        <CardContent className="p-4">
+          <form.Field name="content">
+            {(field) => (
+              <TextareaAutosize
+                ref={textareaRef}
+                value={field.state.value}
+                onChange={(e) => field.handleChange(e.target.value)}
+                onBlur={() => {
+                  field.handleBlur()
+                  form.handleSubmit()
                 }}
-              </form.Subscribe>
-            </div>
-          </CardFooter>
-        </form>
-      ) : (
-        <>
-          <CardContent className="p-4 whitespace-pre-wrap">{journal.content}</CardContent>
-          <CardFooter className="flex justify-between p-4 pt-0">
-            <div className="text-muted-foreground text-sm">{formattedTime}</div>
-            <div className="flex gap-2">
-              <Button variant="ghost" onClick={() => setIsEditing(true)}>
-                <Pencil />
-                Edit
-              </Button>
-              <Button variant="destructive" onClick={() => setIsDeleteDialogOpen(true)}>
-                <Trash2 />
-                Delete
-              </Button>
-            </div>
-          </CardFooter>
-        </>
-      )}
+                className="border-transparent"
+                maxRows={30}
+              />
+            )}
+          </form.Field>
+        </CardContent>
+
+        <CardFooter className="flex justify-between p-4 pt-0">
+          <div className="text-muted-foreground text-sm">{formattedTime}</div>
+          <Button variant="destructive" onClick={() => setIsDeleteDialogOpen(true)}>
+            <Trash2 />
+            Delete
+          </Button>
+        </CardFooter>
+      </form>
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
@@ -185,7 +92,7 @@ export function JournalItem({ journal }: JournalItemProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>No</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Yes</AlertDialogAction>
+            <AlertDialogAction onClick={() => deleteJournal.mutate(journal.id)}>Yes</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

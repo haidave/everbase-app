@@ -1,13 +1,17 @@
 import { useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
+import { TextareaAutosize } from '@/components/ui/textarea'
 import { useForm } from '@tanstack/react-form'
 import { LoaderCircleIcon, SaveIcon } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
 
 import { useCreateJournal } from '@/hooks/use-journals'
 
-export function AddJournalForm() {
+type AddJournalFormProps = {
+  isDashboard?: boolean
+}
+
+export function AddJournalForm({ isDashboard = false }: AddJournalFormProps) {
   const createJournal = useCreateJournal()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
@@ -62,10 +66,11 @@ export function AddJournalForm() {
       >
         {(field) => (
           <>
-            <Textarea
+            <TextareaAutosize
               ref={textareaRef}
               placeholder="What's on your mind today?"
-              className="min-h-32 resize-none"
+              minRows={isDashboard ? 8 : 5}
+              maxRows={isDashboard ? 8 : 30}
               value={field.state.value}
               onChange={(e) => field.handleChange(e.target.value)}
               disabled={isSubmitting}
