@@ -29,6 +29,11 @@ export function JournalItem({ journal }: JournalItemProps) {
   const deleteJournal = useDeleteJournal()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
+  const handleDelete = () => {
+    deleteJournal.mutate(journal.id)
+    setIsDeleteDialogOpen(false)
+  }
+
   const form = useForm({
     defaultValues: {
       content: journal.content,
@@ -54,33 +59,31 @@ export function JournalItem({ journal }: JournalItemProps) {
 
   return (
     <Card>
-      <form>
-        <CardContent className="p-4">
-          <form.Field name="content">
-            {(field) => (
-              <TextareaAutosize
-                ref={textareaRef}
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                onBlur={() => {
-                  field.handleBlur()
-                  form.handleSubmit()
-                }}
-                className="border-transparent"
-                maxRows={30}
-              />
-            )}
-          </form.Field>
-        </CardContent>
+      <p className="text-muted-foreground px-5 pt-6 pb-1 text-xs">{formattedTime}</p>
+      <CardContent className="p-2">
+        <form.Field name="content">
+          {(field) => (
+            <TextareaAutosize
+              ref={textareaRef}
+              value={field.state.value}
+              onChange={(e) => field.handleChange(e.target.value)}
+              onBlur={() => {
+                field.handleBlur()
+                form.handleSubmit()
+              }}
+              className="border-transparent"
+              maxRows={30}
+            />
+          )}
+        </form.Field>
+      </CardContent>
 
-        <CardFooter className="flex justify-between p-4 pt-0">
-          <div className="text-muted-foreground text-sm">{formattedTime}</div>
-          <Button variant="destructive" onClick={() => setIsDeleteDialogOpen(true)}>
-            <Trash2 />
-            Delete
-          </Button>
-        </CardFooter>
-      </form>
+      <CardFooter className="flex justify-end p-4 pt-0">
+        <Button type="button" variant="destructive" onClick={() => setIsDeleteDialogOpen(true)}>
+          <Trash2 />
+          Delete
+        </Button>
+      </CardFooter>
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
@@ -92,7 +95,7 @@ export function JournalItem({ journal }: JournalItemProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>No</AlertDialogCancel>
-            <AlertDialogAction onClick={() => deleteJournal.mutate(journal.id)}>Yes</AlertDialogAction>
+            <AlertDialogAction onClick={handleDelete}>Yes</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
