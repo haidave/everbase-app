@@ -1,9 +1,16 @@
 import { useState } from 'react'
 import { Calendar } from '@/components/ui/calendar'
 import { type Habit } from '@/db/schema'
-import { isFuture } from 'date-fns'
+import { isFuture, isSameMonth } from 'date-fns'
 
-import { useCompleteHabitForDate, useHabitCompletionHistory, useUncompleteHabitForDate } from '@/hooks/use-habits'
+import { formatDateString } from '@/lib/formatters'
+import { useHabitStreak } from '@/hooks/use-habit-streak'
+import {
+  useAllHabitCompletions,
+  useCompleteHabitForDate,
+  useHabitCompletionHistory,
+  useUncompleteHabitForDate,
+} from '@/hooks/use-habits'
 
 type HabitProgressProps = {
   habit: Habit
@@ -16,27 +23,32 @@ export function HabitProgress({ habit }: HabitProgressProps) {
   const startDate = new Date(date.getFullYear(), date.getMonth(), 1)
   const endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0)
 
-  // Get completion history for the habit
-  const { data: completions } = useHabitCompletionHistory(habit.id, startDate, endDate)
+  // Get completion history for the current month view
+  const { data: monthCompletions } = useHabitCompletionHistory(habit.id, startDate, endDate)
+
+  // Get all completions for streak calculation
+  const { data: allCompletions } = useAllHabitCompletions(habit.id)
+
   const completeHabitForDate = useCompleteHabitForDate()
   const uncompleteHabitForDate = useUncompleteHabitForDate()
 
-  // Create a Set of completed dates for easier lookup
+  // Calculate streaks using our custom hook with all completions
+  const { currentStreak, bestStreak } = useHabitStreak(allCompletions)
+
+  // Create a Set of completed dates for easier lookup (for the calendar)
   const completedDates = new Set(
-    completions?.map((completion) => {
-      // Parse the UTC date and convert to local date string
+    monthCompletions?.map((completion) => {
       const utcDate = new Date(completion.completedAt)
-      // Format as YYYY-MM-DD using local date
-      return `${utcDate.getFullYear()}-${String(utcDate.getMonth() + 1).padStart(2, '0')}-${String(utcDate.getDate()).padStart(2, '0')}`
+      return formatDateString(utcDate)
     }) || []
   )
 
   // Handle day click to toggle completion
   const handleDayClick = (clickedDate: Date) => {
-    if (isFuture(clickedDate)) return
+    // Only allow clicking on days in the current month and not in the future
+    if (isFuture(clickedDate) || !isSameMonth(clickedDate, date)) return
 
-    // Format the clicked date as YYYY-MM-DD for comparison
-    const dateStr = `${clickedDate.getFullYear()}-${String(clickedDate.getMonth() + 1).padStart(2, '0')}-${String(clickedDate.getDate()).padStart(2, '0')}`
+    const dateStr = formatDateString(clickedDate)
     const isCompleted = completedDates.has(dateStr)
 
     if (isCompleted) {
@@ -61,15 +73,24 @@ export function HabitProgress({ habit }: HabitProgressProps) {
         disabled={disabledDays}
         modifiers={{
           completed: (day) => {
-            // Format the calendar day as YYYY-MM-DD for comparison
-            const dayStr = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`
+            const dayStr = formatDateString(day)
             return completedDates.has(dayStr)
           },
+          outsideCurrentMonth: (day) => !isSameMonth(day, date),
         }}
         modifiersClassNames={{
-          completed: 'bg-active hover:bg-hover',
+          completed: 'bg-hover',
+          outsideCurrentMonth: 'text-muted-foreground opacity-50 pointer-events-none',
         }}
       />
+      <div className="mt-4 flex flex-col gap-2 text-sm">
+        <p>
+          Current streak: <span className="font-medium">{currentStreak}</span>
+        </p>
+        <p>
+          Best streak: <span className="font-medium">{bestStreak}</span>
+        </p>
+      </div>
     </div>
   )
 }
