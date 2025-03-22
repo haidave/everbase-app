@@ -11,7 +11,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useForm } from '@tanstack/react-form'
-import { LoaderCircleIcon } from 'lucide-react'
+import { LoaderCircleIcon, PlusIcon } from 'lucide-react'
 
 import { useAddTaskToProject, useProjects } from '@/hooks/use-projects'
 import { useCreateTask } from '@/hooks/use-tasks'
@@ -133,7 +133,8 @@ const AddTaskForm = ({ open, onOpenChange }: AddTaskFormProps) => {
             <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
               {([canSubmit, isSubmitting]) => (
                 <Button type="submit" disabled={!canSubmit}>
-                  {isSubmitting ? <LoaderCircleIcon className="animate-spin" /> : 'Add Task'}
+                  {isSubmitting ? <LoaderCircleIcon className="animate-spin" /> : <PlusIcon />}
+                  Add Task
                 </Button>
               )}
             </form.Subscribe>

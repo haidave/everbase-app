@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { TextareaAutosize } from '@/components/ui/textarea'
 import { useForm } from '@tanstack/react-form'
-import { LoaderCircleIcon, SaveIcon } from 'lucide-react'
+import { LoaderCircleIcon, PlusIcon } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
 
 import { useCreateJournal } from '@/hooks/use-journals'
@@ -86,8 +86,8 @@ export function AddJournalForm({ isDashboard = false }: AddJournalFormProps) {
 
       <div className="flex justify-end">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? <LoaderCircleIcon className="animate-spin" /> : <SaveIcon />}
-          Save
+          {isSubmitting ? <LoaderCircleIcon className="animate-spin" /> : <PlusIcon />}
+          Add Journal
         </Button>
       </div>
     </form>
