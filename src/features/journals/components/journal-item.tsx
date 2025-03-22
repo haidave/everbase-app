@@ -10,12 +10,12 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
 import { TextareaAutosize } from '@/components/ui/textarea'
 import { type Journal } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
 import { format } from 'date-fns'
-import { Trash2 } from 'lucide-react'
+import { XIcon } from 'lucide-react'
 
 import { useDeleteJournal, useUpdateJournal } from '@/hooks/use-journals'
 
@@ -59,7 +59,12 @@ export function JournalItem({ journal }: JournalItemProps) {
 
   return (
     <Card>
-      <p className="text-muted-foreground px-5 pt-6 pb-1 text-xs">{formattedTime}</p>
+      <CardHeader className="flex-row items-center justify-between px-5 pt-3 pb-0">
+        <CardDescription className="text-xs">{formattedTime}</CardDescription>
+        <Button variant="ghost" size="icon" onClick={() => setIsDeleteDialogOpen(true)}>
+          <XIcon />
+        </Button>
+      </CardHeader>
       <CardContent className="p-2">
         <form.Field name="content">
           {(field) => (
@@ -78,19 +83,12 @@ export function JournalItem({ journal }: JournalItemProps) {
         </form.Field>
       </CardContent>
 
-      <CardFooter className="flex justify-end p-4 pt-0">
-        <Button type="button" variant="destructive" onClick={() => setIsDeleteDialogOpen(true)}>
-          <Trash2 />
-          Delete
-        </Button>
-      </CardFooter>
-
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Do you want to delete this journal?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your journal entry.
+              This action cannot be undone. This will permanently delete your journal.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
