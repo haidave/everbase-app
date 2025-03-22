@@ -359,7 +359,7 @@ export function useCompleteHabitForDate() {
         isTodayCompletion: todayStr === dateStr,
       }
     },
-    onError: (_, variables, context) => {
+    onError: (_, __, context) => {
       if (context?.previousMonthCompletions) {
         queryClient.setQueryData(context.monthQueryKey, context.previousMonthCompletions)
       }
@@ -465,7 +465,7 @@ export function useUncompleteHabitForDate() {
         isTodayCompletion: todayStr === dateStr,
       }
     },
-    onError: (_, variables, context) => {
+    onError: (_, __, context) => {
       if (context?.previousMonthCompletions) {
         queryClient.setQueryData(context.monthQueryKey, context.previousMonthCompletions)
       }
