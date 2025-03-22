@@ -76,6 +76,14 @@ export function JournalItem({ journal }: JournalItemProps) {
                 field.handleBlur()
                 form.handleSubmit()
               }}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  if (field.state.value.trim() === '') {
+                    form.reset()
+                  }
+                  textareaRef.current?.blur()
+                }
+              }}
               className="border-transparent"
               maxRows={30}
             />
