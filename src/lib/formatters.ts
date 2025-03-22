@@ -26,3 +26,11 @@ export function transformArraySnakeToCamel<T>(array: Record<string, unknown>[] |
   if (!array) return []
   return array.map((item) => snakeToCamelCase<T>(item))
 }
+
+/**
+ * Formats a date as YYYY-MM-DD string
+ * Useful for consistent date comparison across the application
+ */
+export function formatDateString(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}

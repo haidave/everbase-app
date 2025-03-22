@@ -1,12 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { api, type Habit, type HabitCompletion } from '@/lib/api'
+import { formatDateString } from '@/lib/formatters'
 
 import { useAuth } from './use-auth'
-
-function formatDateString(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-}
 
 // Hook for fetching all habits
 export function useHabits() {
@@ -292,23 +289,41 @@ export function useCompleteHabitForDate() {
     mutationFn: ({ habitId, date }: { habitId: string; date: Date }) =>
       api.habitCompletions.completeHabitForDate(habitId, date),
     onMutate: async ({ habitId, date }) => {
-      // Cancel any outgoing refetches
+      // Cancel any outgoing refetches for all related queries
       const startDate = new Date(date.getFullYear(), date.getMonth(), 1)
       const endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0)
-      const queryKey = ['habitCompletions', habitId, startDate.toISOString(), endDate.toISOString()]
+      const monthQueryKey = ['habitCompletions', habitId, startDate.toISOString(), endDate.toISOString()]
+      const allCompletionsKey = ['habitCompletions', 'all', habitId]
+      const todayQueryKey = ['habitCompletions', 'today', user?.id]
 
-      await queryClient.cancelQueries({ queryKey })
+      await queryClient.cancelQueries({ queryKey: monthQueryKey })
+      await queryClient.cancelQueries({ queryKey: allCompletionsKey })
+      await queryClient.cancelQueries({ queryKey: todayQueryKey })
 
-      // Snapshot the previous value
-      const previousCompletions = queryClient.getQueryData<HabitCompletion[]>(queryKey)
+      // Snapshot the previous values
+      const previousMonthCompletions = queryClient.getQueryData<HabitCompletion[]>(monthQueryKey)
+      const previousAllCompletions = queryClient.getQueryData<HabitCompletion[]>(allCompletionsKey)
+      const previousTodayCompletions = queryClient.getQueryData<HabitCompletion[]>(todayQueryKey)
 
       // Create a normalized date for consistent formatting
       const normalizedDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0))
 
-      // Optimistically update
-      queryClient.setQueryData<HabitCompletion[]>(queryKey, (old) => {
+      // Optimistically update month view
+      queryClient.setQueryData<HabitCompletion[]>(monthQueryKey, (old) => {
         const optimisticCompletion: HabitCompletion = {
           id: `temp-${Date.now()}`,
+          habitId,
+          completedAt: normalizedDate,
+        }
+
+        if (!old) return [optimisticCompletion]
+        return [...old, optimisticCompletion]
+      })
+
+      // Optimistically update all completions
+      queryClient.setQueryData<HabitCompletion[]>(allCompletionsKey, (old) => {
+        const optimisticCompletion: HabitCompletion = {
+          id: `temp-${Date.now()}-all`,
           habitId,
           completedAt: normalizedDate,
         }
@@ -321,15 +336,8 @@ export function useCompleteHabitForDate() {
       const todayStr = formatDateString(new Date())
       const dateStr = formatDateString(date)
 
-      if (dateStr === todayStr) {
-        await queryClient.cancelQueries({ queryKey: ['habitCompletions', 'today', user?.id] })
-        const previousTodayCompletions = queryClient.getQueryData<HabitCompletion[]>([
-          'habitCompletions',
-          'today',
-          user?.id,
-        ])
-
-        queryClient.setQueryData<HabitCompletion[]>(['habitCompletions', 'today', user?.id], (old) => {
+      if (todayStr === dateStr) {
+        queryClient.setQueryData<HabitCompletion[]>(todayQueryKey, (old) => {
           const optimisticCompletion: HabitCompletion = {
             id: `temp-${Date.now()}-today`,
             habitId,
@@ -339,21 +347,54 @@ export function useCompleteHabitForDate() {
           if (!old) return [optimisticCompletion]
           return [...old, optimisticCompletion]
         })
-
-        return { previousCompletions, previousTodayCompletions, queryKey, isTodayCompletion: true }
       }
 
-      return { previousCompletions, queryKey, isTodayCompletion: false }
+      return {
+        previousMonthCompletions,
+        previousAllCompletions,
+        previousTodayCompletions,
+        monthQueryKey,
+        allCompletionsKey,
+        todayQueryKey,
+        isTodayCompletion: todayStr === dateStr,
+      }
     },
-    onError: (_, __, context) => {
-      // Roll back on error
-      if (context?.previousCompletions) {
-        queryClient.setQueryData(context.queryKey, context.previousCompletions)
+    onError: (_, variables, context) => {
+      if (context?.previousMonthCompletions) {
+        queryClient.setQueryData(context.monthQueryKey, context.previousMonthCompletions)
+      }
+
+      if (context?.previousAllCompletions) {
+        queryClient.setQueryData(context.allCompletionsKey, context.previousAllCompletions)
       }
 
       if (context?.isTodayCompletion && context.previousTodayCompletions) {
-        queryClient.setQueryData(['habitCompletions', 'today', user?.id], context.previousTodayCompletions)
+        queryClient.setQueryData(context.todayQueryKey, context.previousTodayCompletions)
       }
+    },
+    onSettled: (_, __, variables) => {
+      const { habitId, date } = variables
+
+      // Calculate month range for the calendar view
+      const startDate = new Date(date.getFullYear(), date.getMonth(), 1)
+      const endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0)
+
+      // Invalidate all related queries to ensure fresh data
+      queryClient.invalidateQueries({
+        queryKey: ['habitCompletions', habitId, startDate.toISOString(), endDate.toISOString()],
+      })
+
+      queryClient.invalidateQueries({
+        queryKey: ['habitCompletions', 'all', habitId],
+      })
+
+      queryClient.invalidateQueries({
+        queryKey: ['habitCompletions', 'today', user?.id],
+      })
+
+      queryClient.invalidateQueries({
+        queryKey: ['habitCompletions', 'yearly', user?.id],
+      })
     },
   })
 }
@@ -365,60 +406,76 @@ export function useUncompleteHabitForDate() {
 
   return useMutation({
     mutationFn: ({ habitId, date }: { habitId: string; date: Date }) =>
-      api.habitCompletions.removeCompletionForDate(habitId, date),
+      api.habitCompletions.uncompleteHabitForDate(habitId, date),
     onMutate: async ({ habitId, date }) => {
-      // Cancel any outgoing refetches
+      // Cancel any outgoing refetches for all related queries
       const startDate = new Date(date.getFullYear(), date.getMonth(), 1)
       const endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0)
-      const queryKey = ['habitCompletions', habitId, startDate.toISOString(), endDate.toISOString()]
+      const monthQueryKey = ['habitCompletions', habitId, startDate.toISOString(), endDate.toISOString()]
+      const allCompletionsKey = ['habitCompletions', 'all', habitId]
+      const todayQueryKey = ['habitCompletions', 'today', user?.id]
 
-      await queryClient.cancelQueries({ queryKey })
+      await queryClient.cancelQueries({ queryKey: monthQueryKey })
+      await queryClient.cancelQueries({ queryKey: allCompletionsKey })
+      await queryClient.cancelQueries({ queryKey: todayQueryKey })
 
-      // Snapshot the previous value
-      const previousCompletions = queryClient.getQueryData<HabitCompletion[]>(queryKey)
+      // Snapshot the previous values
+      const previousMonthCompletions = queryClient.getQueryData<HabitCompletion[]>(monthQueryKey)
+      const previousAllCompletions = queryClient.getQueryData<HabitCompletion[]>(allCompletionsKey)
+      const previousTodayCompletions = queryClient.getQueryData<HabitCompletion[]>(todayQueryKey)
 
-      // Format date strings for comparison
+      // Format the date string for comparison
       const dateStr = formatDateString(date)
 
-      // Optimistically update
-      queryClient.setQueryData<HabitCompletion[]>(queryKey, (old) => {
+      // Optimistically update month view
+      queryClient.setQueryData<HabitCompletion[]>(monthQueryKey, (old) => {
         if (!old) return []
         return old.filter((completion) => {
           const completionDate = new Date(completion.completedAt)
-          const completionStr = formatDateString(completionDate)
-          return completionStr !== dateStr || completion.habitId !== habitId
+          return formatDateString(completionDate) !== dateStr
+        })
+      })
+
+      // Optimistically update all completions
+      queryClient.setQueryData<HabitCompletion[]>(allCompletionsKey, (old) => {
+        if (!old) return []
+        return old.filter((completion) => {
+          const completionDate = new Date(completion.completedAt)
+          return formatDateString(completionDate) !== dateStr
         })
       })
 
       // Check if this is today's date and update today's completions if needed
       const todayStr = formatDateString(new Date())
 
-      if (dateStr === todayStr) {
-        await queryClient.cancelQueries({ queryKey: ['habitCompletions', 'today', user?.id] })
-        const previousTodayCompletions = queryClient.getQueryData<HabitCompletion[]>([
-          'habitCompletions',
-          'today',
-          user?.id,
-        ])
-
-        queryClient.setQueryData<HabitCompletion[]>(['habitCompletions', 'today', user?.id], (old) => {
+      if (todayStr === dateStr) {
+        queryClient.setQueryData<HabitCompletion[]>(todayQueryKey, (old) => {
           if (!old) return []
           return old.filter((completion) => completion.habitId !== habitId)
         })
-
-        return { previousCompletions, previousTodayCompletions, queryKey, isTodayCompletion: true }
       }
 
-      return { previousCompletions, queryKey, isTodayCompletion: false }
+      return {
+        previousMonthCompletions,
+        previousAllCompletions,
+        previousTodayCompletions,
+        monthQueryKey,
+        allCompletionsKey,
+        todayQueryKey,
+        isTodayCompletion: todayStr === dateStr,
+      }
     },
-    onError: (_, __, context) => {
-      // Roll back on error
-      if (context?.previousCompletions) {
-        queryClient.setQueryData(context.queryKey, context.previousCompletions)
+    onError: (_, variables, context) => {
+      if (context?.previousMonthCompletions) {
+        queryClient.setQueryData(context.monthQueryKey, context.previousMonthCompletions)
+      }
+
+      if (context?.previousAllCompletions) {
+        queryClient.setQueryData(context.allCompletionsKey, context.previousAllCompletions)
       }
 
       if (context?.isTodayCompletion && context.previousTodayCompletions) {
-        queryClient.setQueryData(['habitCompletions', 'today', user?.id], context.previousTodayCompletions)
+        queryClient.setQueryData(context.todayQueryKey, context.previousTodayCompletions)
       }
     },
     onSettled: (_, __, variables) => {
@@ -428,19 +485,33 @@ export function useUncompleteHabitForDate() {
       const startDate = new Date(date.getFullYear(), date.getMonth(), 1)
       const endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0)
 
-      // Force immediate refetch of calendar data
+      // Invalidate all related queries to ensure fresh data
       queryClient.invalidateQueries({
         queryKey: ['habitCompletions', habitId, startDate.toISOString(), endDate.toISOString()],
       })
 
-      // Always refetch today's completions to ensure dashboard is updated
+      queryClient.invalidateQueries({
+        queryKey: ['habitCompletions', 'all', habitId],
+      })
+
       queryClient.invalidateQueries({
         queryKey: ['habitCompletions', 'today', user?.id],
       })
 
-      // Also invalidate yearly stats if needed
-      queryClient.invalidateQueries({ queryKey: ['habitCompletions', 'yearly', user?.id] })
+      queryClient.invalidateQueries({
+        queryKey: ['habitCompletions', 'yearly', user?.id],
+      })
     },
+  })
+}
+
+export function useAllHabitCompletions(habitId: string) {
+  const { user } = useAuth()
+
+  return useQuery({
+    queryKey: ['habitCompletions', 'all', habitId],
+    queryFn: () => api.habitCompletions.getAllCompletions(habitId),
+    enabled: !!user && !!habitId,
   })
 }
 

@@ -343,6 +343,32 @@ export const api = {
 
       if (error) throw error
     },
+
+    getAllCompletions: async (habitId: string): Promise<HabitCompletion[]> => {
+      const { data, error } = await supabase
+        .from('habit_completions')
+        .select('*')
+        .eq('habit_id', habitId)
+        .order('completed_at', { ascending: false })
+
+      if (error) throw error
+      return transformArraySnakeToCamel<HabitCompletion>(data)
+    },
+
+    uncompleteHabitForDate: async (habitId: string, date: Date): Promise<void> => {
+      // Create a date range for the specific day (using UTC noon to avoid timezone issues)
+      const startDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0))
+      const endDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999))
+
+      const { error } = await supabase
+        .from('habit_completions')
+        .delete()
+        .eq('habit_id', habitId)
+        .gte('completed_at', startDate.toISOString())
+        .lte('completed_at', endDate.toISOString())
+
+      if (error) throw error
+    },
   },
   journals: {
     getAll: async (): Promise<Journal[]> => {
