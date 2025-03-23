@@ -33,7 +33,7 @@ export function HabitProgress({ habit }: HabitProgressProps) {
   const uncompleteHabitForDate = useUncompleteHabitForDate()
 
   // Calculate streaks using our custom hook with all completions
-  const { currentStreak, bestStreak } = useHabitStreak(allCompletions)
+  const { currentStreak, longestStreak } = useHabitStreak(allCompletions)
 
   // Create a Set of completed dates for easier lookup (for the calendar)
   const completedDates = new Set(
@@ -62,7 +62,21 @@ export function HabitProgress({ habit }: HabitProgressProps) {
   const disabledDays = { after: new Date() }
 
   return (
-    <div className="p-4">
+    <div className="flex flex-col gap-4 p-4">
+      <div className="grid grid-cols-2 gap-2">
+        <div className="grid place-items-center gap-1 rounded-md border p-4">
+          <span className="text-base">
+            <span className="font-medium">{currentStreak}</span>
+          </span>
+          <span className="text-muted-foreground text-xs">Current streak</span>
+        </div>
+        <div className="grid place-items-center gap-1 rounded-md border p-4">
+          <span className="text-base">
+            <span className="font-medium">{longestStreak}</span>
+          </span>
+          <span className="text-muted-foreground text-xs">Longest streak</span>
+        </div>
+      </div>
       <Calendar
         mode="default"
         selected={undefined}
@@ -83,14 +97,6 @@ export function HabitProgress({ habit }: HabitProgressProps) {
           outsideCurrentMonth: 'text-muted-foreground opacity-50 pointer-events-none',
         }}
       />
-      <div className="mt-4 flex flex-col gap-2 text-sm">
-        <p>
-          Current streak: <span className="font-medium">{currentStreak}</span>
-        </p>
-        <p>
-          Best streak: <span className="font-medium">{bestStreak}</span>
-        </p>
-      </div>
     </div>
   )
 }

@@ -4,7 +4,7 @@ import { type HabitCompletion } from '@/lib/api'
 import { formatDateString } from '@/lib/formatters'
 
 export function useHabitStreak(completions: HabitCompletion[] | undefined) {
-  if (!completions || completions.length === 0) return { currentStreak: 0, bestStreak: 0 }
+  if (!completions || completions.length === 0) return { currentStreak: 0, longestStreak: 0 }
 
   // Convert to date strings and create a Set for faster lookups
   const completionDateSet = new Set(
@@ -60,8 +60,8 @@ export function useHabitStreak(completions: HabitCompletion[] | undefined) {
     }
   }
 
-  // Calculate best streak by finding all streaks
-  let bestStreak = currentStreak
+  // Calculate longest streak by finding all streaks
+  let longestStreak = currentStreak
 
   // Get all dates as Date objects for easier manipulation
   const allDates = Array.from(completionDateSet)
@@ -81,12 +81,12 @@ export function useHabitStreak(completions: HabitCompletion[] | undefined) {
     ) {
       // Calculate streak length
       const streakLength = i - streakStart + 1
-      bestStreak = Math.max(bestStreak, streakLength)
+      longestStreak = Math.max(longestStreak, streakLength)
 
       // Start a new streak
       streakStart = i + 1
     }
   }
 
-  return { currentStreak, bestStreak }
+  return { currentStreak, longestStreak }
 }

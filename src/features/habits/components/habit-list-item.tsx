@@ -76,7 +76,7 @@ const HabitListItem = ({ habit, onDelete }: HabitListItemProps) => {
                   inputRef.current?.blur()
                 }
               }}
-              className="font-medium"
+              className="text-foreground-primary font-medium"
               aria-label={`Edit habit: ${habit.name}`}
             />
           )}
@@ -108,7 +108,7 @@ const HabitListItem = ({ habit, onDelete }: HabitListItemProps) => {
                 }
               }}
               placeholder="Add description..."
-              className={cn('text-muted-foreground md:text-xs', !field.state.value && 'italic')}
+              className={cn('text-muted-foreground text-xs md:text-xs', !field.state.value && 'italic')}
               aria-label={`Edit description for habit: ${habit.name}`}
             />
           )}
