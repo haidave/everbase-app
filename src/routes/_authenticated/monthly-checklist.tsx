@@ -14,7 +14,7 @@ export const Route = createFileRoute('/_authenticated/monthly-checklist')({
 
 function MonthlyChecklistPage() {
   return (
-    <section className="relative grid gap-6">
+    <section className="relative">
       <MonthlyChecklistList />
     </section>
   )

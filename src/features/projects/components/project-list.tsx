@@ -20,7 +20,7 @@ const ProjectList = () => {
       <div className="flex flex-col items-center gap-4">
         <p>No projects yet.</p>
         <Button variant="outline" onClick={() => setIsAddDialogOpen(true)}>
-          <PlusIcon className="mr-2 h-4 w-4" />
+          <PlusIcon />
           Create your first project
         </Button>
         <ProjectForm open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />

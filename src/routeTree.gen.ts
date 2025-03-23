@@ -19,7 +19,9 @@ import { Route as AuthenticatedTasksImport } from './routes/_authenticated/tasks
 import { Route as AuthenticatedMonthlyChecklistImport } from './routes/_authenticated/monthly-checklist'
 import { Route as AuthenticatedJournalImport } from './routes/_authenticated/journal'
 import { Route as AuthenticatedHabitsImport } from './routes/_authenticated/habits'
+import { Route as AuthenticatedEventsImport } from './routes/_authenticated/events'
 import { Route as AuthenticatedDashboardImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedBirthdaysImport } from './routes/_authenticated/birthdays'
 import { Route as AuthenticatedProjectsIndexImport } from './routes/_authenticated/projects/index'
 import { Route as AuthenticatedProjectsProjectIdImport } from './routes/_authenticated/projects/$projectId'
 
@@ -73,9 +75,21 @@ const AuthenticatedHabitsRoute = AuthenticatedHabitsImport.update({
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 
+const AuthenticatedEventsRoute = AuthenticatedEventsImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+
 const AuthenticatedDashboardRoute = AuthenticatedDashboardImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+
+const AuthenticatedBirthdaysRoute = AuthenticatedBirthdaysImport.update({
+  id: '/birthdays',
+  path: '/birthdays',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 
@@ -119,11 +133,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignInImport
       parentRoute: typeof rootRoute
     }
+    '/_authenticated/birthdays': {
+      id: '/_authenticated/birthdays'
+      path: '/birthdays'
+      fullPath: '/birthdays'
+      preLoaderRoute: typeof AuthenticatedBirthdaysImport
+      parentRoute: typeof AuthenticatedImport
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    '/_authenticated/events': {
+      id: '/_authenticated/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof AuthenticatedEventsImport
       parentRoute: typeof AuthenticatedImport
     }
     '/_authenticated/habits': {
@@ -181,7 +209,9 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedBirthdaysRoute: typeof AuthenticatedBirthdaysRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedEventsRoute: typeof AuthenticatedEventsRoute
   AuthenticatedHabitsRoute: typeof AuthenticatedHabitsRoute
   AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
   AuthenticatedMonthlyChecklistRoute: typeof AuthenticatedMonthlyChecklistRoute
@@ -191,7 +221,9 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedBirthdaysRoute: AuthenticatedBirthdaysRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedEventsRoute: AuthenticatedEventsRoute,
   AuthenticatedHabitsRoute: AuthenticatedHabitsRoute,
   AuthenticatedJournalRoute: AuthenticatedJournalRoute,
   AuthenticatedMonthlyChecklistRoute: AuthenticatedMonthlyChecklistRoute,
@@ -208,7 +240,9 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '': typeof AuthenticatedRouteWithChildren
   '/sign-in': typeof SignInRoute
+  '/birthdays': typeof AuthenticatedBirthdaysRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/events': typeof AuthenticatedEventsRoute
   '/habits': typeof AuthenticatedHabitsRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/monthly-checklist': typeof AuthenticatedMonthlyChecklistRoute
@@ -222,7 +256,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '': typeof AuthenticatedRouteWithChildren
   '/sign-in': typeof SignInRoute
+  '/birthdays': typeof AuthenticatedBirthdaysRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/events': typeof AuthenticatedEventsRoute
   '/habits': typeof AuthenticatedHabitsRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/monthly-checklist': typeof AuthenticatedMonthlyChecklistRoute
@@ -237,7 +273,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/sign-in': typeof SignInRoute
+  '/_authenticated/birthdays': typeof AuthenticatedBirthdaysRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/events': typeof AuthenticatedEventsRoute
   '/_authenticated/habits': typeof AuthenticatedHabitsRoute
   '/_authenticated/journal': typeof AuthenticatedJournalRoute
   '/_authenticated/monthly-checklist': typeof AuthenticatedMonthlyChecklistRoute
@@ -253,7 +291,9 @@ export interface FileRouteTypes {
     | '/'
     | ''
     | '/sign-in'
+    | '/birthdays'
     | '/dashboard'
+    | '/events'
     | '/habits'
     | '/journal'
     | '/monthly-checklist'
@@ -266,7 +306,9 @@ export interface FileRouteTypes {
     | '/'
     | ''
     | '/sign-in'
+    | '/birthdays'
     | '/dashboard'
+    | '/events'
     | '/habits'
     | '/journal'
     | '/monthly-checklist'
@@ -279,7 +321,9 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/sign-in'
+    | '/_authenticated/birthdays'
     | '/_authenticated/dashboard'
+    | '/_authenticated/events'
     | '/_authenticated/habits'
     | '/_authenticated/journal'
     | '/_authenticated/monthly-checklist'
@@ -326,7 +370,9 @@ export const routeTree = rootRoute
     "/_authenticated": {
       "filePath": "_authenticated.tsx",
       "children": [
+        "/_authenticated/birthdays",
         "/_authenticated/dashboard",
+        "/_authenticated/events",
         "/_authenticated/habits",
         "/_authenticated/journal",
         "/_authenticated/monthly-checklist",
@@ -338,8 +384,16 @@ export const routeTree = rootRoute
     "/sign-in": {
       "filePath": "sign-in.tsx"
     },
+    "/_authenticated/birthdays": {
+      "filePath": "_authenticated/birthdays.tsx",
+      "parent": "/_authenticated"
+    },
     "/_authenticated/dashboard": {
       "filePath": "_authenticated/dashboard.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/events": {
+      "filePath": "_authenticated/events.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/habits": {

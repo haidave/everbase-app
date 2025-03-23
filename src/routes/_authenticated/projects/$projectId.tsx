@@ -62,7 +62,7 @@ function ProjectDetailPage() {
           </CardContent>
           <CardFooter className="flex justify-end">
             <Button onClick={() => setEditingProject(true)}>
-              <Pencil className="mr-2 h-4 w-4" />
+              <Pencil />
               Edit
             </Button>
           </CardFooter>

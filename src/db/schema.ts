@@ -104,6 +104,32 @@ export const monthlyChecklistCompletions = pgTable('monthly_checklist_completion
   month: text('month').notNull(), // Format: YYYY-MM
 })
 
+// Events table
+export const events = pgTable('events', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id),
+  title: text('title').notNull(),
+  date: timestamp('date', { withTimezone: true }).notNull(),
+  description: text('description'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+})
+
+// Birthdays table
+export const birthdays = pgTable('birthdays', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id),
+  name: text('name').notNull(),
+  birthDate: timestamp('birth_date', { withTimezone: true }).notNull(),
+  description: text('description'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+})
+
 export type Task = InferSelectModel<typeof tasks>
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number]
 export type Project = InferSelectModel<typeof projects>
@@ -113,3 +139,5 @@ export type HabitCompletion = InferSelectModel<typeof habitCompletions>
 export type Journal = InferSelectModel<typeof journals>
 export type MonthlyChecklist = InferSelectModel<typeof monthlyChecklist>
 export type MonthlyChecklistCompletion = InferSelectModel<typeof monthlyChecklistCompletions>
+export type Event = InferSelectModel<typeof events>
+export type Birthday = InferSelectModel<typeof birthdays>

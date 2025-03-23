@@ -12,7 +12,9 @@ import {
 } from '@/components/ui/sidebar'
 import { Link, useMatches } from '@tanstack/react-router'
 import {
+  CakeIcon,
   CalendarCheckIcon,
+  CalendarIcon,
   CircleHelpIcon,
   FolderIcon,
   KeyboardIcon,
@@ -46,6 +48,16 @@ const items = [
     title: 'Monthly Checklist',
     url: '/monthly-checklist',
     icon: CalendarCheckIcon,
+  },
+  {
+    title: 'Events',
+    url: '/events',
+    icon: CalendarIcon,
+  },
+  {
+    title: 'Birthdays',
+    url: '/birthdays',
+    icon: CakeIcon,
   },
   {
     title: 'Journal',

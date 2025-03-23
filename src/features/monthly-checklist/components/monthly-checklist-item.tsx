@@ -10,7 +10,7 @@ type MonthlyChecklistItemProps = {
   isCompleted: boolean
 }
 
-export function MonthlyChecklistItem({ monthlyChecklist, isCompleted }: MonthlyChecklistItemProps) {
+const MonthlyChecklistItem = ({ monthlyChecklist, isCompleted }: MonthlyChecklistItemProps) => {
   const completeMonthlyChecklist = useCompleteMonthlyChecklist()
   const uncompleteMonthlyChecklist = useUncompleteMonthlyChecklist()
   const [checked, setChecked] = useState(isCompleted)
@@ -25,7 +25,7 @@ export function MonthlyChecklistItem({ monthlyChecklist, isCompleted }: MonthlyC
   }
 
   return (
-    <li className="flex items-center gap-3 py-2">
+    <li className="flex items-center gap-3">
       <Checkbox
         checked={checked}
         onCheckedChange={handleCheckChange}
@@ -40,3 +40,5 @@ export function MonthlyChecklistItem({ monthlyChecklist, isCompleted }: MonthlyC
     </li>
   )
 }
+
+export { MonthlyChecklistItem }

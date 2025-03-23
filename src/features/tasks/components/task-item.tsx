@@ -187,7 +187,7 @@ const TaskItem = ({ task }: TaskItemProps) => {
               className="text-muted-foreground hover:text-foreground"
               aria-label="Assign to project"
             >
-              <FolderIcon className="h-4 w-4" />
+              <FolderIcon />
             </Button>
           )}
         </div>

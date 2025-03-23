@@ -1,11 +1,11 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
-const cn = (...inputs: ClassValue[]): string => {
+export const cn = (...inputs: ClassValue[]): string => {
   return twMerge(clsx(inputs))
 }
 
-const copyToClipboard = async (text: string) => {
+export const copyToClipboard = async (text: string) => {
   try {
     await navigator.clipboard.writeText(text)
   } catch {
@@ -13,10 +13,8 @@ const copyToClipboard = async (text: string) => {
   }
 }
 
-const moveCaretToEnd = <T extends HTMLInputElement | HTMLTextAreaElement>(e: React.FocusEvent<T>) => {
+export const moveCaretToEnd = <T extends HTMLInputElement | HTMLTextAreaElement>(e: React.FocusEvent<T>) => {
   const tempValue = e.target.value
   e.target.value = ''
   e.target.value = tempValue
 }
-
-export { cn, copyToClipboard, moveCaretToEnd }

@@ -9,35 +9,40 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { type Habit } from '@/db/schema'
+import { TextareaAutosize } from '@/components/ui/textarea'
+import { type Birthday } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
+import { format } from 'date-fns'
 import { LoaderCircleIcon, PlusIcon, SaveIcon } from 'lucide-react'
 
-import { useCreateHabit, useUpdateHabit } from '@/hooks/use-habits'
+import { useCreateBirthday, useUpdateBirthday } from '@/hooks/use-birthdays'
 
-type HabitFormProps = {
+type AddBirthdayFormProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  habit?: Habit
+  birthday?: Birthday
 }
 
-export function HabitForm({ open, onOpenChange, habit }: HabitFormProps) {
-  const createHabit = useCreateHabit()
-  const updateHabit = useUpdateHabit()
-  const isEditing = !!habit
+export function AddBirthdayForm({ open, onOpenChange, birthday }: AddBirthdayFormProps) {
+  const createBirthday = useCreateBirthday()
+  const updateBirthday = useUpdateBirthday()
+  const isEditing = !!birthday
 
   const form = useForm({
     defaultValues: {
-      name: habit?.name || '',
-      description: habit?.description || '',
+      name: birthday?.name || '',
+      birthDate: birthday ? new Date(birthday.birthDate) : new Date(),
+      description: birthday?.description || '',
     },
     onSubmit: async ({ value }) => {
-      if (isEditing && habit) {
-        updateHabit.mutate(
+      if (!value.name.trim()) return
+
+      if (isEditing && birthday) {
+        updateBirthday.mutate(
           {
-            id: habit.id,
+            id: birthday.id,
             name: value.name,
+            birthDate: value.birthDate,
             description: value.description,
           },
           {
@@ -48,11 +53,11 @@ export function HabitForm({ open, onOpenChange, habit }: HabitFormProps) {
           }
         )
       } else {
-        createHabit.mutate(
+        createBirthday.mutate(
           {
             name: value.name,
+            birthDate: value.birthDate,
             description: value.description,
-            active: true,
           },
           {
             onSuccess: () => {
@@ -65,15 +70,15 @@ export function HabitForm({ open, onOpenChange, habit }: HabitFormProps) {
     },
   })
 
+  const isPending = isEditing ? updateBirthday.isPending : createBirthday.isPending
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Edit Habit' : 'Create New Habit'}</DialogTitle>
+          <DialogTitle>{isEditing ? 'Edit Birthday' : 'Add Birthday'}</DialogTitle>
           <DialogDescription>
-            {isEditing
-              ? 'Edit your habit details below.'
-              : 'Add a new habit to track. What would you like to build consistency with?'}
+            {isEditing ? 'Update birthday details.' : 'Add a new birthday to remember.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -96,9 +101,32 @@ export function HabitForm({ open, onOpenChange, habit }: HabitFormProps) {
                   <Label htmlFor="name">Name</Label>
                   <Input
                     id="name"
-                    placeholder="e.g., Morning Meditation"
+                    placeholder="Person's name"
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                  />
+                  {field.state.meta.errors.length > 0 ? (
+                    <p className="text-destructive text-sm">{field.state.meta.errors.join(', ')}</p>
+                  ) : null}
+                </>
+              )}
+            </form.Field>
+          </div>
+
+          <div className="grid gap-2">
+            <form.Field name="birthDate">
+              {(field) => (
+                <>
+                  <Label htmlFor="birthDate">Birth Date</Label>
+                  <Input
+                    id="birthDate"
+                    type="date"
+                    value={format(field.state.value, 'yyyy-MM-dd')}
+                    onChange={(e) => {
+                      const date = e.target.value ? new Date(e.target.value) : new Date()
+                      field.handleChange(date)
+                    }}
                     onBlur={field.handleBlur}
                   />
                   {field.state.meta.errors.length > 0 ? (
@@ -113,14 +141,14 @@ export function HabitForm({ open, onOpenChange, habit }: HabitFormProps) {
             <form.Field name="description">
               {(field) => (
                 <>
-                  <Label htmlFor="description">Description (optional)</Label>
-                  <Textarea
+                  <Label htmlFor="description">Notes (optional)</Label>
+                  <TextareaAutosize
                     id="description"
-                    placeholder="Add some details about this habit..."
+                    placeholder="Add some notes..."
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
-                    rows={3}
+                    minRows={3}
                   />
                 </>
               )}
@@ -128,20 +156,10 @@ export function HabitForm({ open, onOpenChange, habit }: HabitFormProps) {
           </div>
 
           <DialogFooter>
-            <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
-              {([canSubmit, isSubmitting]) => (
-                <Button type="submit" disabled={!canSubmit}>
-                  {isSubmitting ? (
-                    <LoaderCircleIcon className="animate-spin" />
-                  ) : isEditing ? (
-                    <SaveIcon />
-                  ) : (
-                    <PlusIcon />
-                  )}
-                  {isEditing ? 'Save Changes' : 'Create Habit'}
-                </Button>
-              )}
-            </form.Subscribe>
+            <Button type="submit" disabled={isPending}>
+              {isPending ? <LoaderCircleIcon className="animate-spin" /> : isEditing ? <SaveIcon /> : <PlusIcon />}
+              {isEditing ? 'Save Changes' : 'Add Birthday'}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
