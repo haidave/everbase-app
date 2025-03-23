@@ -56,7 +56,7 @@ export function DashboardMonthlyChecklist() {
       {activeItems.length === 0 ? (
         <p className="text-muted-foreground text-center">No active items in your monthly checklist.</p>
       ) : (
-        <ul className="max-h-[300px] space-y-1 overflow-y-auto">
+        <ul className="max-h-[300px] space-y-2 overflow-y-auto">
           {activeItems.map((item) => (
             <MonthlyChecklistItem key={item.id} monthlyChecklist={item} isCompleted={completedMap.has(item.id)} />
           ))}

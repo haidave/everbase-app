@@ -1,4 +1,6 @@
 import {
+  type Birthday,
+  type Event,
   type Habit,
   type HabitCompletion,
   type Journal,
@@ -37,6 +39,20 @@ export type NewJournal = {
   userId: string
 }
 
+export type NewBirthday = {
+  name: string
+  birthDate: Date
+  description?: string
+  userId: string
+}
+
+export type NewEvent = {
+  title: string
+  date: Date
+  description?: string
+  userId: string
+}
+
 // Re-export schema types for convenience
 export type {
   Project,
@@ -48,6 +64,8 @@ export type {
   Journal,
   MonthlyChecklist,
   MonthlyChecklistCompletion,
+  Birthday,
+  Event,
 }
 
 export const api = {
@@ -500,6 +518,130 @@ export const api = {
         .eq('month', month)
 
       if (error) throw new Error(error.message)
+    },
+  },
+
+  birthdays: {
+    getAll: async (): Promise<Birthday[]> => {
+      const { data, error } = await supabase.from('birthdays').select('*').order('birth_date', { ascending: true })
+
+      if (error) throw error
+      return transformArraySnakeToCamel<Birthday>(data)
+    },
+
+    getById: async (id: string): Promise<Birthday> => {
+      const { data, error } = await supabase.from('birthdays').select('*').eq('id', id).single()
+
+      if (error) throw error
+      return snakeToCamelCase<Birthday>(data)
+    },
+
+    create: async (birthday: Omit<NewBirthday, 'userId'>): Promise<Birthday> => {
+      const { data: userData } = await supabase.auth.getUser()
+
+      const supabaseBirthday = {
+        name: birthday.name,
+        birth_date: birthday.birthDate.toISOString(),
+        description: birthday.description,
+        user_id: userData.user?.id,
+      }
+
+      const { data, error } = await supabase.from('birthdays').insert(supabaseBirthday).select().single()
+
+      if (error) throw error
+      return snakeToCamelCase<Birthday>(data)
+    },
+
+    update: async (
+      id: string,
+      updates: Partial<Pick<Birthday, 'name' | 'birthDate' | 'description'>>
+    ): Promise<Birthday> => {
+      // Create a new object with snake_case keys for Supabase
+      const supabaseUpdates: Record<string, string | null> = {}
+
+      if (updates.name !== undefined) {
+        supabaseUpdates.name = updates.name
+      }
+
+      if (updates.description !== undefined) {
+        supabaseUpdates.description = updates.description
+      }
+
+      if (updates.birthDate !== undefined) {
+        supabaseUpdates.birth_date = updates.birthDate.toISOString()
+      }
+
+      const { data, error } = await supabase.from('birthdays').update(supabaseUpdates).eq('id', id).select().single()
+
+      if (error) throw error
+      return snakeToCamelCase<Birthday>(data)
+    },
+
+    delete: async (id: string): Promise<void> => {
+      const { error } = await supabase.from('birthdays').delete().eq('id', id)
+      if (error) throw error
+    },
+  },
+
+  events: {
+    getAll: async (): Promise<Event[]> => {
+      const { data, error } = await supabase.from('events').select('*').order('date', { ascending: true })
+
+      if (error) throw error
+      return transformArraySnakeToCamel<Event>(data)
+    },
+
+    getById: async (id: string): Promise<Event> => {
+      const { data, error } = await supabase.from('events').select('*').eq('id', id).single()
+
+      if (error) throw error
+      return snakeToCamelCase<Event>(data)
+    },
+
+    create: async (event: Omit<NewEvent, 'userId'>): Promise<Event> => {
+      const { data: userData } = await supabase.auth.getUser()
+
+      const supabaseEvent = {
+        title: event.title,
+        date: event.date.toISOString(),
+        description: event.description,
+        user_id: userData.user?.id,
+      }
+
+      const { data, error } = await supabase.from('events').insert(supabaseEvent).select().single()
+
+      if (error) throw error
+      return snakeToCamelCase<Event>(data)
+    },
+
+    update: async (id: string, updates: Partial<Pick<Event, 'title' | 'date' | 'description'>>): Promise<Event> => {
+      const supabaseUpdates = {
+        ...updates,
+        date: updates.date?.toISOString(),
+      }
+
+      const { data, error } = await supabase.from('events').update(supabaseUpdates).eq('id', id).select().single()
+
+      if (error) throw error
+      return snakeToCamelCase<Event>(data)
+    },
+
+    delete: async (id: string): Promise<void> => {
+      const { error } = await supabase.from('events').delete().eq('id', id)
+      if (error) throw error
+    },
+
+    // Get upcoming events within a date range
+    getUpcoming: async (startDate: Date, endDate: Date): Promise<Event[]> => {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .gte('date', startDate.toISOString())
+        .lte('date', endDate.toISOString())
+        .order('date', { ascending: true })
+
+      if (error) throw error
+      return transformArraySnakeToCamel<Event>(data)
     },
   },
 }

@@ -24,16 +24,13 @@ export function HabitItem({ habit, isCompleted }: HabitItemProps) {
   }
 
   return (
-    <li className="flex items-center gap-3 py-2">
+    <li className="flex items-center gap-3">
       <Checkbox
         checked={checked}
         onCheckedChange={handleCheckChange}
         aria-label={`Mark habit ${habit.name} as ${checked ? 'incomplete' : 'complete'}`}
       />
-      <div>
-        <p className="text-sm">{habit.name}</p>
-        {habit.description && <p className="text-muted-foreground text-sm">{habit.description}</p>}
-      </div>
+      <p className="text-sm">{habit.name}</p>
     </li>
   )
 }

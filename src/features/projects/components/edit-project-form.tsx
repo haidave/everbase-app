@@ -150,11 +150,7 @@ export function EditProjectForm({ project, open, onOpenChange }: EditProjectForm
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction onClick={handleDelete}>
-                    {deleteProject.isPending ? (
-                      <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <AlertCircle className="mr-2 h-4 w-4" />
-                    )}
+                    {deleteProject.isPending ? <LoaderCircleIcon className="animate-spin" /> : <AlertCircle />}
                     Delete
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -173,7 +169,7 @@ export function EditProjectForm({ project, open, onOpenChange }: EditProjectForm
 
                 return (
                   <Button type="submit" disabled={!canSubmit || !hasChanges || isSubmitting}>
-                    {isSubmitting ? <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    {isSubmitting ? <LoaderCircleIcon className="animate-spin" /> : null}
                     Save changes
                   </Button>
                 )

@@ -114,7 +114,7 @@ export function ProjectForm({ open, onOpenChange }: ProjectFormProps) {
             <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
               {([canSubmit, isSubmitting]) => (
                 <Button type="submit" disabled={!canSubmit}>
-                  {isSubmitting ? <LoaderCircleIcon className="mr-2 animate-spin" /> : <PlusIcon className="mr-2" />}
+                  {isSubmitting ? <LoaderCircleIcon className="animate-spin" /> : <PlusIcon />}
                   Create Project
                 </Button>
               )}
