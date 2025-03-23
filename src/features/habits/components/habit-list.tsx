@@ -11,28 +11,23 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { type Habit } from '@/db/schema'
-import { Pencil, PlusIcon, Trash2 } from 'lucide-react'
+import { PlusIcon } from 'lucide-react'
 
 import { useDeleteHabit, useHabits } from '@/hooks/use-habits'
 
 import { HabitForm } from './habit-form'
-import { HabitProgress } from './habit-progress'
+import { HabitListItem } from './habit-list-item'
 
-export function HabitList() {
+const HabitList = () => {
   const { data: habits, isLoading: isLoadingHabits } = useHabits()
   const deleteHabit = useDeleteHabit()
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [editingHabit, setEditingHabit] = useState<Habit | null>(null)
   const [habitToDelete, setHabitToDelete] = useState<Habit | null>(null)
 
   if (isLoadingHabits) return <div className="p-4">Loading habits...</div>
 
   const activeHabits = habits?.filter((habit) => habit.active) || []
-
-  const handleEditHabit = (habit: Habit) => {
-    setEditingHabit(habit)
-  }
 
   const handleDeleteHabit = (habit: Habit) => {
     setHabitToDelete(habit)
@@ -50,7 +45,7 @@ export function HabitList() {
       <div className="flex flex-col items-center gap-4">
         <p>No habits yet.</p>
         <Button onClick={() => setIsAddDialogOpen(true)}>
-          <PlusIcon className="mr-2 h-4 w-4" />
+          <PlusIcon />
           Create your first habit
         </Button>
         <HabitForm open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />
@@ -61,57 +56,18 @@ export function HabitList() {
   return (
     <div className="space-y-4">
       <Button onClick={() => setIsAddDialogOpen(true)}>
-        <PlusIcon className="mr-2 h-4 w-4" />
+        <PlusIcon />
         Add Habit
       </Button>
 
       <ul className="flex flex-wrap gap-4">
         {activeHabits.map((habit) => (
-          <li key={habit.id} className="bg-card rounded-md border">
-            <div className="flex items-center justify-between gap-3 p-3">
-              <div>
-                <p className="font-medium">{habit.name}</p>
-                {habit.description && <p className="text-muted-foreground text-sm">{habit.description}</p>}
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleEditHabit(habit)}
-                  aria-label={`Edit habit ${habit.name}`}
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleDeleteHabit(habit)}
-                  aria-label={`Delete habit ${habit.name}`}
-                  className="text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            <HabitProgress habit={habit} />
-          </li>
+          <HabitListItem key={habit.id} habit={habit} onDelete={handleDeleteHabit} />
         ))}
       </ul>
 
       {/* Habit Form Dialog */}
       <HabitForm open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />
-
-      {/* Edit Habit Dialog */}
-      {editingHabit && (
-        <HabitForm
-          open={!!editingHabit}
-          onOpenChange={(open) => {
-            if (!open) setEditingHabit(null)
-          }}
-          habit={editingHabit}
-        />
-      )}
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!habitToDelete} onOpenChange={(open) => !open && setHabitToDelete(null)}>
@@ -131,3 +87,5 @@ export function HabitList() {
     </div>
   )
 }
+
+export { HabitList }

@@ -131,7 +131,7 @@ export function AddMonthlyChecklistForm({ open, onOpenChange, monthlyChecklist }
           <DialogFooter>
             <Button type="submit" disabled={isPending}>
               {isPending ? <LoaderCircleIcon className="animate-spin" /> : isEditing ? <SaveIcon /> : <PlusIcon />}
-              {isEditing ? 'Save Changes' : 'Create Item'}
+              {isEditing ? 'Save Changes' : 'Add Item'}
             </Button>
           </DialogFooter>
         </form>
