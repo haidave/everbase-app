@@ -19,9 +19,10 @@ import { useCreateTask } from '@/hooks/use-tasks'
 type AddTaskFormProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
+  defaultProjectId?: string
 }
 
-const AddTaskForm = ({ open, onOpenChange }: AddTaskFormProps) => {
+const AddTaskForm = ({ open, onOpenChange, defaultProjectId }: AddTaskFormProps) => {
   const createTask = useCreateTask()
   const { data: projects } = useProjects()
   const addTaskToProject = useAddTaskToProject()
@@ -29,7 +30,7 @@ const AddTaskForm = ({ open, onOpenChange }: AddTaskFormProps) => {
   const form = useForm({
     defaultValues: {
       text: '',
-      projectId: '',
+      projectId: defaultProjectId || '',
     },
     onSubmit: async ({ value }) => {
       createTask.mutate(

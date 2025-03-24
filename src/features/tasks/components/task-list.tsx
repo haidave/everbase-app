@@ -1,12 +1,20 @@
+import { type Task } from '@/lib/api'
 import { useTasks } from '@/hooks/use-tasks'
 
 import { TaskItem } from './task-item'
 
-const TaskList = () => {
-  const { data: tasks, isLoading, error } = useTasks()
+type TaskListProps = {
+  tasks?: Task[]
+}
 
-  if (isLoading) return <div className="p-4">Loading tasks...</div>
-  if (error) return <div className="p-4 text-red-500">Error loading tasks: {error.message}</div>
+const TaskList = ({ tasks: propTasks }: TaskListProps) => {
+  const { data: fetchedTasks, isLoading, error } = useTasks()
+
+  // Use provided tasks or fetched tasks
+  const tasks = propTasks || fetchedTasks
+
+  if (isLoading && !propTasks) return <div className="p-4">Loading tasks...</div>
+  if (error && !propTasks) return <div className="p-4 text-red-500">Error loading tasks: {error.message}</div>
   if (!tasks?.length) return <p>No tasks yet.</p>
 
   // Sort tasks: incomplete tasks first, then completed tasks by updatedAt
