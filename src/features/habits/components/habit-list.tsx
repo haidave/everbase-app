@@ -15,7 +15,7 @@ import { PlusIcon } from 'lucide-react'
 
 import { useDeleteHabit, useHabits } from '@/hooks/use-habits'
 
-import { HabitForm } from './habit-form'
+import { AddHabitForm } from './add-habit-form'
 import { HabitListItem } from './habit-list-item'
 
 const HabitList = () => {
@@ -48,7 +48,7 @@ const HabitList = () => {
           <PlusIcon />
           Create your first habit
         </Button>
-        <HabitForm open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />
+        <AddHabitForm open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />
       </div>
     )
   }
@@ -67,7 +67,7 @@ const HabitList = () => {
       </ul>
 
       {/* Habit Form Dialog */}
-      <HabitForm open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />
+      <AddHabitForm open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!habitToDelete} onOpenChange={(open) => !open && setHabitToDelete(null)}>

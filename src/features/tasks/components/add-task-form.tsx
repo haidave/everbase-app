@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import {
@@ -12,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useForm } from '@tanstack/react-form'
 import { LoaderCircleIcon, PlusIcon } from 'lucide-react'
+import { useHotkeys } from 'react-hotkeys-hook'
 
 import { useAddTaskToProject, useProjects } from '@/hooks/use-projects'
 import { useCreateTask } from '@/hooks/use-tasks'
@@ -26,6 +28,7 @@ const AddTaskForm = ({ open, onOpenChange, defaultProjectId }: AddTaskFormProps)
   const createTask = useCreateTask()
   const { data: projects } = useProjects()
   const addTaskToProject = useAddTaskToProject()
+  const formRef = useRef<HTMLFormElement>(null)
 
   const form = useForm({
     defaultValues: {
@@ -63,6 +66,19 @@ const AddTaskForm = ({ open, onOpenChange, defaultProjectId }: AddTaskFormProps)
     },
   })
 
+  useHotkeys(
+    'mod+enter',
+    () => {
+      if (formRef.current?.contains(document.activeElement)) {
+        formRef.current?.requestSubmit()
+      }
+    },
+    {
+      preventDefault: true,
+      enableOnFormTags: ['INPUT', 'SELECT'],
+    }
+  )
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -72,6 +88,7 @@ const AddTaskForm = ({ open, onOpenChange, defaultProjectId }: AddTaskFormProps)
         </DialogHeader>
 
         <form
+          ref={formRef}
           onSubmit={(e) => {
             e.preventDefault()
             form.handleSubmit()

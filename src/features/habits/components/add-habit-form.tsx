@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -13,19 +14,21 @@ import { Textarea } from '@/components/ui/textarea'
 import { type Habit } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
 import { LoaderCircleIcon, PlusIcon, SaveIcon } from 'lucide-react'
+import { useHotkeys } from 'react-hotkeys-hook'
 
 import { useCreateHabit, useUpdateHabit } from '@/hooks/use-habits'
 
-type HabitFormProps = {
+type AddHabitFormProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   habit?: Habit
 }
 
-export function HabitForm({ open, onOpenChange, habit }: HabitFormProps) {
+export function AddHabitForm({ open, onOpenChange, habit }: AddHabitFormProps) {
   const createHabit = useCreateHabit()
   const updateHabit = useUpdateHabit()
   const isEditing = !!habit
+  const formRef = useRef<HTMLFormElement>(null)
 
   const form = useForm({
     defaultValues: {
@@ -65,6 +68,19 @@ export function HabitForm({ open, onOpenChange, habit }: HabitFormProps) {
     },
   })
 
+  useHotkeys(
+    'mod+enter',
+    () => {
+      if (formRef.current?.contains(document.activeElement)) {
+        formRef.current?.requestSubmit()
+      }
+    },
+    {
+      preventDefault: true,
+      enableOnFormTags: ['INPUT', 'TEXTAREA'],
+    }
+  )
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -78,6 +94,7 @@ export function HabitForm({ open, onOpenChange, habit }: HabitFormProps) {
         </DialogHeader>
 
         <form
+          ref={formRef}
           onSubmit={(e) => {
             e.preventDefault()
             form.handleSubmit()

@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import {
@@ -16,6 +17,7 @@ import { type Event } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
 import { format } from 'date-fns'
 import { CalendarIcon, LoaderCircleIcon, PlusIcon, SaveIcon } from 'lucide-react'
+import { useHotkeys } from 'react-hotkeys-hook'
 
 import { useCreateEvent, useUpdateEvent } from '@/hooks/use-events'
 
@@ -29,6 +31,7 @@ export function AddEventForm({ open, onOpenChange, event }: AddEventFormProps) {
   const createEvent = useCreateEvent()
   const updateEvent = useUpdateEvent()
   const isEditing = !!event
+  const formRef = useRef<HTMLFormElement>(null)
 
   const form = useForm({
     defaultValues: {
@@ -72,6 +75,19 @@ export function AddEventForm({ open, onOpenChange, event }: AddEventFormProps) {
     },
   })
 
+  useHotkeys(
+    'mod+enter',
+    () => {
+      if (formRef.current?.contains(document.activeElement)) {
+        formRef.current?.requestSubmit()
+      }
+    },
+    {
+      preventDefault: true,
+      enableOnFormTags: ['INPUT', 'TEXTAREA'],
+    }
+  )
+
   const isPending = isEditing ? updateEvent.isPending : createEvent.isPending
 
   return (
@@ -85,6 +101,7 @@ export function AddEventForm({ open, onOpenChange, event }: AddEventFormProps) {
         </DialogHeader>
 
         <form
+          ref={formRef}
           onSubmit={(e) => {
             e.preventDefault()
             form.handleSubmit()
