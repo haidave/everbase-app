@@ -119,7 +119,7 @@ export function useAddTaskToProject() {
 
       // Invalidate the specific project's tasks query
       queryClient.invalidateQueries({
-        queryKey: ['tasks', 'project', variables.projectId],
+        queryKey: ['projects', variables.projectId, 'tasks'],
       })
 
       // Also invalidate the general tasks query
