@@ -123,7 +123,7 @@ export function AddEventForm({ open, onOpenChange, event }: AddEventFormProps) {
                   <Label htmlFor="date">Date</Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="h-10 w-full justify-start px-3 text-left font-normal">
+                      <Button variant="outline" size="input" className="justify-start">
                         <CalendarIcon />
                         {format(field.state.value, 'PPP')}
                       </Button>

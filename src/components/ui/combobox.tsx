@@ -39,6 +39,7 @@ export function Combobox({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
+          size="input"
           role="combobox"
           aria-expanded={open}
           className={cn('text-muted-foreground w-full justify-between', triggerClassName)}
