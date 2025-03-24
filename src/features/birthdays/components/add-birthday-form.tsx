@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -14,6 +15,7 @@ import { type Birthday } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
 import { format } from 'date-fns'
 import { LoaderCircleIcon, PlusIcon, SaveIcon } from 'lucide-react'
+import { useHotkeys } from 'react-hotkeys-hook'
 
 import { useCreateBirthday, useUpdateBirthday } from '@/hooks/use-birthdays'
 
@@ -27,6 +29,7 @@ export function AddBirthdayForm({ open, onOpenChange, birthday }: AddBirthdayFor
   const createBirthday = useCreateBirthday()
   const updateBirthday = useUpdateBirthday()
   const isEditing = !!birthday
+  const formRef = useRef<HTMLFormElement>(null)
 
   const form = useForm({
     defaultValues: {
@@ -70,6 +73,19 @@ export function AddBirthdayForm({ open, onOpenChange, birthday }: AddBirthdayFor
     },
   })
 
+  useHotkeys(
+    'mod+enter',
+    () => {
+      if (formRef.current?.contains(document.activeElement)) {
+        formRef.current?.requestSubmit()
+      }
+    },
+    {
+      preventDefault: true,
+      enableOnFormTags: ['INPUT', 'TEXTAREA'],
+    }
+  )
+
   const isPending = isEditing ? updateBirthday.isPending : createBirthday.isPending
 
   return (
@@ -83,6 +99,7 @@ export function AddBirthdayForm({ open, onOpenChange, birthday }: AddBirthdayFor
         </DialogHeader>
 
         <form
+          ref={formRef}
           onSubmit={(e) => {
             e.preventDefault()
             form.handleSubmit()

@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -13,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { type MonthlyChecklist } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
 import { LoaderCircleIcon, PlusIcon, SaveIcon } from 'lucide-react'
+import { useHotkeys } from 'react-hotkeys-hook'
 
 import { useCreateMonthlyChecklist, useUpdateMonthlyChecklist } from '@/hooks/use-monthly-checklist'
 
@@ -26,6 +28,7 @@ export function AddMonthlyChecklistForm({ open, onOpenChange, monthlyChecklist }
   const createMonthlyChecklist = useCreateMonthlyChecklist()
   const updateMonthlyChecklist = useUpdateMonthlyChecklist()
   const isEditing = !!monthlyChecklist
+  const formRef = useRef<HTMLFormElement>(null)
 
   const form = useForm({
     defaultValues: {
@@ -65,6 +68,19 @@ export function AddMonthlyChecklistForm({ open, onOpenChange, monthlyChecklist }
     },
   })
 
+  useHotkeys(
+    'mod+enter',
+    () => {
+      if (formRef.current?.contains(document.activeElement)) {
+        formRef.current?.requestSubmit()
+      }
+    },
+    {
+      preventDefault: true,
+      enableOnFormTags: ['INPUT', 'TEXTAREA'],
+    }
+  )
+
   const isPending = isEditing ? updateMonthlyChecklist.isPending : createMonthlyChecklist.isPending
 
   return (
@@ -80,6 +96,7 @@ export function AddMonthlyChecklistForm({ open, onOpenChange, monthlyChecklist }
         </DialogHeader>
 
         <form
+          ref={formRef}
           onSubmit={(e) => {
             e.preventDefault()
             form.handleSubmit()

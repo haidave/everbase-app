@@ -32,13 +32,7 @@ export function useCreateTask() {
   return useMutation({
     mutationFn: (task: { text: string }) => api.tasks.create(task),
     onSuccess: () => {
-      // Invalidate all tasks queries
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
-
-      // Also invalidate user-specific tasks if you have them
-      if (user?.id) {
-        queryClient.invalidateQueries({ queryKey: ['tasks', user.id] })
-      }
+      queryClient.invalidateQueries({ queryKey: ['tasks', user?.id] })
     },
   })
 }
@@ -49,46 +43,23 @@ export function useUpdateTask() {
   const { user } = useAuth()
 
   return useMutation({
-    mutationFn: ({
-      id,
-      ...updates
-    }: { id: string } & Partial<Omit<Task, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>) =>
-      api.tasks.update(id, updates),
-
-    // Add optimistic update
-    onMutate: async ({ id, ...updates }) => {
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['tasks', user?.id] })
-
-      // Snapshot the previous value
-      const previousTasks = queryClient.getQueryData(['tasks', user?.id])
-
-      // Optimistically update to the new value
-      queryClient.setQueryData(['tasks', user?.id], (old: Task[] | undefined) => {
-        if (!old) return old
-        return old.map((task) => (task.id === id ? { ...task, ...updates } : task))
-      })
-
-      // Return a context object with the snapshotted value
-      return { previousTasks }
-    },
-
-    // If the mutation fails, use the context returned from onMutate to roll back
-    onError: (_err, _variables, context) => {
-      if (context?.previousTasks) {
-        queryClient.setQueryData(['tasks', user?.id], context.previousTasks)
-      }
-    },
-
-    // Always refetch after error or success
-    onSettled: () => {
-      // Invalidate user tasks
+    mutationFn: (updates: Partial<Task> & { id: string }) => api.tasks.update(updates.id, updates),
+    onSuccess: (_, variables) => {
+      // Invalidate tasks
       queryClient.invalidateQueries({ queryKey: ['tasks', user?.id] })
 
-      // Also invalidate any project-related task queries
-      // This will update task lists in project views
+      // Directly invalidate the project tasks query pattern
       queryClient.invalidateQueries({
-        queryKey: ['tasks', 'project'],
+        queryKey: ['projects'],
+        predicate: (query) => {
+          const queryKey = query.queryKey
+          return Array.isArray(queryKey) && queryKey.length === 3 && queryKey[2] === 'tasks'
+        },
+      })
+
+      // Also invalidate task-projects relationships
+      queryClient.invalidateQueries({
+        queryKey: ['tasks', variables.id, 'projects'],
       })
     },
   })
@@ -102,14 +73,17 @@ export function useDeleteTask() {
   return useMutation({
     mutationFn: api.tasks.delete,
     onSuccess: () => {
-      // Invalidate user tasks
+      // Invalidate tasks
       queryClient.invalidateQueries({ queryKey: ['tasks', user?.id] })
 
-      // Invalidate all project-related task queries
-      queryClient.invalidateQueries({ queryKey: ['tasks', 'project'] })
-
-      // Also invalidate task-project relationships
-      queryClient.invalidateQueries({ queryKey: ['tasks', 'projects'] })
+      // Directly invalidate the project tasks query pattern
+      queryClient.invalidateQueries({
+        queryKey: ['projects'],
+        predicate: (query) => {
+          const queryKey = query.queryKey
+          return Array.isArray(queryKey) && queryKey.length === 3 && queryKey[2] === 'tasks'
+        },
+      })
     },
   })
 }

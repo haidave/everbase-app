@@ -3,8 +3,10 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { EditProjectForm } from '@/features/projects/components/edit-project-form'
+import { AddTaskForm } from '@/features/tasks/components/add-task-form'
+import { TaskList } from '@/features/tasks/components/task-list'
 import { createFileRoute } from '@tanstack/react-router'
-import { LoaderCircleIcon, Pencil } from 'lucide-react'
+import { LoaderCircleIcon, Pencil, PlusIcon } from 'lucide-react'
 
 import { api } from '@/lib/api'
 import { useDynamicTitle } from '@/hooks/use-dynamic-title'
@@ -35,6 +37,7 @@ function ProjectDetailPage() {
   const { project: initialProject } = Route.useLoaderData()
   const { data: relatedTasks, isLoading: isLoadingTasks } = useProjectTasks(projectId)
   const [editingProject, setEditingProject] = useState(false)
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
   // Get real-time updates from the server
   const { data: updatedProject, isLoading, error } = useProject(projectId)
@@ -69,20 +72,20 @@ function ProjectDetailPage() {
         </Card>
 
         <div className="bg-card rounded-lg border p-4">
-          <h2 className="text-foreground-primary mb-4 text-lg font-medium">Project Tasks</h2>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-foreground-primary text-lg font-medium">Project Tasks</h2>
+            <Button onClick={() => setIsAddDialogOpen(true)} className="w-fit">
+              <PlusIcon />
+              Add Task
+            </Button>
+          </div>
+
           {isLoadingTasks ? (
             <div className="flex items-center justify-center py-4">
               <LoaderCircleIcon className="text-muted-foreground h-5 w-5 animate-spin" />
             </div>
           ) : relatedTasks && relatedTasks.length > 0 ? (
-            <ul className="divide-y">
-              {relatedTasks.map((task) => (
-                <li key={task.id} className="flex items-center justify-between p-3">
-                  <span className="truncate">{task.text}</span>
-                  <span className="text-muted-foreground text-xs">{new Date(task.createdAt).toLocaleDateString()}</span>
-                </li>
-              ))}
-            </ul>
+            <TaskList tasks={relatedTasks} />
           ) : (
             <p className="text-muted-foreground">No tasks assigned to this project yet.</p>
           )}
@@ -98,6 +101,8 @@ function ProjectDetailPage() {
           }}
         />
       )}
+
+      <AddTaskForm open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} defaultProjectId={projectId} />
     </>
   )
 }
