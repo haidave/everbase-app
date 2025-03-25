@@ -1,16 +1,6 @@
 import { useState } from 'react'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import {
   Dialog,
   DialogContent,
@@ -24,7 +14,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { PROJECT_STATUSES, type Project, type ProjectStatus } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
-import { AlertCircle, LoaderCircleIcon } from 'lucide-react'
+import { LoaderCircleIcon } from 'lucide-react'
 
 import { useDeleteProject, useUpdateProject } from '@/hooks/use-projects'
 
@@ -133,29 +123,22 @@ export function EditProjectForm({ project, open, onOpenChange }: EditProjectForm
           </div>
 
           <DialogFooter className="flex justify-between gap-2 sm:justify-between">
-            <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" type="button">
-                  Delete Project
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete the project and remove all associated
-                    task connections.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete}>
-                    {deleteProject.isPending ? <LoaderCircleIcon className="animate-spin" /> : <AlertCircle />}
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <Button
+              variant="destructive"
+              type="button"
+              onClick={() => setIsDeleteDialogOpen(true)}
+              disabled={deleteProject.isPending}
+            >
+              Delete Project
+            </Button>
+            <ConfirmationDialog
+              open={isDeleteDialogOpen}
+              onOpenChange={setIsDeleteDialogOpen}
+              title="Are you sure?"
+              description="This will permanently delete the project and remove all associated task connections."
+              onConfirm={handleDelete}
+              isLoading={deleteProject.isPending}
+            />
 
             <form.Subscribe
               selector={(state) => ({

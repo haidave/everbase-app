@@ -16,7 +16,6 @@ export const Route = createFileRoute('/_authenticated/events')({
 function EventsPage() {
   return (
     <section className="space-y-4">
-      <h2 className="text-lg font-medium">Events</h2>
       <AddEventForm open={false} onOpenChange={() => {}} />
       <EventList />
     </section>

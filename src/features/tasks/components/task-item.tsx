@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { TextInput } from '@/components/ui/text-input'
 import { useForm } from '@tanstack/react-form'
@@ -22,6 +23,7 @@ const TaskItem = ({ task }: TaskItemProps) => {
   const deleteTask = useDeleteTask()
   const isCompleted = Boolean(task.completed)
   const [showProjectSelect, setShowProjectSelect] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   // Get projects for dropdown
   const { data: projects } = useProjects()
@@ -90,6 +92,11 @@ const TaskItem = ({ task }: TaskItemProps) => {
         }
       )
     }
+  }
+
+  const confirmDelete = () => {
+    deleteTask.mutate(task.id)
+    setShowDeleteDialog(false)
   }
 
   return (
@@ -194,12 +201,21 @@ const TaskItem = ({ task }: TaskItemProps) => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => deleteTask.mutate(task.id)}
+          onClick={() => setShowDeleteDialog(true)}
           aria-label={`Delete task: ${task.text}`}
         >
           <XIcon />
         </Button>
       </div>
+
+      <ConfirmationDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Are you sure?"
+        description={`This will permanently delete the task "${task.text}".`}
+        onConfirm={confirmDelete}
+        isLoading={deleteTask.isPending}
+      />
     </li>
   )
 }

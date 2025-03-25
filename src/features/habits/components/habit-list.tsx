@@ -1,15 +1,6 @@
 import { useState } from 'react'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { type Habit } from '@/db/schema'
 import { PlusIcon } from 'lucide-react'
 
@@ -70,20 +61,14 @@ const HabitList = () => {
       <AddHabitForm open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!habitToDelete} onOpenChange={(open) => !open && setHabitToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete the habit &ldquo;{habitToDelete?.name}&rdquo; and all its completion history.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmationDialog
+        open={!!habitToDelete}
+        onOpenChange={(open) => !open && setHabitToDelete(null)}
+        title="Are you sure?"
+        description={`This will permanently delete the habit "${habitToDelete?.name}" and all its completion history.`}
+        onConfirm={confirmDelete}
+        isLoading={deleteHabit.isPending}
+      />
     </div>
   )
 }
