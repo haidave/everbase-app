@@ -1,15 +1,6 @@
 import { useState } from 'react'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { type MonthlyChecklist } from '@/db/schema'
 import { Pencil, PlusIcon, Trash2 } from 'lucide-react'
 
@@ -111,24 +102,14 @@ export function MonthlyChecklistList() {
       )}
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog
+      <ConfirmationDialog
         open={!!monthlyChecklistToDelete}
         onOpenChange={(open) => !open && setMonthlyChecklistToDelete(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete the item &ldquo;{monthlyChecklistToDelete?.name}&rdquo; and all its
-              completion history.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        title="Are you sure?"
+        description={`This will permanently delete the item "${monthlyChecklistToDelete?.name}".`}
+        onConfirm={confirmDelete}
+        isLoading={deleteMonthlyChecklist.isPending}
+      />
     </div>
   )
 }

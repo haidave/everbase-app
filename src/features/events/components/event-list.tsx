@@ -1,15 +1,6 @@
 import { useState } from 'react'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { type Event } from '@/db/schema'
 import { PlusIcon } from 'lucide-react'
 
@@ -57,20 +48,14 @@ export function EventList() {
 
       <AddEventForm open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />
 
-      <AlertDialog open={!!eventToDelete} onOpenChange={(open) => !open && setEventToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete the event &quot;{eventToDelete?.title}&quot;.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmationDialog
+        open={!!eventToDelete}
+        onOpenChange={(open) => !open && setEventToDelete(null)}
+        title="Are you sure?"
+        description={`This will permanently delete the event "${eventToDelete?.title}".`}
+        onConfirm={confirmDelete}
+        isLoading={deleteEvent.isPending}
+      />
     </div>
   )
 }
