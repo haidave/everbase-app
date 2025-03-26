@@ -8,6 +8,8 @@ import {
   type MonthlyChecklistCompletion,
   type Project,
   type ProjectStatus,
+  type Subscription,
+  type SubscriptionFrequency,
   type Task,
   type TaskProject,
 } from '@/db/schema'
@@ -53,6 +55,19 @@ export type NewEvent = {
   userId: string
 }
 
+export type NewSubscription = {
+  name: string
+  price: string
+  currency: string
+  frequency: SubscriptionFrequency
+  renewalDay: number
+  renewalMonth?: number
+  startDate: Date
+  description?: string
+  userId: string
+  active: boolean
+}
+
 // Re-export schema types for convenience
 export type {
   Project,
@@ -66,6 +81,8 @@ export type {
   MonthlyChecklistCompletion,
   Birthday,
   Event,
+  Subscription,
+  SubscriptionFrequency,
 }
 
 export const api = {
@@ -642,6 +659,97 @@ export const api = {
 
       if (error) throw error
       return transformArraySnakeToCamel<Event>(data)
+    },
+  },
+
+  subscriptions: {
+    getAll: async (): Promise<Subscription[]> => {
+      const { data, error } = await supabase.from('subscriptions').select('*').order('created_at', { ascending: false })
+
+      if (error) throw error
+      return transformArraySnakeToCamel<Subscription>(data)
+    },
+
+    getById: async (id: string): Promise<Subscription> => {
+      const { data, error } = await supabase.from('subscriptions').select('*').eq('id', id).single()
+
+      if (error) throw error
+      return snakeToCamelCase<Subscription>(data)
+    },
+
+    create: async (subscription: Omit<NewSubscription, 'userId'>): Promise<Subscription> => {
+      const { data: userData } = await supabase.auth.getUser()
+
+      const supabaseSubscription = {
+        name: subscription.name,
+        price: subscription.price,
+        currency: subscription.currency,
+        frequency: subscription.frequency,
+        renewal_day: subscription.renewalDay,
+        renewal_month: subscription.renewalMonth,
+        start_date: subscription.startDate.toISOString(),
+        description: subscription.description,
+        active: subscription.active,
+        user_id: userData.user?.id,
+      }
+
+      const { data, error } = await supabase.from('subscriptions').insert(supabaseSubscription).select().single()
+
+      if (error) throw error
+      return snakeToCamelCase<Subscription>(data)
+    },
+
+    update: async (
+      id: string,
+      updates: Partial<
+        Pick<
+          Subscription,
+          | 'name'
+          | 'price'
+          | 'currency'
+          | 'frequency'
+          | 'renewalDay'
+          | 'renewalMonth'
+          | 'startDate'
+          | 'description'
+          | 'active'
+        >
+      >
+    ): Promise<Subscription> => {
+      // Create a clean object with snake_case keys for Supabase
+      const supabaseUpdates = {
+        name: updates.name,
+        price: updates.price,
+        currency: updates.currency,
+        frequency: updates.frequency,
+        renewal_day: updates.renewalDay,
+        renewal_month: updates.renewalMonth,
+        start_date: updates.startDate?.toISOString(),
+        description: updates.description,
+        active: updates.active,
+      }
+
+      // Filter out undefined values
+      Object.keys(supabaseUpdates).forEach((key) => {
+        if (supabaseUpdates[key as keyof typeof supabaseUpdates] === undefined) {
+          delete supabaseUpdates[key as keyof typeof supabaseUpdates]
+        }
+      })
+
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .update(supabaseUpdates)
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return snakeToCamelCase<Subscription>(data)
+    },
+
+    delete: async (id: string): Promise<void> => {
+      const { error } = await supabase.from('subscriptions').delete().eq('id', id)
+      if (error) throw error
     },
   },
 }

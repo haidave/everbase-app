@@ -1,5 +1,5 @@
 import { type InferSelectModel } from 'drizzle-orm'
-import { boolean, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { boolean, integer, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 
 // Users table - will be managed by Supabase Auth
 export const users = pgTable('users', {
@@ -130,6 +130,29 @@ export const birthdays = pgTable('birthdays', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })
 
+// Subscription billing frequency
+export const SUBSCRIPTION_FREQUENCIES = ['monthly', 'yearly'] as const
+export const subscriptionFrequencyEnum = pgEnum('subscription_frequency', SUBSCRIPTION_FREQUENCIES)
+
+// Subscriptions table
+export const subscriptions = pgTable('subscriptions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id),
+  name: text('name').notNull(),
+  price: text('price').notNull(), // Store as text to handle different currencies
+  currency: text('currency').default('CZK').notNull(),
+  frequency: subscriptionFrequencyEnum('frequency').default('monthly').notNull(),
+  renewalDay: integer('renewal_day').notNull(), // Day of month (1-31) when subscription renews
+  renewalMonth: integer('renewal_month'), // Month (1-12) for yearly subscriptions
+  startDate: timestamp('start_date', { withTimezone: true }).notNull(),
+  description: text('description'),
+  active: boolean('active').default(true).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+})
+
 export type Task = InferSelectModel<typeof tasks>
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number]
 export type Project = InferSelectModel<typeof projects>
@@ -141,3 +164,5 @@ export type MonthlyChecklist = InferSelectModel<typeof monthlyChecklist>
 export type MonthlyChecklistCompletion = InferSelectModel<typeof monthlyChecklistCompletions>
 export type Event = InferSelectModel<typeof events>
 export type Birthday = InferSelectModel<typeof birthdays>
+export type SubscriptionFrequency = (typeof SUBSCRIPTION_FREQUENCIES)[number]
+export type Subscription = InferSelectModel<typeof subscriptions>

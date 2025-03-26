@@ -16,6 +16,7 @@ import { Route as AuthenticatedImport } from './routes/_authenticated'
 import { Route as IndexImport } from './routes/index'
 import { Route as AuthCallbackImport } from './routes/auth/callback'
 import { Route as AuthenticatedTasksImport } from './routes/_authenticated/tasks'
+import { Route as AuthenticatedSubscriptionsImport } from './routes/_authenticated/subscriptions'
 import { Route as AuthenticatedMonthlyChecklistImport } from './routes/_authenticated/monthly-checklist'
 import { Route as AuthenticatedJournalImport } from './routes/_authenticated/journal'
 import { Route as AuthenticatedHabitsImport } from './routes/_authenticated/habits'
@@ -55,6 +56,14 @@ const AuthenticatedTasksRoute = AuthenticatedTasksImport.update({
   path: '/tasks',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+
+const AuthenticatedSubscriptionsRoute = AuthenticatedSubscriptionsImport.update(
+  {
+    id: '/subscriptions',
+    path: '/subscriptions',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any,
+)
 
 const AuthenticatedMonthlyChecklistRoute =
   AuthenticatedMonthlyChecklistImport.update({
@@ -175,6 +184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMonthlyChecklistImport
       parentRoute: typeof AuthenticatedImport
     }
+    '/_authenticated/subscriptions': {
+      id: '/_authenticated/subscriptions'
+      path: '/subscriptions'
+      fullPath: '/subscriptions'
+      preLoaderRoute: typeof AuthenticatedSubscriptionsImport
+      parentRoute: typeof AuthenticatedImport
+    }
     '/_authenticated/tasks': {
       id: '/_authenticated/tasks'
       path: '/tasks'
@@ -215,6 +231,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedHabitsRoute: typeof AuthenticatedHabitsRoute
   AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
   AuthenticatedMonthlyChecklistRoute: typeof AuthenticatedMonthlyChecklistRoute
+  AuthenticatedSubscriptionsRoute: typeof AuthenticatedSubscriptionsRoute
   AuthenticatedTasksRoute: typeof AuthenticatedTasksRoute
   AuthenticatedProjectsProjectIdRoute: typeof AuthenticatedProjectsProjectIdRoute
   AuthenticatedProjectsIndexRoute: typeof AuthenticatedProjectsIndexRoute
@@ -227,6 +244,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedHabitsRoute: AuthenticatedHabitsRoute,
   AuthenticatedJournalRoute: AuthenticatedJournalRoute,
   AuthenticatedMonthlyChecklistRoute: AuthenticatedMonthlyChecklistRoute,
+  AuthenticatedSubscriptionsRoute: AuthenticatedSubscriptionsRoute,
   AuthenticatedTasksRoute: AuthenticatedTasksRoute,
   AuthenticatedProjectsProjectIdRoute: AuthenticatedProjectsProjectIdRoute,
   AuthenticatedProjectsIndexRoute: AuthenticatedProjectsIndexRoute,
@@ -246,6 +264,7 @@ export interface FileRoutesByFullPath {
   '/habits': typeof AuthenticatedHabitsRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/monthly-checklist': typeof AuthenticatedMonthlyChecklistRoute
+  '/subscriptions': typeof AuthenticatedSubscriptionsRoute
   '/tasks': typeof AuthenticatedTasksRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
@@ -262,6 +281,7 @@ export interface FileRoutesByTo {
   '/habits': typeof AuthenticatedHabitsRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/monthly-checklist': typeof AuthenticatedMonthlyChecklistRoute
+  '/subscriptions': typeof AuthenticatedSubscriptionsRoute
   '/tasks': typeof AuthenticatedTasksRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
@@ -279,6 +299,7 @@ export interface FileRoutesById {
   '/_authenticated/habits': typeof AuthenticatedHabitsRoute
   '/_authenticated/journal': typeof AuthenticatedJournalRoute
   '/_authenticated/monthly-checklist': typeof AuthenticatedMonthlyChecklistRoute
+  '/_authenticated/subscriptions': typeof AuthenticatedSubscriptionsRoute
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
@@ -297,6 +318,7 @@ export interface FileRouteTypes {
     | '/habits'
     | '/journal'
     | '/monthly-checklist'
+    | '/subscriptions'
     | '/tasks'
     | '/auth/callback'
     | '/projects/$projectId'
@@ -312,6 +334,7 @@ export interface FileRouteTypes {
     | '/habits'
     | '/journal'
     | '/monthly-checklist'
+    | '/subscriptions'
     | '/tasks'
     | '/auth/callback'
     | '/projects/$projectId'
@@ -327,6 +350,7 @@ export interface FileRouteTypes {
     | '/_authenticated/habits'
     | '/_authenticated/journal'
     | '/_authenticated/monthly-checklist'
+    | '/_authenticated/subscriptions'
     | '/_authenticated/tasks'
     | '/auth/callback'
     | '/_authenticated/projects/$projectId'
@@ -376,6 +400,7 @@ export const routeTree = rootRoute
         "/_authenticated/habits",
         "/_authenticated/journal",
         "/_authenticated/monthly-checklist",
+        "/_authenticated/subscriptions",
         "/_authenticated/tasks",
         "/_authenticated/projects/$projectId",
         "/_authenticated/projects/"
@@ -406,6 +431,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/monthly-checklist": {
       "filePath": "_authenticated/monthly-checklist.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/subscriptions": {
+      "filePath": "_authenticated/subscriptions.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/tasks": {
