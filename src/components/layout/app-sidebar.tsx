@@ -15,6 +15,7 @@ import {
   CakeIcon,
   CalendarCheckIcon,
   CalendarIcon,
+  CalendarSyncIcon,
   CircleHelpIcon,
   FolderIcon,
   KeyboardIcon,
@@ -58,6 +59,11 @@ const items = [
     title: 'Birthdays',
     url: '/birthdays',
     icon: CakeIcon,
+  },
+  {
+    title: 'Subscriptions',
+    url: '/subscriptions',
+    icon: CalendarSyncIcon,
   },
   {
     title: 'Journal',
