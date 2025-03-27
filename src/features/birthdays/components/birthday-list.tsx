@@ -1,13 +1,30 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { type Birthday } from '@/db/schema'
-import { PlusIcon } from 'lucide-react'
+import { getMonth } from 'date-fns'
+import { CalendarDaysIcon, PlusIcon } from 'lucide-react'
 
 import { useBirthdays, useDeleteBirthday } from '@/hooks/use-birthdays'
 
 import { AddBirthdayForm } from './add-birthday-form'
 import { BirthdayListItem } from './birthday-list-item'
+
+const MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+]
 
 export function BirthdayList() {
   const { data: birthdays, isLoading } = useBirthdays()
@@ -29,21 +46,67 @@ export function BirthdayList() {
     }
   }
 
+  // Group birthdays by month
+  const birthdaysByMonth = birthdays?.reduce(
+    (acc, birthday) => {
+      const month = getMonth(new Date(birthday.birthDate))
+      if (!acc[month]) {
+        acc[month] = []
+      }
+      acc[month].push(birthday)
+      return acc
+    },
+    {} as Record<number, Birthday[]>
+  )
+
+  // Sort birthdays within each month by day
+  Object.values(birthdaysByMonth || {}).forEach((monthBirthdays) => {
+    monthBirthdays.sort((a, b) => {
+      const dayA = new Date(a.birthDate).getDate()
+      const dayB = new Date(b.birthDate).getDate()
+      return dayA - dayB
+    })
+  })
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <Button onClick={() => setIsAddDialogOpen(true)}>
         <PlusIcon />
         Add Birthday
       </Button>
 
       {birthdays && birthdays.length > 0 ? (
-        <div className="space-y-4">
-          {birthdays.map((birthday) => (
-            <BirthdayListItem key={birthday.id} birthday={birthday} onDelete={handleDeleteBirthday} />
-          ))}
+        <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+          {MONTHS.map((month, index) => {
+            const monthBirthdays = birthdaysByMonth?.[index] || []
+            if (monthBirthdays.length === 0) return null
+
+            return (
+              <Card key={month}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <CalendarDaysIcon className="size-5" />
+                    {month}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {monthBirthdays.map((birthday) => {
+                    return <BirthdayListItem key={birthday.id} birthday={birthday} onDelete={handleDeleteBirthday} />
+                  })}
+                </CardContent>
+              </Card>
+            )
+          })}
         </div>
       ) : (
-        <p className="text-muted-foreground text-center">No birthdays yet.</p>
+        <Card className="flex flex-col items-center gap-4 p-8">
+          <CalendarDaysIcon className="text-muted-foreground size-12" />
+          <p className="text-center">No birthdays added yet.</p>
+          <Button onClick={() => setIsAddDialogOpen(true)}>
+            <PlusIcon />
+            Add Birthday
+          </Button>
+        </Card>
       )}
 
       <AddBirthdayForm open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />
