@@ -3,28 +3,13 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { type Birthday } from '@/db/schema'
-import { getMonth } from 'date-fns'
+import { format, getMonth } from 'date-fns'
 import { CalendarDaysIcon, PlusIcon } from 'lucide-react'
 
 import { useBirthdays, useDeleteBirthday } from '@/hooks/use-birthdays'
 
 import { AddBirthdayForm } from './add-birthday-form'
 import { BirthdayListItem } from './birthday-list-item'
-
-const MONTHS = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-]
 
 export function BirthdayList() {
   const { data: birthdays, isLoading } = useBirthdays()
@@ -77,22 +62,26 @@ export function BirthdayList() {
 
       {birthdays && birthdays.length > 0 ? (
         <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-          {MONTHS.map((month, index) => {
-            const monthBirthdays = birthdaysByMonth?.[index] || []
+          {Array.from({ length: 12 }, (_, i) => {
+            const monthBirthdays = birthdaysByMonth?.[i] || []
             if (monthBirthdays.length === 0) return null
 
+            // Create a date object for the current month to get its name
+            const monthDate = new Date(2024, i, 1)
+            const monthName = format(monthDate, 'LLLL')
+
             return (
-              <Card key={month}>
+              <Card key={monthName}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">
                     <CalendarDaysIcon className="size-5" />
-                    {month}
+                    {monthName}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {monthBirthdays.map((birthday) => {
-                    return <BirthdayListItem key={birthday.id} birthday={birthday} onDelete={handleDeleteBirthday} />
-                  })}
+                  {monthBirthdays.map((birthday) => (
+                    <BirthdayListItem key={birthday.id} birthday={birthday} onDelete={handleDeleteBirthday} />
+                  ))}
                 </CardContent>
               </Card>
             )

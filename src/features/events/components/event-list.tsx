@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { type Event } from '@/db/schema'
-import { PlusIcon } from 'lucide-react'
+import { format, getMonth } from 'date-fns'
+import { CalendarIcon, PlusIcon } from 'lucide-react'
 
 import { useDeleteEvent, useEvents } from '@/hooks/use-events'
 
@@ -29,21 +31,71 @@ export function EventList() {
     }
   }
 
+  // Group events by month
+  const eventsByMonth = events?.reduce(
+    (acc, event) => {
+      const month = getMonth(new Date(event.date))
+      if (!acc[month]) {
+        acc[month] = []
+      }
+      acc[month].push(event)
+      return acc
+    },
+    {} as Record<number, Event[]>
+  )
+
+  // Sort events within each month by date
+  Object.values(eventsByMonth || {}).forEach((monthEvents) => {
+    monthEvents.sort((a, b) => {
+      const dateA = new Date(a.date).getTime()
+      const dateB = new Date(b.date).getTime()
+      return dateA - dateB
+    })
+  })
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <Button onClick={() => setIsAddDialogOpen(true)}>
         <PlusIcon />
         Add Event
       </Button>
 
       {events && events.length > 0 ? (
-        <div className="space-y-4">
-          {events.map((event) => (
-            <EventListItem key={event.id} event={event} onDelete={handleDeleteEvent} />
-          ))}
+        <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 12 }, (_, i) => {
+            const monthEvents = eventsByMonth?.[i] || []
+            if (monthEvents.length === 0) return null
+
+            // Create a date object for the current month to get its name
+            const monthDate = new Date(2024, i, 1)
+            const monthName = format(monthDate, 'LLLL')
+
+            return (
+              <Card key={monthName}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <CalendarIcon className="size-5" />
+                    {monthName}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {monthEvents.map((event) => (
+                    <EventListItem key={event.id} event={event} onDelete={handleDeleteEvent} />
+                  ))}
+                </CardContent>
+              </Card>
+            )
+          })}
         </div>
       ) : (
-        <p className="text-muted-foreground text-center">No events yet.</p>
+        <Card className="flex flex-col items-center gap-4 p-8">
+          <CalendarIcon className="text-muted-foreground size-12" />
+          <p className="text-center">No events added yet.</p>
+          <Button onClick={() => setIsAddDialogOpen(true)}>
+            <PlusIcon />
+            Add Event
+          </Button>
+        </Card>
       )}
 
       <AddEventForm open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />
