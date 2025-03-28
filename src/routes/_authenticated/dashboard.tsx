@@ -1,3 +1,4 @@
+import { QuoteOfTheDay } from '@/features/dashboard/components/quote-of-the-day'
 import { UpcomingEvents } from '@/features/dashboard/components/upcoming-events/upcoming-events'
 import { DashboardHabits } from '@/features/habits/components/dashboard-habits'
 import { AddJournalForm } from '@/features/journals/components/add-journal-form'
@@ -40,8 +41,12 @@ function DashboardPage() {
         </section>
       </div>
 
-      <section className="bg-card break-inside-avoid rounded-lg border p-4 lg:col-span-4">
+      <section className="bg-card break-inside-avoid rounded-lg border p-4 lg:col-span-3">
         <RecentTaskList limit={5} />
+      </section>
+
+      <section className="bg-card break-inside-avoid rounded-lg border p-4 lg:col-span-1">
+        <QuoteOfTheDay />
       </section>
     </div>
   )
