@@ -22,6 +22,7 @@ import {
   LayoutDashboardIcon,
   ListTodoIcon,
   NotebookPenIcon,
+  QuoteIcon,
   SproutIcon,
   UserIcon,
 } from 'lucide-react'
@@ -64,6 +65,11 @@ const items = [
     title: 'Subscriptions',
     url: '/subscriptions',
     icon: CalendarSyncIcon,
+  },
+  {
+    title: 'Quotes',
+    url: '/quotes',
+    icon: QuoteIcon,
   },
   {
     title: 'Journal',

@@ -8,6 +8,7 @@ import {
   type MonthlyChecklistCompletion,
   type Project,
   type ProjectStatus,
+  type Quote,
   type Subscription,
   type SubscriptionFrequency,
   type Task,
@@ -83,6 +84,7 @@ export type {
   Event,
   Subscription,
   SubscriptionFrequency,
+  Quote,
 }
 
 export const api = {
@@ -749,6 +751,67 @@ export const api = {
 
     delete: async (id: string): Promise<void> => {
       const { error } = await supabase.from('subscriptions').delete().eq('id', id)
+      if (error) throw error
+    },
+  },
+
+  quotes: {
+    getAll: async (): Promise<Quote[]> => {
+      const { data, error } = await supabase.from('quotes').select('*').order('created_at', { ascending: false })
+
+      if (error) throw error
+      return transformArraySnakeToCamel<Quote>(data)
+    },
+
+    getQuoteOfTheDay: async (): Promise<Quote | null> => {
+      // Get all quotes
+      const { data, error } = await supabase.from('quotes').select('*')
+
+      if (error) throw error
+      if (!data.length) return null
+
+      // Use the current date as a seed for consistent daily selection
+      const today = new Date()
+      const dateString = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`
+      const seed = Array.from(dateString).reduce((acc, char) => acc + char.charCodeAt(0), 0)
+
+      // Select a quote using the seed
+      const selectedIndex = seed % data.length
+      return snakeToCamelCase<Quote>(data[selectedIndex])
+    },
+
+    create: async (quote: Omit<Quote, 'id' | 'userId' | 'createdAt' | 'updatedAt'>): Promise<Quote> => {
+      const { data: userData } = await supabase.auth.getUser()
+
+      const supabaseQuote = {
+        quote: quote.quote,
+        author: quote.author,
+        user_id: userData.user?.id,
+      }
+
+      const { data, error } = await supabase.from('quotes').insert(supabaseQuote).select().single()
+
+      if (error) throw error
+      return snakeToCamelCase<Quote>(data)
+    },
+
+    update: async (quote: Pick<Quote, 'id' | 'quote' | 'author'>): Promise<Quote> => {
+      const { data, error } = await supabase
+        .from('quotes')
+        .update({
+          quote: quote.quote,
+          author: quote.author,
+        })
+        .eq('id', quote.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return snakeToCamelCase<Quote>(data)
+    },
+
+    delete: async (id: string): Promise<void> => {
+      const { error } = await supabase.from('quotes').delete().eq('id', id)
       if (error) throw error
     },
   },

@@ -153,6 +153,18 @@ export const subscriptions = pgTable('subscriptions', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })
 
+// Quotes table
+export const quotes = pgTable('quotes', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id),
+  quote: text('quote').notNull(),
+  author: text('author').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+})
+
 export type Task = InferSelectModel<typeof tasks>
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number]
 export type Project = InferSelectModel<typeof projects>
@@ -166,3 +178,4 @@ export type Event = InferSelectModel<typeof events>
 export type Birthday = InferSelectModel<typeof birthdays>
 export type SubscriptionFrequency = (typeof SUBSCRIPTION_FREQUENCIES)[number]
 export type Subscription = InferSelectModel<typeof subscriptions>
+export type Quote = InferSelectModel<typeof quotes>
