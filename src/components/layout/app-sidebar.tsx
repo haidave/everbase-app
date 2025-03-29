@@ -1,3 +1,5 @@
+import { useCallback, useEffect, useState } from 'react'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import {
   Sidebar,
   SidebarContent,
@@ -9,10 +11,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSkeleton,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarRail,
 } from '@/components/ui/sidebar'
 import { Link, useMatches } from '@tanstack/react-router'
-import { CircleHelpIcon, FolderIcon, KeyboardIcon, UserIcon } from 'lucide-react'
+import { ChevronDown, CircleEllipsisIcon, CircleHelpIcon, FolderIcon, KeyboardIcon, UserIcon } from 'lucide-react'
 
 import { NAVIGATION_ITEMS } from '@/config/app-layout.config'
 import { useProjects } from '@/hooks/use-projects'
@@ -24,10 +29,22 @@ export function AppSidebar() {
   const signOut = useSignOut()
   const { data: projects, isLoading: isLoadingProjects } = useProjects()
   const matches = useMatches()
+  const [isOtherOpen, setIsOtherOpen] = useState(false)
 
-  const isPathActive = (path: string) => {
-    return matches.some((match) => match.pathname === path)
-  }
+  const isPathActive = useCallback(
+    (path: string) => {
+      return matches.some((match) => match.pathname === path)
+    },
+    [matches]
+  )
+
+  useEffect(() => {
+    const isAnyOtherActive = NAVIGATION_ITEMS.filter((item) => item.group === 'other').some((item) =>
+      isPathActive(item.url)
+    )
+
+    setIsOtherOpen(isAnyOtherActive)
+  }, [isPathActive])
 
   return (
     <Sidebar collapsible="icon" className="py-2">
@@ -37,7 +54,7 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu>
-            {NAVIGATION_ITEMS.map((item) => (
+            {NAVIGATION_ITEMS.filter((item) => !item.group).map((item) => (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton asChild isActive={isPathActive(item.url)}>
                   <Link to={item.url}>
@@ -47,6 +64,33 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
+            <Collapsible open={isOtherOpen} onOpenChange={setIsOtherOpen} className="group/collapsible">
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton asChild>
+                    <button>
+                      <CircleEllipsisIcon className="size-4" />
+                      <span>Other pages</span>
+                      <ChevronDown className="ml-auto size-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                    </button>
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    {NAVIGATION_ITEMS.filter((item) => item.group === 'other').map((item) => (
+                      <SidebarMenuSubItem key={item.title}>
+                        <SidebarMenuSubButton asChild isActive={isPathActive(item.url)}>
+                          <Link to={item.url}>
+                            <item.icon />
+                            <span>{item.title}</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
           </SidebarMenu>
         </SidebarGroup>
 

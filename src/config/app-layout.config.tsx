@@ -15,6 +15,7 @@ export type NavigationRoute = {
   title: string
   url: string
   icon: LucideIcon
+  group?: 'other'
 }
 
 export const NAVIGATION_ITEMS: NavigationRoute[] = [
@@ -29,38 +30,42 @@ export const NAVIGATION_ITEMS: NavigationRoute[] = [
     icon: ListTodoIcon,
   },
   {
-    title: 'Habits',
-    url: '/habits',
-    icon: SproutIcon,
-  },
-  {
-    title: 'Monthly Checklist',
-    url: '/monthly-checklist',
-    icon: CalendarCheckIcon,
-  },
-  {
     title: 'Events',
     url: '/events',
     icon: CalendarIcon,
   },
   {
-    title: 'Birthdays',
-    url: '/birthdays',
-    icon: CakeIcon,
-  },
-  {
-    title: 'Subscriptions',
-    url: '/subscriptions',
-    icon: CalendarSyncIcon,
-  },
-  {
-    title: 'Quotes',
-    url: '/quotes',
-    icon: QuoteIcon,
+    title: 'Habits',
+    url: '/habits',
+    icon: SproutIcon,
   },
   {
     title: 'Journal',
     url: '/journal',
     icon: NotebookPenIcon,
+  },
+  {
+    title: 'Monthly Checklist',
+    url: '/monthly-checklist',
+    icon: CalendarCheckIcon,
+    group: 'other',
+  },
+  {
+    title: 'Birthdays',
+    url: '/birthdays',
+    icon: CakeIcon,
+    group: 'other',
+  },
+  {
+    title: 'Subscriptions',
+    url: '/subscriptions',
+    icon: CalendarSyncIcon,
+    group: 'other',
+  },
+  {
+    title: 'Quotes',
+    url: '/quotes',
+    icon: QuoteIcon,
+    group: 'other',
   },
 ]
