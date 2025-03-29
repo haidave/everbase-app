@@ -44,7 +44,6 @@ export function useCreateQuote() {
     mutationFn: (quote: Omit<Quote, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => api.quotes.create(quote),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['quotes', user?.id] })
-      queryClient.invalidateQueries({ queryKey: ['quote-of-the-day', user?.id] })
     },
   })
 }
