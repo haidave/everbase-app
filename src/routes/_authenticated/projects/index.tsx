@@ -14,8 +14,7 @@ export const Route = createFileRoute('/_authenticated/projects/')({
 
 function ProjectsPage() {
   return (
-    <section className="bg-card break-inside-avoid rounded-lg border p-4">
-      <h2 className="mb-4">Projects</h2>
+    <section>
       <ProjectList />
     </section>
   )

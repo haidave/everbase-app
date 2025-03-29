@@ -97,6 +97,15 @@ const AppCommand = ({ projects }: AppCommandProps) => {
                 <span>{item.title}</span>
               </CommandItem>
             ))}
+            <CommandItem
+              onSelect={() => {
+                setOpen(false)
+                navigate({ to: '/projects' })
+              }}
+            >
+              <FolderIcon className="size-4" />
+              <span>Projects</span>
+            </CommandItem>
           </CommandGroup>
 
           {projects && projects.length > 0 && (
