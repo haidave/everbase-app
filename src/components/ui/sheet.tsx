@@ -57,8 +57,8 @@ const SheetContent = React.forwardRef<React.ComponentRef<typeof SheetPrimitive.C
       <SheetOverlay />
       <SheetPrimitive.Content
         ref={ref}
-        onOpenAutoFocus={(e) => e.preventDefault()}
-        onCloseAutoFocus={(e) => e.preventDefault()}
+        // onOpenAutoFocus={(e) => e.preventDefault()}
+        // onCloseAutoFocus={(e) => e.preventDefault()}
         className={cn(sheetVariants({ side }), className)}
         {...props}
       >
