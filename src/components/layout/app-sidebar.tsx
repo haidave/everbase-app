@@ -17,16 +17,15 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar'
 import { Link, useMatches } from '@tanstack/react-router'
-import { ChevronDown, CircleEllipsisIcon, CircleHelpIcon, FolderIcon, KeyboardIcon, UserIcon } from 'lucide-react'
+import { ChevronDown, CircleEllipsisIcon, FolderIcon } from 'lucide-react'
 
 import { NAVIGATION_ITEMS } from '@/config/app-layout.config'
 import { useProjects } from '@/hooks/use-projects'
-import { useSignOut } from '@/hooks/use-sign-out'
 
+import { UserMenu } from '../ui/user-menu'
 import { AppCommand } from './app-command'
 
 export function AppSidebar() {
-  const signOut = useSignOut()
   const { data: projects, isLoading: isLoadingProjects } = useProjects()
   const matches = useMatches()
   const [isOtherOpen, setIsOtherOpen] = useState(false)
@@ -64,7 +63,11 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
-            <Collapsible open={isOtherOpen} onOpenChange={setIsOtherOpen} className="group/collapsible">
+            <Collapsible
+              open={isOtherOpen}
+              onOpenChange={setIsOtherOpen}
+              className="group/collapsible group-data-[collapsible=icon]:hidden"
+            >
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton asChild>
@@ -95,7 +98,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {isLoadingProjects || (projects && projects.length > 0) ? (
-          <SidebarGroup>
+          <SidebarGroup className="group-data-[collapsible=icon]:hidden">
             <SidebarGroupLabel>
               <Link to="/projects" className="hover:text-muted-foreground">
                 Projects
@@ -124,23 +127,12 @@ export function AppSidebar() {
           </SidebarGroup>
         ) : null}
       </SidebarContent>
-      <SidebarFooter>
-        <SidebarMenu className="flex flex-row items-center justify-between">
-          <div className="flex gap-2 group-data-[collapsible=icon]:hidden">
-            <SidebarMenuItem>
-              <SidebarMenuButton>
-                <CircleHelpIcon />
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton>
-                <KeyboardIcon />
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </div>
+
+      <SidebarFooter className="pr-4">
+        <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={() => signOut()}>
-              <UserIcon />
+            <SidebarMenuButton asChild>
+              <UserMenu />
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
