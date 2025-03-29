@@ -10,15 +10,7 @@ import { type Project } from '@/lib/api'
 import { useSignOut } from '@/hooks/use-sign-out'
 import { useTheme } from '@/hooks/use-theme'
 
-import {
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from '../ui/command'
+import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command'
 import { SidebarMenuButton } from '../ui/sidebar'
 
 type AppCommandProps = {
@@ -124,8 +116,6 @@ const AppCommand = ({ projects }: AppCommandProps) => {
               ))}
             </CommandGroup>
           )}
-
-          <CommandSeparator />
 
           <CommandGroup heading="Other">
             <CommandItem
