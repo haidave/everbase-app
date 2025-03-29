@@ -20,7 +20,10 @@ const UserMenu = () => {
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <SidebarMenuButton isActive={isOpen} className="h-auto w-full justify-start gap-3">
+        <SidebarMenuButton
+          isActive={isOpen}
+          className="h-auto w-full justify-start gap-3 data-[active=true]:font-normal"
+        >
           <Avatar className="size-8 shrink-0 group-data-[collapsible=icon]:size-4">
             <AvatarImage src={user.user_metadata.picture} />
             <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
