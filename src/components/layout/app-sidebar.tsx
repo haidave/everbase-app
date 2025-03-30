@@ -17,7 +17,7 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar'
 import { Link, useMatches } from '@tanstack/react-router'
-import { ChevronDown, CircleEllipsisIcon, FolderIcon } from 'lucide-react'
+import { ChevronDown, FileStackIcon, FolderIcon } from 'lucide-react'
 
 import { NAVIGATION_ITEMS } from '@/config/app-layout.config'
 import { useProjects } from '@/hooks/use-projects'
@@ -72,7 +72,7 @@ export function AppSidebar() {
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton asChild>
                     <button>
-                      <CircleEllipsisIcon className="size-4" />
+                      <FileStackIcon className="size-4" />
                       <span>Other pages</span>
                       <ChevronDown className="ml-auto size-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                     </button>
