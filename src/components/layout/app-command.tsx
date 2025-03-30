@@ -40,14 +40,14 @@ const AppCommand = ({ projects }: AppCommandProps) => {
     <>
       <SidebarMenuButton
         variant="search"
-        className="flex min-h-9 w-full items-center justify-between"
+        className="flex min-h-10 w-full items-center justify-between"
         onClick={() => setOpen(true)}
       >
         <span className="flex items-center gap-2">
           <SearchIcon size={16} />
           Search
         </span>
-        <span className="flex items-center text-xs opacity-50">⌘K</span>
+        <span className="flex items-center pr-0.5 text-xs opacity-50">⌘K</span>
       </SidebarMenuButton>
 
       <CommandDialog open={open} onOpenChange={setOpen}>
