@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { DynamicIcon } from '@/components/ui/dynamic-icon'
 import { Link } from '@tanstack/react-router'
 import { PlusIcon } from 'lucide-react'
 
@@ -33,7 +34,10 @@ const ProjectList = () => {
         {projects.map((project) => (
           <Card key={project.id} className="min-h-40">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-lg">{project.name}</CardTitle>
+              <div className="flex items-center gap-2">
+                <DynamicIcon name={project.icon} className="size-4" />
+                <CardTitle className="text-lg">{project.name}</CardTitle>
+              </div>
               <Badge>{project.status}</Badge>
             </CardHeader>
             <CardContent>

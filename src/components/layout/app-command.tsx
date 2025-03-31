@@ -11,6 +11,7 @@ import { useSignOut } from '@/hooks/use-sign-out'
 import { useTheme } from '@/hooks/use-theme'
 
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command'
+import { DynamicIcon } from '../ui/dynamic-icon'
 import { SidebarMenuButton } from '../ui/sidebar'
 
 type AppCommandProps = {
@@ -110,7 +111,7 @@ const AppCommand = ({ projects }: AppCommandProps) => {
                     navigate({ to: '/projects/$projectId', params: { projectId: project.id } })
                   }}
                 >
-                  <FolderIcon className="size-4" />
+                  <DynamicIcon name={project.icon} />
                   <span>{project.name}</span>
                 </CommandItem>
               ))}

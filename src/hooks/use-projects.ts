@@ -30,8 +30,7 @@ export function useCreateProject() {
   const { user } = useAuth()
 
   return useMutation({
-    mutationFn: (project: { name: string; status?: 'backlog' | 'active' | 'passive' | 'completed' }) =>
-      api.projects.create(project),
+    mutationFn: (project: Pick<Project, 'name' | 'status' | 'icon'>) => api.projects.create(project),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects', user?.id] })
     },
@@ -44,29 +43,9 @@ export function useUpdateProject() {
   const { user } = useAuth()
 
   return useMutation({
-    mutationFn: ({ id, ...updates }: { id: string } & Partial<Pick<Project, 'name' | 'status'>>) =>
-      api.projects.update(id, updates),
-    onSuccess: (_, variables) => {
-      // Invalidate projects
+    mutationFn: (project: Pick<Project, 'id' | 'name' | 'status' | 'icon'>) => api.projects.update(project),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects', user?.id] })
-
-      // Force refetch ALL task-project relationships
-      queryClient.invalidateQueries({
-        queryKey: ['tasks'],
-        refetchType: 'all',
-      })
-
-      // Force refetch the specific project data
-      queryClient.refetchQueries({
-        queryKey: ['projects', variables.id],
-        exact: false,
-      })
-
-      // Force refetch all task-project relationships
-      queryClient.refetchQueries({
-        queryKey: ['tasks', '*', 'projects'],
-        exact: false,
-      })
     },
   })
 }
@@ -77,19 +56,9 @@ export function useDeleteProject() {
   const { user } = useAuth()
 
   return useMutation({
-    mutationFn: api.projects.delete,
-    onSuccess: (_, projectId) => {
-      // Invalidate projects
+    mutationFn: (id: string) => api.projects.delete(id),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects', user?.id] })
-
-      // Invalidate all task-project relationships
-      queryClient.invalidateQueries({ queryKey: ['tasks', 'projects'] })
-
-      // Invalidate tasks for this specific project
-      queryClient.invalidateQueries({ queryKey: ['tasks', 'project', projectId] })
-
-      // Also invalidate general tasks as they might show project info
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
     },
   })
 }

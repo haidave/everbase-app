@@ -9,11 +9,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { IconPicker } from '@/components/ui/icon-picker'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { PROJECT_STATUSES, type Project, type ProjectStatus } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
+import { useNavigate } from '@tanstack/react-router'
 import { LoaderCircleIcon } from 'lucide-react'
 
 import { useDeleteProject, useUpdateProject } from '@/hooks/use-projects'
@@ -25,6 +27,7 @@ type EditProjectFormProps = {
 }
 
 export function EditProjectForm({ project, open, onOpenChange }: EditProjectFormProps) {
+  const navigate = useNavigate()
   const updateProject = useUpdateProject()
   const deleteProject = useDeleteProject()
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -33,6 +36,7 @@ export function EditProjectForm({ project, open, onOpenChange }: EditProjectForm
     defaultValues: {
       name: project.name,
       status: project.status as ProjectStatus,
+      icon: project.icon || 'Folder',
     },
     onSubmit: async ({ value }) => {
       updateProject.mutate(
@@ -40,10 +44,11 @@ export function EditProjectForm({ project, open, onOpenChange }: EditProjectForm
           id: project.id,
           name: value.name,
           status: value.status,
+          icon: value.icon,
         },
         {
           onSuccess: () => {
-            onOpenChange(false)
+            setTimeout(() => onOpenChange(false), 100)
           },
         }
       )
@@ -55,6 +60,7 @@ export function EditProjectForm({ project, open, onOpenChange }: EditProjectForm
       onSuccess: () => {
         setIsDeleteDialogOpen(false)
         onOpenChange(false)
+        navigate({ to: '/projects' })
       },
     })
   }
@@ -64,36 +70,21 @@ export function EditProjectForm({ project, open, onOpenChange }: EditProjectForm
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Edit Project</DialogTitle>
-          <DialogDescription>Edit the name and status of the project.</DialogDescription>
+          <DialogDescription>Make changes to your project here.</DialogDescription>
         </DialogHeader>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            form.handleSubmit()
-          }}
-          className="space-y-4"
-        >
+        <form onSubmit={form.handleSubmit} className="space-y-4">
           <div className="grid gap-4">
-            <form.Field
-              name="name"
-              validators={{
-                onSubmit: ({ value }) => (!value ? 'Project name cannot be empty' : null),
-              }}
-            >
+            <form.Field name="name">
               {(field) => (
                 <div className="grid gap-2">
                   <Label htmlFor="name">Name</Label>
                   <Input
                     id="name"
+                    placeholder="Project name"
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
-                    onBlur={field.handleBlur}
-                    aria-invalid={!!field.state.meta.errors?.length}
                   />
-                  {field.state.meta.errors.length > 0 ? (
-                    <p className="text-destructive text-sm">{field.state.meta.errors.join(', ')}</p>
-                  ) : null}
                 </div>
               )}
             </form.Field>
@@ -120,47 +111,40 @@ export function EditProjectForm({ project, open, onOpenChange }: EditProjectForm
                 </div>
               )}
             </form.Field>
+
+            <form.Field name="icon">
+              {(field) => (
+                <div className="grid gap-2">
+                  <Label htmlFor="icon">Icon</Label>
+                  <IconPicker value={field.state.value} onChange={field.handleChange} />
+                </div>
+              )}
+            </form.Field>
           </div>
 
-          <DialogFooter className="flex justify-between gap-2 sm:justify-between">
-            <Button
-              variant="destructive"
-              type="button"
-              onClick={() => setIsDeleteDialogOpen(true)}
-              disabled={deleteProject.isPending}
-            >
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="destructive" type="button" onClick={() => setIsDeleteDialogOpen(true)}>
               Delete Project
             </Button>
-            <ConfirmationDialog
-              open={isDeleteDialogOpen}
-              onOpenChange={setIsDeleteDialogOpen}
-              title="Are you sure?"
-              description="This will permanently delete the project and remove all associated task connections."
-              onConfirm={handleDelete}
-              isLoading={deleteProject.isPending}
-            />
-
-            <form.Subscribe
-              selector={(state) => ({
-                canSubmit: state.canSubmit,
-                isSubmitting: state.isSubmitting,
-                values: state.values,
-              })}
-            >
-              {({ canSubmit, isSubmitting, values }) => {
-                const hasChanges = values.name !== project.name || values.status !== project.status
-
-                return (
-                  <Button type="submit" disabled={!canSubmit || !hasChanges || isSubmitting}>
-                    {isSubmitting ? <LoaderCircleIcon className="animate-spin" /> : null}
-                    Save changes
-                  </Button>
-                )
-              }}
+            <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
+              {([canSubmit, isSubmitting]) => (
+                <Button type="submit" disabled={!canSubmit}>
+                  {isSubmitting ? <LoaderCircleIcon className="animate-spin" /> : 'Save Changes'}
+                </Button>
+              )}
             </form.Subscribe>
           </DialogFooter>
         </form>
       </DialogContent>
+
+      <ConfirmationDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        title="Delete Project"
+        description="Are you sure you want to delete this project? This action cannot be undone."
+        onConfirm={handleDelete}
+        isLoading={deleteProject.isPending}
+      />
     </Dialog>
   )
 }

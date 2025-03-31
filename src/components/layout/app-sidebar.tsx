@@ -17,11 +17,12 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar'
 import { Link, useMatches } from '@tanstack/react-router'
-import { ChevronDown, FileStackIcon, FolderIcon } from 'lucide-react'
+import { ChevronDown, FileStackIcon } from 'lucide-react'
 
 import { NAVIGATION_ITEMS } from '@/config/app-layout.config'
 import { useProjects } from '@/hooks/use-projects'
 
+import { DynamicIcon } from '../ui/dynamic-icon'
 import { UserMenu } from '../ui/user-menu'
 import { AppCommand } from './app-command'
 
@@ -98,7 +99,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {isLoadingProjects || (projects && projects.length > 0) ? (
-          <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+          <SidebarGroup>
             <SidebarGroupLabel>
               <Link to="/projects" className="hover:text-muted-foreground">
                 Projects
@@ -116,7 +117,7 @@ export function AppSidebar() {
                   <SidebarMenuItem key={project.id}>
                     <SidebarMenuButton asChild isActive={isPathActive(`/projects/${project.id}`)}>
                       <Link to="/projects/$projectId" params={{ projectId: project.id }}>
-                        <FolderIcon className="shrink-0" />
+                        <DynamicIcon name={project.icon} />
                         <span>{project.name}</span>
                       </Link>
                     </SidebarMenuButton>

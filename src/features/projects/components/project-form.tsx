@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { IconPicker } from '@/components/ui/icon-picker'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -28,10 +29,11 @@ export function ProjectForm({ open, onOpenChange }: ProjectFormProps) {
     defaultValues: {
       name: '',
       status: 'backlog' as ProjectStatus,
+      icon: 'Folder',
     },
     onSubmit: async ({ value }) => {
       createProject.mutate(
-        { name: value.name, status: value.status },
+        { name: value.name, status: value.status, icon: value.icon },
         {
           onSuccess: () => {
             form.reset()
@@ -104,6 +106,17 @@ export function ProjectForm({ open, onOpenChange }: ProjectFormProps) {
                         <SelectItem value="completed">Completed</SelectItem>
                       </SelectContent>
                     </Select>
+                  </>
+                )}
+              </form.Field>
+            </div>
+
+            <div className="grid gap-2">
+              <form.Field name="icon">
+                {(field) => (
+                  <>
+                    <Label htmlFor="icon">Icon</Label>
+                    <IconPicker value={field.state.value} onChange={field.handleChange} />
                   </>
                 )}
               </form.Field>

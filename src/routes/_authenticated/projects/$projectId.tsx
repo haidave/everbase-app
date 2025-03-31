@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { DynamicIcon } from '@/components/ui/dynamic-icon'
 import { EditProjectForm } from '@/features/projects/components/edit-project-form'
 import { AddTaskForm } from '@/features/tasks/components/add-task-form'
 import { TaskList } from '@/features/tasks/components/task-list'
@@ -55,7 +56,10 @@ function ProjectDetailPage() {
       <div className="mx-auto max-w-3xl">
         <Card className="mb-6">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xl">{displayProject.name}</CardTitle>
+            <div className="flex items-center gap-2">
+              <DynamicIcon name={displayProject.icon} className="size-4" />
+              <CardTitle className="text-xl">{displayProject.name}</CardTitle>
+            </div>
             <Badge>{displayProject.status}</Badge>
           </CardHeader>
           <CardContent>

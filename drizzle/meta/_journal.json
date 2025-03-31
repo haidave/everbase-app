@@ -71,6 +71,13 @@
       "when": 1743195252873,
       "tag": "0009_blushing_robin_chapel",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1743365547686,
+      "tag": "0010_even_thundra",
+      "breakpoints": true
     }
   ]
 }
