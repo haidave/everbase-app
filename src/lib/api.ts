@@ -29,6 +29,7 @@ export type NewProject = {
   name: string
   status?: ProjectStatus
   userId: string
+  icon?: string
 }
 
 export type NewHabit = {
@@ -158,6 +159,7 @@ export const api = {
       const supabaseProject = {
         name: project.name,
         status: project.status || 'backlog',
+        icon: project.icon || 'Folder',
         user_id: userData.user?.id,
       }
 
@@ -167,7 +169,8 @@ export const api = {
       return snakeToCamelCase<Project>(data)
     },
 
-    update: async (id: string, updates: Partial<Pick<Project, 'name' | 'status'>>): Promise<Project> => {
+    update: async (project: Pick<Project, 'id' | 'name' | 'status' | 'icon'>): Promise<Project> => {
+      const { id, ...updates } = project
       const { data, error } = await supabase.from('projects').update(updates).eq('id', id).select().single()
 
       if (error) throw error
