@@ -70,6 +70,24 @@ export type NewSubscription = {
   active: boolean
 }
 
+// Add Feature type
+export type Feature = {
+  id: string
+  projectId: string
+  name: string
+  description?: string
+  icon: string
+  createdAt: string
+  updatedAt: string
+}
+
+export type NewFeature = {
+  projectId: string
+  name: string
+  description?: string
+  icon?: string
+}
+
 // Re-export schema types for convenience
 export type {
   Project,
@@ -135,6 +153,32 @@ export const api = {
       const { error } = await supabase.from('task_projects').insert({ task_id: taskId, project_id: projectId })
 
       if (error) throw error
+    },
+
+    addToFeature: async (taskId: string, featureId: string): Promise<void> => {
+      const { error } = await supabase.from('task_features').insert({ task_id: taskId, feature_id: featureId })
+
+      if (error) throw error
+    },
+
+    removeFromFeature: async (taskId: string, featureId: string): Promise<void> => {
+      const { error } = await supabase.from('task_features').delete().eq('task_id', taskId).eq('feature_id', featureId)
+
+      if (error) throw error
+    },
+
+    getFeatures: async (taskId: string): Promise<Feature[]> => {
+      const { data, error } = await supabase.from('task_features').select('feature_id').eq('task_id', taskId)
+
+      if (error) throw error
+
+      if (data.length === 0) return []
+
+      const featureIds = data.map((item) => item.feature_id)
+      const { data: features, error: featuresError } = await supabase.from('features').select('*').in('id', featureIds)
+
+      if (featuresError) throw featuresError
+      return transformArraySnakeToCamel<Feature>(features)
     },
   },
 
@@ -410,6 +454,7 @@ export const api = {
       if (error) throw error
     },
   },
+
   journals: {
     getAll: async (): Promise<Journal[]> => {
       const { data, error } = await supabase.from('journals').select('*').order('created_at', { ascending: false })
@@ -816,6 +861,81 @@ export const api = {
     delete: async (id: string): Promise<void> => {
       const { error } = await supabase.from('quotes').delete().eq('id', id)
       if (error) throw error
+    },
+  },
+
+  features: {
+    getAll: async (projectId: string): Promise<Feature[]> => {
+      const { data, error } = await supabase
+        .from('features')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: true })
+
+      if (error) throw error
+      return transformArraySnakeToCamel<Feature>(data)
+    },
+
+    getById: async (id: string): Promise<Feature> => {
+      const { data, error } = await supabase.from('features').select('*').eq('id', id).single()
+
+      if (error) throw error
+      return snakeToCamelCase<Feature>(data)
+    },
+
+    create: async (feature: NewFeature): Promise<Feature> => {
+      const supabaseFeature = {
+        project_id: feature.projectId,
+        name: feature.name,
+        description: feature.description || null,
+        icon: feature.icon || 'folders',
+      }
+
+      const { data, error } = await supabase.from('features').insert(supabaseFeature).select().single()
+
+      if (error) throw error
+      return snakeToCamelCase<Feature>(data)
+    },
+
+    update: async (feature: Partial<Feature> & { id: string }): Promise<Feature> => {
+      const { id, ...updates } = feature
+      const supabaseUpdates = {
+        name: updates.name,
+        description: updates.description,
+        icon: updates.icon,
+        project_id: updates.projectId,
+      }
+
+      // Only include properties that are defined
+      const filteredUpdates = Object.fromEntries(Object.entries(supabaseUpdates).filter(([, v]) => v !== undefined))
+
+      const { data, error } = await supabase.from('features').update(filteredUpdates).eq('id', id).select().single()
+
+      if (error) throw error
+      return snakeToCamelCase<Feature>(data)
+    },
+
+    delete: async (id: string): Promise<void> => {
+      const { error } = await supabase.from('features').delete().eq('id', id)
+      if (error) throw error
+    },
+
+    getTasks: async (featureId: string): Promise<Task[]> => {
+      const { data, error } = await supabase.from('task_features').select('task_id').eq('feature_id', featureId)
+
+      if (error) throw error
+
+      if (data.length === 0) return []
+
+      const taskIds = data.map((item) => item.task_id)
+      const { data: tasks, error: tasksError } = await supabase
+        .from('tasks')
+        .select('*')
+        .in('id', taskIds)
+        .order('created_at', { ascending: false })
+
+      if (tasksError) throw tasksError
+      return transformArraySnakeToCamel<Task>(tasks)
     },
   },
 }

@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -8,20 +9,44 @@ import {
 } from '@/components/ui/breadcrumbs'
 import { Link, useRouterState } from '@tanstack/react-router'
 
+type BreadcrumbLevel = {
+  title: string | ((loaderData: Record<string, unknown>, params: Record<string, string>) => string)
+  to: string
+  routeId?: string
+}
+
 type BreadcrumbConfig = {
-  parent?: {
-    title: string
-    to: string
-  }
+  levels: BreadcrumbLevel[]
   formatTitle?: (title: string) => string
 }
 
 const ROUTE_BREADCRUMBS: Record<string, BreadcrumbConfig> = {
   '/_authenticated/projects/$projectId': {
-    parent: {
-      title: 'Projects',
-      to: '/projects',
-    },
+    levels: [
+      {
+        title: 'Projects',
+        to: '/projects',
+      },
+    ],
+  },
+  '/_authenticated/projects_/$projectId/features/$featureId': {
+    levels: [
+      {
+        title: 'Projects',
+        to: '/projects',
+      },
+      {
+        title: (loaderData) => {
+          return (loaderData as { project?: { name?: string } })?.project?.name || 'Project'
+        },
+        to: '/projects/$projectId',
+        routeId: '/_authenticated/projects_/$projectId/features/$featureId',
+      },
+      {
+        title: 'Features',
+        to: '/projects/$projectId/features',
+      },
+    ],
   },
 }
 
@@ -30,21 +55,61 @@ const AppBreadcrumbs = () => {
   const currentRoute = routerState.matches.at(-1)
   const routeId = currentRoute?.routeId || ''
   const currentPageTitle = currentRoute?.meta?.[0]?.title || ''
+  const routeParams = currentRoute?.params || {}
 
   const config = ROUTE_BREADCRUMBS[routeId]
 
-  if (config?.parent) {
-    const { parent } = config
-    const displayTitle = config.formatTitle ? config.formatTitle(currentPageTitle) : currentPageTitle
+  // Helper function to replace params in the URL
+  const getProcessedUrl = (url: string) => {
+    let processedUrl = url
+    // Replace any parameters with their actual values
+    Object.entries(routeParams).forEach(([key, value]) => {
+      if (typeof value === 'string') {
+        processedUrl = processedUrl.replace(`$${key}`, value)
+      }
+    })
+    return processedUrl
+  }
+
+  // Helper function to get the title
+  const getTitle = (level: BreadcrumbLevel) => {
+    if (typeof level.title === 'function' && level.routeId) {
+      // Find the route match with the specified routeId
+      const routeMatch = routerState.matches.find((match) => match.routeId === level.routeId)
+      if (routeMatch?.loaderData) {
+        return level.title(routeMatch.loaderData, routeParams)
+      }
+    }
+
+    if (typeof level.title === 'function') {
+      return level.title({}, routeParams)
+    }
+
+    return level.title
+  }
+
+  if (config?.levels && config.levels.length > 0) {
+    const { levels } = config
+    let displayTitle = currentPageTitle
+
+    // Apply any custom formatting
+    if (config.formatTitle) {
+      displayTitle = config.formatTitle(displayTitle)
+    }
 
     return (
       <Breadcrumb>
         <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link to={parent.to}>{parent.title}</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
+          {levels.map((level, index) => (
+            <React.Fragment key={index}>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to={getProcessedUrl(level.to)}>{getTitle(level)}</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              {index < levels.length - 1 && <BreadcrumbSeparator />}
+            </React.Fragment>
+          ))}
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbPage>{displayTitle}</BreadcrumbPage>

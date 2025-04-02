@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { DynamicIcon } from '@/components/ui/dynamic-icon'
 import { EditProjectForm } from '@/features/projects/components/edit-project-form'
+import { FeatureList } from '@/features/projects/components/feature-list'
 import { AddTaskForm } from '@/features/tasks/components/add-task-form'
 import { TaskList } from '@/features/tasks/components/task-list'
 import { createFileRoute } from '@tanstack/react-router'
@@ -75,6 +76,10 @@ function ProjectDetailPage() {
           </CardFooter>
         </Card>
 
+        <div className="bg-card mb-6 rounded-lg border p-4">
+          <FeatureList projectId={projectId} />
+        </div>
+
         <div className="bg-card rounded-lg border p-4">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-foreground-primary text-lg font-medium">Project Tasks</h2>
@@ -91,7 +96,7 @@ function ProjectDetailPage() {
           ) : relatedTasks && relatedTasks.length > 0 ? (
             <TaskList tasks={relatedTasks} />
           ) : (
-            <p className="text-muted-foreground">No tasks assigned to this project yet.</p>
+            <p className="text-muted-foreground text-sm">No tasks assigned to this project yet.</p>
           )}
         </div>
       </div>
