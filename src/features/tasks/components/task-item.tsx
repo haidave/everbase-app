@@ -5,10 +5,11 @@ import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { TextInput } from '@/components/ui/text-input'
 import { useForm } from '@tanstack/react-form'
-import { FolderIcon, XIcon } from 'lucide-react'
+import { FolderIcon, FoldersIcon, XIcon } from 'lucide-react'
 
 import { type Task } from '@/lib/api'
 import { cn } from '@/lib/utils'
+import { useAddTaskToFeature, useRemoveTaskFromFeature, useTaskFeatures } from '@/hooks/use-features'
 import { useAddTaskToProject, useProjects, useRemoveTaskFromProject } from '@/hooks/use-projects'
 import { useTaskProjects } from '@/hooks/use-task-projects'
 import { useDeleteTask, useUpdateTask } from '@/hooks/use-tasks'
@@ -37,6 +38,17 @@ const TaskItem = ({ task }: TaskItemProps) => {
 
   // Get current project (if any)
   const currentProject = taskProjects && taskProjects.length > 0 ? taskProjects[0] : null
+
+  // Get current feature associations
+  const { data: taskFeatures } = useTaskFeatures(task.id)
+  const [showFeatureSelect, setShowFeatureSelect] = useState(false)
+
+  // Feature mutations
+  const addTaskToFeature = useAddTaskToFeature()
+  const removeTaskFromFeature = useRemoveTaskFromFeature()
+
+  // Get current feature (if any)
+  const currentFeature = taskFeatures && taskFeatures.length > 0 ? taskFeatures[0] : null
 
   const form = useForm({
     defaultValues: {
@@ -88,6 +100,37 @@ const TaskItem = ({ task }: TaskItemProps) => {
         {
           onSuccess: () => {
             setShowProjectSelect(false)
+          },
+        }
+      )
+    }
+  }
+
+  const handleFeatureChange = (featureId: string) => {
+    // If there's a current feature and it's different from the selected one
+    if (currentFeature && currentFeature.id !== featureId) {
+      removeTaskFromFeature.mutate(
+        { taskId: task.id, featureId: currentFeature.id },
+        {
+          onSuccess: () => {
+            addTaskToFeature.mutate(
+              { taskId: task.id, featureId },
+              {
+                onSuccess: () => {
+                  setShowFeatureSelect(false)
+                },
+              }
+            )
+          },
+        }
+      )
+    } else {
+      // If there's no current feature, just add to the new one
+      addTaskToFeature.mutate(
+        { taskId: task.id, featureId },
+        {
+          onSuccess: () => {
+            setShowFeatureSelect(false)
           },
         }
       )
@@ -198,6 +241,52 @@ const TaskItem = ({ task }: TaskItemProps) => {
             </Button>
           )}
         </div>
+
+        {/* Feature selection - only show if a project is selected */}
+        {currentProject && (
+          <div className="ml-left flex items-center">
+            {currentFeature && !showFeatureSelect && (
+              <span className="mr-2 hidden text-xs sm:inline-block">{currentFeature.name}</span>
+            )}
+
+            {showFeatureSelect ? (
+              <Select
+                defaultOpen={true}
+                value={currentFeature?.id || ''}
+                onValueChange={handleFeatureChange}
+                onOpenChange={(open) => {
+                  if (!open) {
+                    setShowFeatureSelect(false)
+                  }
+                }}
+              >
+                <SelectTrigger className="h-8 w-[140px]">
+                  <SelectValue placeholder="Select feature" />
+                </SelectTrigger>
+                <SelectContent>
+                  {projects
+                    ?.filter((f) => f.id === currentProject.id)
+                    .map((feature) => (
+                      <SelectItem key={feature.id} value={feature.id}>
+                        {feature.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowFeatureSelect(true)}
+                className="text-muted-foreground hover:text-foreground"
+                aria-label="Assign to feature"
+              >
+                <FoldersIcon />
+              </Button>
+            )}
+          </div>
+        )}
+
         <Button
           variant="ghost"
           size="icon"

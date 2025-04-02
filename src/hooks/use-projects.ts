@@ -44,8 +44,18 @@ export function useUpdateProject() {
 
   return useMutation({
     mutationFn: (project: Pick<Project, 'id' | 'name' | 'status' | 'icon'>) => api.projects.update(project),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projects', user?.id] })
+    onSuccess: (_, variables) => {
+      // Only invalidate the specific project
+      queryClient.invalidateQueries({
+        queryKey: ['projects', variables.id],
+        exact: true,
+      })
+
+      // Only invalidate the user's projects list
+      queryClient.invalidateQueries({
+        queryKey: ['projects', user?.id],
+        exact: true,
+      })
     },
   })
 }

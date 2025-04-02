@@ -115,7 +115,11 @@ export function AppSidebar() {
               ) : (
                 projects?.map((project) => (
                   <SidebarMenuItem key={project.id}>
-                    <SidebarMenuButton asChild isActive={isPathActive(`/projects/${project.id}`)}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isPathActive(`/projects/${project.id}`)}
+                      className="group-data-[collapsible=icon]:outline-hover group-data-[collapsible=icon]:outline group-data-[collapsible=icon]:outline-dashed"
+                    >
                       <Link to="/projects/$projectId" params={{ projectId: project.id }}>
                         <DynamicIcon name={project.icon} />
                         <span>{project.name}</span>

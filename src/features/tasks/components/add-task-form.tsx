@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import {
@@ -15,54 +15,49 @@ import { useForm } from '@tanstack/react-form'
 import { LoaderCircleIcon, PlusIcon } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
 
-import { useAddTaskToProject, useProjects } from '@/hooks/use-projects'
+import { useFeatures } from '@/hooks/use-features'
+import { useProjects } from '@/hooks/use-projects'
 import { useCreateTask } from '@/hooks/use-tasks'
 
 type AddTaskFormProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   defaultProjectId?: string
+  defaultFeatureId?: string
 }
 
-const AddTaskForm = ({ open, onOpenChange, defaultProjectId }: AddTaskFormProps) => {
+const AddTaskForm = ({ open, onOpenChange, defaultProjectId, defaultFeatureId }: AddTaskFormProps) => {
   const createTask = useCreateTask()
   const { data: projects } = useProjects()
-  const addTaskToProject = useAddTaskToProject()
   const formRef = useRef<HTMLFormElement>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Get features for the selected project
+  const [selectedProjectId, setSelectedProjectId] = useState(defaultProjectId || '')
+  const { data: features } = useFeatures(selectedProjectId)
 
   const form = useForm({
     defaultValues: {
       text: '',
       projectId: defaultProjectId || '',
+      featureId: defaultFeatureId || '',
     },
     onSubmit: async ({ value }) => {
-      createTask.mutate(
-        { text: value.text },
-        {
-          onSuccess: (newTask) => {
-            // If a project was selected, add the task to that project
-            if (value.projectId) {
-              addTaskToProject.mutate(
-                {
-                  taskId: newTask.id,
-                  projectId: value.projectId,
-                },
-                {
-                  // Reset form only after both operations complete
-                  onSuccess: () => {
-                    form.reset()
-                    onOpenChange(false)
-                  },
-                }
-              )
-            } else {
-              // Reset immediately if no project association
-              form.reset()
-              onOpenChange(false)
-            }
-          },
-        }
-      )
+      setIsSubmitting(true)
+      try {
+        await createTask.mutateAsync({
+          text: value.text.trim(),
+          projectId: value.projectId || undefined,
+          featureId: value.featureId || undefined,
+        })
+
+        form.reset()
+        onOpenChange(false)
+      } catch (error) {
+        console.error('Error creating task:', error)
+      } finally {
+        setIsSubmitting(false)
+      }
     },
   })
 
@@ -78,6 +73,13 @@ const AddTaskForm = ({ open, onOpenChange, defaultProjectId }: AddTaskFormProps)
       enableOnFormTags: ['INPUT', 'SELECT'],
     }
   )
+
+  // Handle project selection changes
+  const handleProjectChange = (projectId: string) => {
+    form.setFieldValue('projectId', projectId)
+    form.setFieldValue('featureId', '') // Reset feature when project changes
+    setSelectedProjectId(projectId)
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -99,7 +101,7 @@ const AddTaskForm = ({ open, onOpenChange, defaultProjectId }: AddTaskFormProps)
               <form.Field
                 name="text"
                 validators={{
-                  onSubmit: ({ value }) => (!value ? 'Task title cannot be empty' : null),
+                  onSubmit: ({ value }) => (!value?.trim() ? 'Task title cannot be empty' : null),
                 }}
               >
                 {(field) => (
@@ -135,7 +137,7 @@ const AddTaskForm = ({ open, onOpenChange, defaultProjectId }: AddTaskFormProps)
                           label: project.name,
                         }))}
                         value={field.state.value}
-                        onValueChange={field.handleChange}
+                        onValueChange={handleProjectChange}
                         placeholder="Select project"
                         emptyMessage="No project found."
                         searchPlaceholder="Search project..."
@@ -145,17 +147,45 @@ const AddTaskForm = ({ open, onOpenChange, defaultProjectId }: AddTaskFormProps)
                 </form.Field>
               </div>
             )}
+
+            {features && features.length > 0 && selectedProjectId && (
+              <div className="grid gap-2">
+                <form.Field name="featureId">
+                  {(field) => (
+                    <>
+                      <Label htmlFor="featureId">Feature (optional)</Label>
+                      <Combobox
+                        options={features.map((feature) => ({
+                          value: feature.id,
+                          label: feature.name,
+                        }))}
+                        value={field.state.value}
+                        onValueChange={field.handleChange}
+                        placeholder="Select feature"
+                        emptyMessage="No feature found."
+                        searchPlaceholder="Search feature..."
+                      />
+                    </>
+                  )}
+                </form.Field>
+              </div>
+            )}
           </div>
 
           <DialogFooter>
-            <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
-              {([canSubmit, isSubmitting]) => (
-                <Button type="submit" disabled={!canSubmit}>
-                  {isSubmitting ? <LoaderCircleIcon className="animate-spin" /> : <PlusIcon />}
+            <Button type="submit" disabled={isSubmitting || createTask.isPending || !form.state.canSubmit}>
+              {isSubmitting || createTask.isPending ? (
+                <>
+                  <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                <>
+                  <PlusIcon className="mr-2 h-4 w-4" />
                   Add Task
-                </Button>
+                </>
               )}
-            </form.Subscribe>
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

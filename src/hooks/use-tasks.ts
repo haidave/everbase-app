@@ -30,9 +30,41 @@ export function useCreateTask() {
   const { user } = useAuth()
 
   return useMutation({
-    mutationFn: (task: { text: string }) => api.tasks.create(task),
-    onSuccess: () => {
+    mutationFn: async (task: { text: string; projectId?: string; featureId?: string }) => {
+      // Create the task
+      const newTask = await api.tasks.create({ text: task.text })
+
+      // If projectId is provided, associate with project
+      if (task.projectId) {
+        await api.tasks.addToProject(newTask.id, task.projectId)
+      }
+
+      // If featureId is provided, associate with feature
+      if (task.featureId) {
+        await api.tasks.addToFeature(newTask.id, task.featureId)
+      }
+
+      return newTask
+    },
+    onSuccess: (_, variables) => {
+      // Invalidate tasks list
       queryClient.invalidateQueries({ queryKey: ['tasks', user?.id] })
+
+      // Invalidate project tasks if needed
+      if (variables.projectId) {
+        queryClient.invalidateQueries({
+          queryKey: ['projects', variables.projectId, 'tasks'],
+          exact: true,
+        })
+      }
+
+      // Invalidate feature tasks if needed
+      if (variables.featureId) {
+        queryClient.invalidateQueries({
+          queryKey: ['features', variables.featureId, 'tasks'],
+          exact: true,
+        })
+      }
     },
   })
 }
@@ -61,6 +93,15 @@ export function useUpdateTask() {
       queryClient.invalidateQueries({
         queryKey: ['tasks', variables.id, 'projects'],
       })
+
+      // Add this to invalidate feature tasks queries
+      queryClient.invalidateQueries({
+        queryKey: ['features'],
+        predicate: (query) => {
+          const queryKey = query.queryKey
+          return Array.isArray(queryKey) && queryKey.length === 3 && queryKey[2] === 'tasks'
+        },
+      })
     },
   })
 }
@@ -79,6 +120,15 @@ export function useDeleteTask() {
       // Directly invalidate the project tasks query pattern
       queryClient.invalidateQueries({
         queryKey: ['projects'],
+        predicate: (query) => {
+          const queryKey = query.queryKey
+          return Array.isArray(queryKey) && queryKey.length === 3 && queryKey[2] === 'tasks'
+        },
+      })
+
+      // Add this to invalidate feature tasks queries
+      queryClient.invalidateQueries({
+        queryKey: ['features'],
         predicate: (query) => {
           const queryKey = query.queryKey
           return Array.isArray(queryKey) && queryKey.length === 3 && queryKey[2] === 'tasks'
