@@ -1,6 +1,6 @@
 import { type Birthday, type Event } from '@/db/schema'
 import { calculateNextBirthdayAge, getNextBirthdayDate } from '@/features/birthdays/lib/utils'
-import { addDays } from 'date-fns'
+import { addDays, isAfter, isBefore, isSameDay, startOfDay } from 'date-fns'
 
 export type UpcomingItem = {
   id: string
@@ -18,8 +18,7 @@ export function getFilteredUpcomingItems(
   if (!birthdays || !events) return []
 
   // Current date for calculations
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  const today = startOfDay(new Date())
   const endDate = addDays(today, daysAhead)
 
   // Process birthdays to get this year's dates
@@ -49,8 +48,11 @@ export function getFilteredUpcomingItems(
   return [...birthdayItems, ...eventItems]
     .sort((a, b) => a.date.getTime() - b.date.getTime())
     .filter((item) => {
-      const itemDate = new Date(item.date)
-      itemDate.setHours(0, 0, 0, 0)
-      return itemDate >= today && itemDate <= endDate
+      // Include items that are today or in the future (within daysAhead)
+      return (
+        isSameDay(item.date, today) ||
+        (isAfter(item.date, today) && isBefore(item.date, endDate)) ||
+        isSameDay(item.date, endDate)
+      )
     })
 }

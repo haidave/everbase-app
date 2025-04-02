@@ -16,7 +16,9 @@ import {
 } from '@/db/schema'
 
 import { snakeToCamelCase, transformArraySnakeToCamel } from './formatters'
+import { normalizeToUTCDay } from './normalizers'
 import { supabase } from './supabase'
+import { getUTCDayRange } from './utils'
 
 // Define API-specific types
 export type NewTask = {
@@ -668,9 +670,11 @@ export const api = {
     create: async (event: Omit<NewEvent, 'userId'>): Promise<Event> => {
       const { data: userData } = await supabase.auth.getUser()
 
+      const normalizedDate = normalizeToUTCDay(event.date)
+
       const supabaseEvent = {
         title: event.title,
-        date: event.date.toISOString(),
+        date: normalizedDate.toISOString(),
         description: event.description,
         user_id: userData.user?.id,
       }
@@ -682,9 +686,15 @@ export const api = {
     },
 
     update: async (id: string, updates: Partial<Pick<Event, 'title' | 'date' | 'description'>>): Promise<Event> => {
+      const updatesToApply = { ...updates }
+
+      if (updatesToApply.date) {
+        updatesToApply.date = normalizeToUTCDay(updatesToApply.date)
+      }
+
       const supabaseUpdates = {
-        ...updates,
-        date: updates.date?.toISOString(),
+        ...updatesToApply,
+        date: updatesToApply.date?.toISOString(),
       }
 
       const { data, error } = await supabase.from('events').update(supabaseUpdates).eq('id', id).select().single()
@@ -700,11 +710,14 @@ export const api = {
 
     // Get upcoming events within a date range
     getUpcoming: async (startDate: Date, endDate: Date): Promise<Event[]> => {
+      const normalizedStartDate = normalizeToUTCDay(startDate)
+      const { end: normalizedEndDate } = getUTCDayRange(endDate)
+
       const { data, error } = await supabase
         .from('events')
         .select('*')
-        .gte('date', startDate.toISOString())
-        .lte('date', endDate.toISOString())
+        .gte('date', normalizedStartDate.toISOString())
+        .lte('date', normalizedEndDate.toISOString())
         .order('date', { ascending: true })
 
       if (error) throw error

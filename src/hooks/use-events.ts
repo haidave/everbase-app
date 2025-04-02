@@ -1,6 +1,5 @@
 import { type Event } from '@/db/schema'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { addDays } from 'date-fns'
 
 import { api } from '@/lib/api'
 
@@ -25,8 +24,13 @@ export function useUpcomingEvents(days = 30) {
   return useQuery({
     queryKey: ['events', 'upcoming', user?.id, days],
     queryFn: () => {
-      const startDate = new Date()
-      const endDate = addDays(startDate, days)
+      const today = new Date()
+      // Create a date at 00:00 local time
+      const startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+      // Create an end date at 00:00 local time days in the future
+      const endDate = new Date(startDate)
+      endDate.setDate(endDate.getDate() + days)
+
       return api.events.getUpcoming(startDate, endDate)
     },
     enabled: !!user,
