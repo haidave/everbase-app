@@ -1,4 +1,4 @@
-import { type InferSelectModel } from 'drizzle-orm'
+import { relations, type InferSelectModel } from 'drizzle-orm'
 import { boolean, integer, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 
 // Users table - will be managed by Supabase Auth
@@ -165,6 +165,46 @@ export const quotes = pgTable('quotes', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })
+
+// Features table
+export const features = pgTable('features', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  projectId: uuid('project_id')
+    .notNull()
+    .references(() => projects.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  description: text('description'),
+  icon: text('icon').default('folders').notNull(), // Default icon for features
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+})
+
+// Create a relation between tasks and features
+export const taskFeatures = pgTable('task_features', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  taskId: uuid('task_id')
+    .notNull()
+    .references(() => tasks.id, { onDelete: 'cascade' }),
+  featureId: uuid('feature_id')
+    .notNull()
+    .references(() => features.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+})
+
+// Define relationships
+export const featuresRelations = relations(features, ({ one, many }) => ({
+  project: one(projects, {
+    fields: [features.projectId],
+    references: [projects.id],
+  }),
+  tasks: many(taskFeatures),
+}))
+
+// Update task relations to include features
+export const tasksRelations = relations(tasks, ({ many }) => ({
+  projects: many(taskProjects),
+  features: many(taskFeatures),
+}))
 
 export type Task = InferSelectModel<typeof tasks>
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number]
