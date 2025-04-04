@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { TASK_STATUSES, type Task, type TaskStatus } from '@/db/schema'
 import {
-  closestCorners,
+  closestCenter,
   DndContext,
   DragOverlay,
   PointerSensor,
@@ -256,7 +256,7 @@ export function TaskKanbanBoard({ tasks: propTasks }: TaskKanbanBoardProps) {
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCorners}
+      collisionDetection={closestCenter}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}

@@ -31,7 +31,7 @@ export function TaskKanbanColumn({ id, title, tasks, isActive = false }: TaskKan
         <span className="text-muted-foreground bg-secondary rounded-full px-2 py-1 text-xs">{tasks.length}</span>
       </div>
 
-      <div className="flex-1 space-y-2 overflow-y-auto">
+      <div className="flex flex-1 flex-col gap-2 overflow-y-auto">
         <SortableContext items={tasks.map((task) => task.id)} strategy={verticalListSortingStrategy}>
           {tasks.map((task) => (
             <TaskKanbanItem key={task.id} task={task} />
