@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import {
@@ -19,6 +19,7 @@ import { useHotkeys } from 'react-hotkeys-hook'
 
 import { useFeatures, useTaskFeatures } from '@/hooks/use-features'
 import { useProjects } from '@/hooks/use-projects'
+import { useUpdateTaskAssociations } from '@/hooks/use-task-associations'
 import { useTaskProjects } from '@/hooks/use-task-projects'
 import { useUpdateTask } from '@/hooks/use-tasks'
 
@@ -35,15 +36,25 @@ export function EditTaskForm({ task, open, onOpenChange }: EditTaskFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Get current project and feature associations
-  const { data: taskProjects } = useTaskProjects(task.id)
-  const { data: taskFeatures } = useTaskFeatures(task.id)
+  const { data: taskProjects, isLoading: isLoadingProjects } = useTaskProjects(task.id)
+  const { data: taskFeatures, isLoading: isLoadingFeatures } = useTaskFeatures(task.id)
 
   const currentProject = taskProjects && taskProjects.length > 0 ? taskProjects[0] : null
   const currentFeature = taskFeatures && taskFeatures.length > 0 ? taskFeatures[0] : null
 
   // Get features for the selected project
-  const [selectedProjectId, setSelectedProjectId] = useState(currentProject?.id || '')
+  // Initialize with currentProject.id if available, and update when data loads
+  const [selectedProjectId, setSelectedProjectId] = useState('')
   const { data: features } = useFeatures(selectedProjectId)
+
+  // Update selectedProjectId when taskProjects loads
+  useEffect(() => {
+    if (currentProject?.id) {
+      setSelectedProjectId(currentProject.id)
+    }
+  }, [currentProject])
+
+  const updateTaskAssociations = useUpdateTaskAssociations()
 
   const form = useForm({
     defaultValues: {
@@ -55,10 +66,20 @@ export function EditTaskForm({ task, open, onOpenChange }: EditTaskFormProps) {
     onSubmit: async ({ value }) => {
       setIsSubmitting(true)
       try {
+        // Update the task's basic properties
         await updateTask.mutateAsync({
           id: task.id,
           text: value.text.trim(),
           status: value.status as TaskStatus,
+        })
+
+        // Update task associations
+        await updateTaskAssociations.mutateAsync({
+          taskId: task.id,
+          currentProjectId: currentProject?.id,
+          newProjectId: value.projectId || null,
+          currentFeatureId: currentFeature?.id,
+          newFeatureId: value.featureId || null,
         })
 
         onOpenChange(false)
@@ -140,40 +161,58 @@ export function EditTaskForm({ task, open, onOpenChange }: EditTaskFormProps) {
                   {(field) => (
                     <>
                       <Label htmlFor="projectId">Project (optional)</Label>
-                      <Combobox
-                        options={projects.map((project) => ({
-                          value: project.id,
-                          label: project.name,
-                        }))}
-                        value={field.state.value}
-                        onValueChange={handleProjectChange}
-                        placeholder="Select project"
-                        emptyMessage="No project found."
-                        searchPlaceholder="Search project..."
-                      />
+                      {isLoadingProjects ? (
+                        <div className="border-input bg-background flex h-10 w-full items-center rounded-md border px-3 py-2 text-sm">
+                          <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />
+                          Loading projects...
+                        </div>
+                      ) : (
+                        <Combobox
+                          options={projects.map((project) => ({
+                            value: project.id,
+                            label: project.name,
+                          }))}
+                          value={field.state.value}
+                          onValueChange={handleProjectChange}
+                          placeholder="Select project"
+                          emptyMessage="No project found."
+                          searchPlaceholder="Search project..."
+                        />
+                      )}
                     </>
                   )}
                 </form.Field>
               </div>
             )}
 
-            {features && features.length > 0 && selectedProjectId && (
+            {selectedProjectId && (
               <div className="grid gap-2">
                 <form.Field name="featureId">
                   {(field) => (
                     <>
                       <Label htmlFor="featureId">Feature (optional)</Label>
-                      <Combobox
-                        options={features.map((feature) => ({
-                          value: feature.id,
-                          label: feature.name,
-                        }))}
-                        value={field.state.value}
-                        onValueChange={field.handleChange}
-                        placeholder="Select feature"
-                        emptyMessage="No feature found."
-                        searchPlaceholder="Search feature..."
-                      />
+                      {isLoadingFeatures ? (
+                        <div className="border-input bg-background flex h-10 w-full items-center rounded-md border px-3 py-2 text-sm">
+                          <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />
+                          Loading features...
+                        </div>
+                      ) : features && features.length > 0 ? (
+                        <Combobox
+                          options={features.map((feature) => ({
+                            value: feature.id,
+                            label: feature.name,
+                          }))}
+                          value={field.state.value}
+                          onValueChange={field.handleChange}
+                          placeholder="Select feature"
+                          emptyMessage="No feature found."
+                          searchPlaceholder="Search feature..."
+                        />
+                      ) : (
+                        <div className="border-input bg-background text-muted-foreground flex h-10 w-full items-center rounded-md border px-3 py-2 text-sm">
+                          No features available for this project
+                        </div>
+                      )}
                     </>
                   )}
                 </form.Field>
