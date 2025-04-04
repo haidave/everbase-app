@@ -16,8 +16,8 @@ import { arrayMove } from '@dnd-kit/sortable'
 
 import { useTasks, useUpdateTask } from '@/hooks/use-tasks'
 
-import { TaskKanbanColumn } from './task-kanban-column'
-import { TaskKanbanItem } from './task-kanban-item'
+import { TaskKanbanColumn } from './parts/task-kanban-column'
+import { TaskKanbanItem } from './parts/task-kanban-item'
 
 type TaskKanbanBoardProps = {
   tasks?: Task[]

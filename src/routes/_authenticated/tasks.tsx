@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { AddTaskForm } from '@/features/tasks/components/add-task-form'
-import { TaskKanbanBoard } from '@/features/tasks/components/task-kanban-board'
+import { TaskKanbanBoard } from '@/features/tasks/components/task-kanban-board/task-kanban-board'
 import { TaskList } from '@/features/tasks/components/task-list'
 import { createFileRoute } from '@tanstack/react-router'
 import { KanbanIcon, ListIcon, PlusIcon } from 'lucide-react'

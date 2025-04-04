@@ -17,7 +17,7 @@ import { useTaskFeatures } from '@/hooks/use-features'
 import { useTaskProjects } from '@/hooks/use-task-projects'
 import { useDeleteTask } from '@/hooks/use-tasks'
 
-import { EditTaskForm } from './edit-task-form'
+import { EditTaskForm } from '../../edit-task-form'
 
 type TaskKanbanItemProps = {
   task: Task
