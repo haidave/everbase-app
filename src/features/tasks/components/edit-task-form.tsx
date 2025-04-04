@@ -12,53 +12,58 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import type { TaskStatus } from '@/db/schema'
+import type { Task, TaskStatus } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
-import { LoaderCircleIcon, PlusIcon } from 'lucide-react'
+import { LoaderCircleIcon, SaveIcon } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
 
-import { useFeatures } from '@/hooks/use-features'
+import { useFeatures, useTaskFeatures } from '@/hooks/use-features'
 import { useProjects } from '@/hooks/use-projects'
-import { useCreateTask } from '@/hooks/use-tasks'
+import { useTaskProjects } from '@/hooks/use-task-projects'
+import { useUpdateTask } from '@/hooks/use-tasks'
 
-type AddTaskFormProps = {
+type EditTaskFormProps = {
+  task: Task
   open: boolean
   onOpenChange: (open: boolean) => void
-  defaultProjectId?: string
-  defaultFeatureId?: string
 }
 
-const AddTaskForm = ({ open, onOpenChange, defaultProjectId, defaultFeatureId }: AddTaskFormProps) => {
-  const createTask = useCreateTask()
+export function EditTaskForm({ task, open, onOpenChange }: EditTaskFormProps) {
+  const updateTask = useUpdateTask()
   const { data: projects } = useProjects()
   const formRef = useRef<HTMLFormElement>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // Get current project and feature associations
+  const { data: taskProjects } = useTaskProjects(task.id)
+  const { data: taskFeatures } = useTaskFeatures(task.id)
+
+  const currentProject = taskProjects && taskProjects.length > 0 ? taskProjects[0] : null
+  const currentFeature = taskFeatures && taskFeatures.length > 0 ? taskFeatures[0] : null
+
   // Get features for the selected project
-  const [selectedProjectId, setSelectedProjectId] = useState(defaultProjectId || '')
+  const [selectedProjectId, setSelectedProjectId] = useState(currentProject?.id || '')
   const { data: features } = useFeatures(selectedProjectId)
 
   const form = useForm({
     defaultValues: {
-      text: '',
-      projectId: defaultProjectId || '',
-      featureId: defaultFeatureId || '',
-      status: 'todo',
+      text: task.text,
+      projectId: currentProject?.id || '',
+      featureId: currentFeature?.id || '',
+      status: task.status,
     },
     onSubmit: async ({ value }) => {
       setIsSubmitting(true)
       try {
-        await createTask.mutateAsync({
+        await updateTask.mutateAsync({
+          id: task.id,
           text: value.text.trim(),
-          projectId: value.projectId || undefined,
-          featureId: value.featureId || undefined,
           status: value.status as TaskStatus,
         })
 
-        form.reset()
         onOpenChange(false)
       } catch (error) {
-        console.error('Error creating task:', error)
+        console.error('Error updating task:', error)
       } finally {
         setIsSubmitting(false)
       }
@@ -89,8 +94,8 @@ const AddTaskForm = ({ open, onOpenChange, defaultProjectId, defaultFeatureId }:
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add Task</DialogTitle>
-          <DialogDescription>Add a new task to your list. Fill out the details below.</DialogDescription>
+          <DialogTitle>Edit Task</DialogTitle>
+          <DialogDescription>Update your task details below.</DialogDescription>
         </DialogHeader>
 
         <form
@@ -201,16 +206,16 @@ const AddTaskForm = ({ open, onOpenChange, defaultProjectId, defaultFeatureId }:
           </div>
 
           <DialogFooter>
-            <Button type="submit" disabled={isSubmitting || createTask.isPending || !form.state.canSubmit}>
-              {isSubmitting || createTask.isPending ? (
+            <Button type="submit" disabled={isSubmitting || updateTask.isPending || !form.state.canSubmit}>
+              {isSubmitting || updateTask.isPending ? (
                 <>
                   <LoaderCircleIcon className="animate-spin" />
-                  Adding...
+                  Saving...
                 </>
               ) : (
                 <>
-                  <PlusIcon />
-                  Add Task
+                  <SaveIcon />
+                  Save Changes
                 </>
               )}
             </Button>
@@ -220,5 +225,3 @@ const AddTaskForm = ({ open, onOpenChange, defaultProjectId, defaultFeatureId }:
     </Dialog>
   )
 }
-
-export { AddTaskForm }

@@ -103,7 +103,7 @@ export function SubscriptionList() {
         <div className="flex flex-col items-center gap-4 py-12">
           <p>No subscriptions yet.</p>
           <Button onClick={() => setIsAddDialogOpen(true)}>
-            <PlusIcon className="mr-2 h-4 w-4" />
+            <PlusIcon />
             Add your first subscription
           </Button>
         </div>

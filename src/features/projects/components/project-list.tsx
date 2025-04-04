@@ -56,7 +56,7 @@ const ProjectList = () => {
         ))}
         <Card className="grid min-h-40 place-items-center py-6">
           <Button variant="ghost" onClick={() => setIsAddDialogOpen(true)}>
-            <PlusIcon className="mr-2" />
+            <PlusIcon />
             Add Project
           </Button>
         </Card>

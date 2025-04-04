@@ -1,11 +1,23 @@
+import { useState } from 'react'
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu'
 import { type Task } from '@/db/schema'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { FolderIcon, FoldersIcon } from 'lucide-react'
+import { FolderIcon, FoldersIcon, Pencil, Trash2 } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { useTaskFeatures } from '@/hooks/use-features'
 import { useTaskProjects } from '@/hooks/use-task-projects'
+import { useDeleteTask } from '@/hooks/use-tasks'
+
+import { EditTaskForm } from './edit-task-form'
 
 type TaskKanbanItemProps = {
   task: Task
@@ -28,6 +40,10 @@ export function TaskKanbanItem({ task, isDragging = false }: TaskKanbanItemProps
     },
   })
 
+  const deleteTask = useDeleteTask()
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+
   const isDone = task.status === 'done'
 
   // Get current project and feature associations
@@ -42,34 +58,67 @@ export function TaskKanbanItem({ task, isDragging = false }: TaskKanbanItemProps
     transition,
   }
 
+  const handleDelete = () => {
+    deleteTask.mutate(task.id)
+    setIsDeleteDialogOpen(false)
+  }
+
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      className={cn(
-        'bg-card hover:bg-accent flex cursor-grab flex-col gap-2 rounded-md border p-3 shadow-sm active:cursor-grabbing',
-        (isDragging || isSortableDragging) && 'opacity-50'
-      )}
-    >
-      <p className={cn('line-clamp-3 text-sm', isDone && 'text-muted-foreground line-through')}>{task.text}</p>
+    <>
+      <ContextMenu>
+        <ContextMenuTrigger>
+          <div
+            ref={setNodeRef}
+            style={style}
+            {...attributes}
+            {...listeners}
+            className={cn(
+              'bg-card hover:bg-accent flex cursor-grab flex-col gap-2 rounded-md border p-3 shadow-sm active:cursor-grabbing',
+              (isDragging || isSortableDragging) && 'opacity-50'
+            )}
+          >
+            <p className={cn('line-clamp-3 text-sm', isDone && 'text-muted-foreground line-through')}>{task.text}</p>
 
-      <div className="flex flex-wrap items-center gap-4 text-xs">
-        {currentProject && (
-          <div className="text-muted-foreground flex items-center gap-1">
-            <FolderIcon className="size-3" />
-            <span>{currentProject.name}</span>
-          </div>
-        )}
+            <div className="flex flex-wrap items-center gap-4 text-xs">
+              {currentProject && (
+                <div className="text-muted-foreground flex items-center gap-1">
+                  <FolderIcon className="size-3" />
+                  <span>{currentProject.name}</span>
+                </div>
+              )}
 
-        {currentFeature && (
-          <div className="text-muted-foreground flex items-center gap-1">
-            <FoldersIcon className="size-3" />
-            <span>{currentFeature.name}</span>
+              {currentFeature && (
+                <div className="text-muted-foreground flex items-center gap-1">
+                  <FoldersIcon className="size-3" />
+                  <span>{currentFeature.name}</span>
+                </div>
+              )}
+            </div>
           </div>
-        )}
-      </div>
-    </div>
+        </ContextMenuTrigger>
+        <ContextMenuContent>
+          <ContextMenuItem onClick={() => setIsEditDialogOpen(true)}>
+            <Pencil className="mr-2 h-4 w-4" />
+            Edit
+          </ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem onClick={() => setIsDeleteDialogOpen(true)} className="text-destructive">
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
+
+      <EditTaskForm task={task} open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} />
+
+      <ConfirmationDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        title="Delete Task"
+        description={`Are you sure you want to delete "${task.text}"? This action cannot be undone.`}
+        onConfirm={handleDelete}
+        isLoading={deleteTask.isPending}
+      />
+    </>
   )
 }
