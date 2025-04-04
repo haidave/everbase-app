@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Badge } from '@/components/ui/badge'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import {
   ContextMenu,
@@ -73,13 +74,13 @@ export function TaskKanbanItem({ task, isDragging = false }: TaskKanbanItemProps
             {...attributes}
             {...listeners}
             className={cn(
-              'bg-card hover:bg-accent flex cursor-grab flex-col gap-2 rounded-md border p-3 shadow-sm active:cursor-grabbing',
+              'bg-card hover:bg-accent flex cursor-grab flex-col rounded-md border p-3 shadow-sm active:cursor-grabbing',
               (isDragging || isSortableDragging) && 'opacity-50'
             )}
           >
             <p className={cn('line-clamp-3 text-sm', isDone && 'text-muted-foreground line-through')}>{task.text}</p>
 
-            <div className="flex flex-wrap items-center gap-4 text-xs">
+            <div className={cn('flex flex-wrap items-center gap-2 text-xs', currentProject && 'mt-2')}>
               {isLoadingProjects ? (
                 <div className="text-muted-foreground flex animate-pulse items-center gap-1">
                   <FolderIcon className="size-3" />
@@ -87,10 +88,10 @@ export function TaskKanbanItem({ task, isDragging = false }: TaskKanbanItemProps
                 </div>
               ) : (
                 currentProject && (
-                  <div className="text-muted-foreground flex items-center gap-1">
+                  <Badge className="text-muted-foreground flex items-center gap-1 font-normal">
                     <FolderIcon className="size-3" />
                     <span>{currentProject.name}</span>
-                  </div>
+                  </Badge>
                 )
               )}
 
@@ -101,10 +102,10 @@ export function TaskKanbanItem({ task, isDragging = false }: TaskKanbanItemProps
                 </div>
               ) : (
                 currentFeature && (
-                  <div className="text-muted-foreground flex items-center gap-1">
+                  <Badge className="text-muted-foreground flex items-center gap-1 font-normal">
                     <FoldersIcon className="size-3" />
                     <span>{currentFeature.name}</span>
-                  </div>
+                  </Badge>
                 )
               )}
             </div>

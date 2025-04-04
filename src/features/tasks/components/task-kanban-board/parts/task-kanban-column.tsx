@@ -28,7 +28,9 @@ export function TaskKanbanColumn({ id, title, tasks, isActive = false }: TaskKan
     >
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-medium capitalize">{title}</h3>
-        <span className="text-muted-foreground bg-secondary rounded-full px-2 py-1 text-xs">{tasks.length}</span>
+        <span className="bg-secondary text-muted-foreground grid size-6 place-items-center rounded-full text-xs">
+          {tasks.length}
+        </span>
       </div>
 
       <div className="flex flex-1 flex-col gap-2 overflow-y-auto">
