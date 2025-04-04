@@ -26,6 +26,7 @@ export type NewTask = {
   text: string
   status?: TaskStatus
   userId: string
+  order?: number
 }
 
 export type NewProject = {
@@ -112,7 +113,14 @@ export type {
 export const api = {
   tasks: {
     getAll: async (): Promise<Task[]> => {
-      const { data, error } = await supabase.from('tasks').select('*').order('status').order('order')
+      const { data: userData } = await supabase.auth.getUser()
+
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('user_id', userData.user?.id)
+        .order('status')
+        .order('order', { ascending: true }) // Lower order values first
 
       if (error) throw error
       return transformArraySnakeToCamel<Task>(data)
@@ -130,7 +138,8 @@ export const api = {
 
       const supabaseTask = {
         text: task.text,
-        status: task.status,
+        status: task.status || 'todo',
+        order: task.order !== undefined ? task.order : 1000,
         user_id: userData.user?.id,
       }
 
