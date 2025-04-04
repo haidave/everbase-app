@@ -1,3 +1,4 @@
+import type { TaskStatus } from '@/db/schema'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { api, type Task } from '@/lib/api'
@@ -30,7 +31,7 @@ export function useCreateTask() {
   const { user } = useAuth()
 
   return useMutation({
-    mutationFn: async (task: { text: string; projectId?: string; featureId?: string }) => {
+    mutationFn: async (task: { text: string; projectId?: string; featureId?: string; status?: TaskStatus }) => {
       // Create the task
       const newTask = await api.tasks.create({ text: task.text })
 
@@ -75,7 +76,8 @@ export function useUpdateTask() {
   const { user } = useAuth()
 
   return useMutation({
-    mutationFn: (updates: Partial<Task> & { id: string }) => api.tasks.update(updates.id, updates),
+    mutationFn: ({ id, ...updates }: { id: string } & Partial<Pick<Task, 'text' | 'status' | 'order'>>) =>
+      api.tasks.update(id, updates),
     onSuccess: (_, variables) => {
       // Invalidate tasks
       queryClient.invalidateQueries({ queryKey: ['tasks', user?.id] })

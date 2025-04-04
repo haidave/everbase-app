@@ -20,9 +20,9 @@ const RecentTaskList = ({ limit = 5 }: RecentTaskListProps) => {
   if (error) return <div className="p-4 text-red-500">Error loading tasks: {error.message}</div>
   if (!tasks?.length) return <p>No tasks yet.</p>
 
-  // Filter out completed tasks, then sort by creation date (newest first)
+  // Filter out done tasks, then sort by creation date (newest first)
   const recentTasks = [...tasks]
-    .filter((task) => !task.completed)
+    .filter((task) => task.status !== 'done')
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, limit)
 

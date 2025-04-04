@@ -13,6 +13,7 @@ import {
   type SubscriptionFrequency,
   type Task,
   type TaskProject,
+  type TaskStatus,
 } from '@/db/schema'
 
 import { snakeToCamelCase, transformArraySnakeToCamel } from './formatters'
@@ -23,7 +24,7 @@ import { getUTCDayRange } from './utils'
 // Define API-specific types
 export type NewTask = {
   text: string
-  completed?: boolean
+  status?: TaskStatus
   userId: string
 }
 
@@ -111,7 +112,7 @@ export type {
 export const api = {
   tasks: {
     getAll: async (): Promise<Task[]> => {
-      const { data, error } = await supabase.from('tasks').select('*').order('created_at', { ascending: false })
+      const { data, error } = await supabase.from('tasks').select('*').order('status').order('order')
 
       if (error) throw error
       return transformArraySnakeToCamel<Task>(data)
@@ -129,7 +130,7 @@ export const api = {
 
       const supabaseTask = {
         text: task.text,
-        completed: task.completed,
+        status: task.status,
         user_id: userData.user?.id,
       }
 
@@ -139,8 +140,14 @@ export const api = {
       return snakeToCamelCase<Task>(data)
     },
 
-    update: async (id: string, updates: Partial<Pick<Task, 'text' | 'completed'>>): Promise<Task> => {
-      const { data, error } = await supabase.from('tasks').update(updates).eq('id', id).select().single()
+    update: async (id: string, updates: Partial<Pick<Task, 'text' | 'status' | 'order'>>): Promise<Task> => {
+      const dbUpdates: Record<string, unknown> = {}
+
+      if (updates.text !== undefined) dbUpdates.text = updates.text
+      if (updates.status !== undefined) dbUpdates.status = updates.status
+      if (updates.order !== undefined) dbUpdates.order = updates.order
+
+      const { data, error } = await supabase.from('tasks').update(dbUpdates).eq('id', id).select().single()
 
       if (error) throw error
       return snakeToCamelCase<Task>(data)

@@ -11,6 +11,8 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import type { TaskStatus } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
 import { LoaderCircleIcon, PlusIcon } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
@@ -41,6 +43,7 @@ const AddTaskForm = ({ open, onOpenChange, defaultProjectId, defaultFeatureId }:
       text: '',
       projectId: defaultProjectId || '',
       featureId: defaultFeatureId || '',
+      status: 'todo',
     },
     onSubmit: async ({ value }) => {
       setIsSubmitting(true)
@@ -49,6 +52,7 @@ const AddTaskForm = ({ open, onOpenChange, defaultProjectId, defaultFeatureId }:
           text: value.text.trim(),
           projectId: value.projectId || undefined,
           featureId: value.featureId || undefined,
+          status: value.status as TaskStatus,
         })
 
         form.reset()
@@ -170,6 +174,30 @@ const AddTaskForm = ({ open, onOpenChange, defaultProjectId, defaultFeatureId }:
                 </form.Field>
               </div>
             )}
+
+            <div className="grid gap-2">
+              <form.Field name="status">
+                {(field) => (
+                  <>
+                    <Label htmlFor="status">Status</Label>
+                    <Select
+                      value={field.state.value}
+                      onValueChange={(value) => field.handleChange(value as TaskStatus)}
+                    >
+                      <SelectTrigger id="status">
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="todo">Todo</SelectItem>
+                        <SelectItem value="in_progress">In Progress</SelectItem>
+                        <SelectItem value="on_hold">On Hold</SelectItem>
+                        <SelectItem value="done">Done</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </>
+                )}
+              </form.Field>
+            </div>
           </div>
 
           <DialogFooter>
