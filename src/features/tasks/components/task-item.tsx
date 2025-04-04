@@ -22,7 +22,7 @@ const TaskItem = ({ task }: TaskItemProps) => {
   const inputRef = useRef<HTMLInputElement>(null)
   const updateTask = useUpdateTask()
   const deleteTask = useDeleteTask()
-  const isCompleted = Boolean(task.completed)
+  const isDone = task.status === 'done'
   const [showProjectSelect, setShowProjectSelect] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
@@ -56,7 +56,7 @@ const TaskItem = ({ task }: TaskItemProps) => {
     },
     onSubmit: async ({ value }) => {
       // Skip for completed tasks or unchanged text
-      if (isCompleted || value.text.trim() === task.text) {
+      if (isDone || value.text.trim() === task.text) {
         inputRef.current?.blur()
         return
       }
@@ -147,11 +147,11 @@ const TaskItem = ({ task }: TaskItemProps) => {
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-1 items-center gap-3">
           <Checkbox
-            checked={isCompleted}
+            checked={isDone}
             onCheckedChange={() => {
               updateTask.mutate({
                 id: task.id,
-                completed: !isCompleted,
+                status: isDone ? 'todo' : 'done',
               })
             }}
           />
@@ -163,23 +163,23 @@ const TaskItem = ({ task }: TaskItemProps) => {
                   ref={inputRef}
                   value={field.state.value}
                   onChange={(e) => {
-                    if (!isCompleted) {
+                    if (!isDone) {
                       field.handleChange(e.target.value)
                     }
                   }}
                   onBlur={() => {
                     field.handleBlur()
-                    if (!isCompleted) {
+                    if (!isDone) {
                       form.handleSubmit()
                     }
                   }}
                   onClick={() => {
-                    if (!isCompleted) {
+                    if (!isDone) {
                       setTimeout(() => inputRef.current?.focus(), 0)
                     }
                   }}
                   onKeyDown={(e) => {
-                    if (isCompleted) return
+                    if (isDone) return
 
                     if (e.key === 'Enter') {
                       e.preventDefault()
@@ -191,10 +191,10 @@ const TaskItem = ({ task }: TaskItemProps) => {
                       inputRef.current?.blur()
                     }
                   }}
-                  readOnly={isCompleted}
-                  disabled={isCompleted}
-                  aria-label={`${isCompleted ? 'View' : 'Edit'} task: ${task.text}`}
-                  className={cn(isCompleted && 'line-through')}
+                  readOnly={isDone}
+                  disabled={isDone}
+                  aria-label={`${isDone ? 'View' : 'Edit'} task: ${task.text}`}
+                  className={cn(isDone && 'line-through')}
                 />
               )}
             </form.Field>
