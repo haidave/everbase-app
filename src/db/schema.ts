@@ -10,13 +10,17 @@ export const users = pgTable('users', {
 })
 
 // Tasks table with simplified schema
+export const TASK_STATUSES = ['todo', 'in_progress', 'on_hold', 'done'] as const
+export const taskStatusEnum = pgEnum('task_status', TASK_STATUSES)
+
 export const tasks = pgTable('tasks', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id')
     .notNull()
     .references(() => users.id),
   text: text('text').notNull(),
-  completed: boolean('completed').default(false),
+  status: taskStatusEnum('status').default('todo').notNull(),
+  order: integer('order').default(0),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })
@@ -220,3 +224,4 @@ export type Birthday = InferSelectModel<typeof birthdays>
 export type SubscriptionFrequency = (typeof SUBSCRIPTION_FREQUENCIES)[number]
 export type Subscription = InferSelectModel<typeof subscriptions>
 export type Quote = InferSelectModel<typeof quotes>
+export type TaskStatus = (typeof TASK_STATUSES)[number]
