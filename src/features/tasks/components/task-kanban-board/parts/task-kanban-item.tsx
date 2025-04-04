@@ -47,8 +47,8 @@ export function TaskKanbanItem({ task, isDragging = false }: TaskKanbanItemProps
   const isDone = task.status === 'done'
 
   // Get current project and feature associations
-  const { data: taskProjects } = useTaskProjects(task.id)
-  const { data: taskFeatures } = useTaskFeatures(task.id)
+  const { data: taskProjects, isLoading: isLoadingProjects } = useTaskProjects(task.id)
+  const { data: taskFeatures, isLoading: isLoadingFeatures } = useTaskFeatures(task.id)
 
   const currentProject = taskProjects && taskProjects.length > 0 ? taskProjects[0] : null
   const currentFeature = taskFeatures && taskFeatures.length > 0 ? taskFeatures[0] : null
@@ -80,18 +80,32 @@ export function TaskKanbanItem({ task, isDragging = false }: TaskKanbanItemProps
             <p className={cn('line-clamp-3 text-sm', isDone && 'text-muted-foreground line-through')}>{task.text}</p>
 
             <div className="flex flex-wrap items-center gap-4 text-xs">
-              {currentProject && (
-                <div className="text-muted-foreground flex items-center gap-1">
+              {isLoadingProjects ? (
+                <div className="text-muted-foreground flex animate-pulse items-center gap-1">
                   <FolderIcon className="size-3" />
-                  <span>{currentProject.name}</span>
+                  <span className="bg-muted h-3 w-16 rounded"></span>
                 </div>
+              ) : (
+                currentProject && (
+                  <div className="text-muted-foreground flex items-center gap-1">
+                    <FolderIcon className="size-3" />
+                    <span>{currentProject.name}</span>
+                  </div>
+                )
               )}
 
-              {currentFeature && (
-                <div className="text-muted-foreground flex items-center gap-1">
+              {isLoadingFeatures ? (
+                <div className="text-muted-foreground flex animate-pulse items-center gap-1">
                   <FoldersIcon className="size-3" />
-                  <span>{currentFeature.name}</span>
+                  <span className="bg-muted h-3 w-16 rounded"></span>
                 </div>
+              ) : (
+                currentFeature && (
+                  <div className="text-muted-foreground flex items-center gap-1">
+                    <FoldersIcon className="size-3" />
+                    <span>{currentFeature.name}</span>
+                  </div>
+                )
               )}
             </div>
           </div>
