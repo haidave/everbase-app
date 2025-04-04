@@ -100,11 +100,7 @@ export function AddFeatureForm({ projectId, open, onOpenChange }: AddFeatureForm
             <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting, createFeature.isPending]}>
               {([canSubmit, isSubmitting, isPending]) => (
                 <Button type="submit" disabled={!canSubmit || isPending}>
-                  {isSubmitting || isPending ? (
-                    <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <PlusIcon className="mr-2 h-4 w-4" />
-                  )}
+                  {isSubmitting || isPending ? <LoaderCircleIcon className="animate-spin" /> : <PlusIcon />}
                   Add Feature
                 </Button>
               )}

@@ -204,12 +204,12 @@ const AddTaskForm = ({ open, onOpenChange, defaultProjectId, defaultFeatureId }:
             <Button type="submit" disabled={isSubmitting || createTask.isPending || !form.state.canSubmit}>
               {isSubmitting || createTask.isPending ? (
                 <>
-                  <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />
+                  <LoaderCircleIcon className="animate-spin" />
                   Adding...
                 </>
               ) : (
                 <>
-                  <PlusIcon className="mr-2 h-4 w-4" />
+                  <PlusIcon />
                   Add Task
                 </>
               )}
