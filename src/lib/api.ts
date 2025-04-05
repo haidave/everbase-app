@@ -32,6 +32,7 @@ export type NewTask = {
 
 export type NewProject = {
   name: string
+  description?: string
   status?: ProjectStatus
   userId: string
   icon?: string
@@ -249,6 +250,7 @@ export const api = {
 
       const supabaseProject = {
         name: project.name,
+        description: project.description || null,
         status: status,
         icon: project.icon || 'folder',
         order: newOrder,
@@ -266,6 +268,7 @@ export const api = {
       const dbUpdates: Record<string, unknown> = {}
 
       if (projectUpdates.name !== undefined) dbUpdates.name = projectUpdates.name
+      if (projectUpdates.description !== undefined) dbUpdates.description = projectUpdates.description
       if (projectUpdates.status !== undefined) dbUpdates.status = projectUpdates.status
       if (projectUpdates.icon !== undefined) dbUpdates.icon = projectUpdates.icon
       if (projectUpdates.order !== undefined) dbUpdates.order = projectUpdates.order
@@ -947,7 +950,7 @@ export const api = {
         .from('features')
         .select('*')
         .eq('project_id', projectId)
-        .order('created_at', { ascending: true })
+        .order('name', { ascending: true })
 
       if (error) throw error
       return transformArraySnakeToCamel<Feature>(data)

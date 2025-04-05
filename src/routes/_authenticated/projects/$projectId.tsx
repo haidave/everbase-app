@@ -1,14 +1,15 @@
 import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DynamicIcon } from '@/components/ui/dynamic-icon'
 import { EditProjectForm } from '@/features/projects/components/edit-project-form'
 import { FeatureList } from '@/features/projects/components/feature-list'
 import { AddTaskForm } from '@/features/tasks/components/add-task-form'
 import { TaskKanbanBoard } from '@/features/tasks/components/task-kanban-board/task-kanban-board'
+import { useTaskFiltersStore } from '@/store/use-task-filters-store'
 import { createFileRoute } from '@tanstack/react-router'
-import { LoaderCircleIcon, Pencil, PlusIcon } from 'lucide-react'
+import { GroupIcon, LoaderCircleIcon, Pencil, PlusIcon, UngroupIcon } from 'lucide-react'
 
 import { api } from '@/lib/api'
 import { useDynamicTitle } from '@/hooks/use-dynamic-title'
@@ -40,6 +41,7 @@ function ProjectDetailPage() {
   const { data: relatedTasks, isLoading: isLoadingTasks } = useProjectTasks(projectId)
   const [editingProject, setEditingProject] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const { groupByFeatureInProjectView, setGroupByFeatureInProjectView } = useTaskFiltersStore()
 
   // Get real-time updates from the server
   const { data: updatedProject, isLoading, error } = useProject(projectId)
@@ -54,39 +56,47 @@ function ProjectDetailPage() {
 
   return (
     <>
-      <div className="mx-auto max-w-3xl">
-        <Card className="mb-6">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <div className="flex items-center gap-2">
-              <DynamicIcon name={displayProject.icon} className="size-4" />
-              <CardTitle className="text-xl">{displayProject.name}</CardTitle>
+      <div className="flex flex-col gap-8">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-0">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <DynamicIcon name={displayProject.icon} className="size-5" />
+                <CardTitle className="text-xl">{displayProject.name}</CardTitle>
+              </div>
+              <Badge>{displayProject.status}</Badge>
             </div>
-            <Badge>{displayProject.status}</Badge>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground text-sm">
-              Created on {new Date(displayProject.createdAt).toLocaleDateString()}
-            </p>
-          </CardContent>
-          <CardFooter className="flex justify-end">
             <Button onClick={() => setEditingProject(true)}>
               <Pencil />
               Edit
             </Button>
-          </CardFooter>
+          </CardHeader>
+          <CardContent>
+            {displayProject.description ? (
+              <p className="text-muted-foreground mt-2 text-sm">{displayProject.description}</p>
+            ) : null}
+          </CardContent>
         </Card>
 
-        <div className="bg-card mb-6 rounded-lg border p-4">
-          <FeatureList projectId={projectId} />
-        </div>
+        <FeatureList projectId={projectId} />
 
-        <div className="bg-card rounded-lg border p-4">
+        <div>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-foreground-primary text-lg font-medium">Project Tasks</h2>
-            <Button onClick={() => setIsAddDialogOpen(true)} className="w-fit">
-              <PlusIcon />
-              Add Task
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button onClick={() => setIsAddDialogOpen(true)} className="w-fit">
+                <PlusIcon />
+                Add Task
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setGroupByFeatureInProjectView(!groupByFeatureInProjectView)}
+                className="text-muted-foreground flex items-center gap-1"
+              >
+                {groupByFeatureInProjectView ? <UngroupIcon /> : <GroupIcon />}
+                {groupByFeatureInProjectView ? 'Ungroup' : 'Group by Feature'}
+              </Button>
+            </div>
           </div>
 
           {isLoadingTasks ? (
@@ -94,7 +104,7 @@ function ProjectDetailPage() {
               <LoaderCircleIcon className="text-muted-foreground h-5 w-5 animate-spin" />
             </div>
           ) : relatedTasks && relatedTasks.length > 0 ? (
-            <TaskKanbanBoard tasks={relatedTasks} />
+            <TaskKanbanBoard tasks={relatedTasks} isProjectView={true} />
           ) : (
             <p className="text-muted-foreground text-sm">No tasks assigned to this project yet.</p>
           )}

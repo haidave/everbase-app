@@ -26,6 +26,7 @@ import { Route as AuthenticatedDashboardImport } from './routes/_authenticated/d
 import { Route as AuthenticatedBirthdaysImport } from './routes/_authenticated/birthdays'
 import { Route as AuthenticatedProjectsIndexImport } from './routes/_authenticated/projects/index'
 import { Route as AuthenticatedProjectsProjectIdImport } from './routes/_authenticated/projects/$projectId'
+import { Route as AuthenticatedProjectsProjectIdFeaturesIndexImport } from './routes/_authenticated/projects_/$projectId/features/index'
 import { Route as AuthenticatedProjectsProjectIdFeaturesFeatureIdImport } from './routes/_authenticated/projects_/$projectId/features/$featureId'
 
 // Create/Update Routes
@@ -122,6 +123,13 @@ const AuthenticatedProjectsProjectIdRoute =
   AuthenticatedProjectsProjectIdImport.update({
     id: '/projects/$projectId',
     path: '/projects/$projectId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+
+const AuthenticatedProjectsProjectIdFeaturesIndexRoute =
+  AuthenticatedProjectsProjectIdFeaturesIndexImport.update({
+    id: '/projects_/$projectId/features/',
+    path: '/projects/$projectId/features/',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 
@@ -248,6 +256,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProjectsProjectIdFeaturesFeatureIdImport
       parentRoute: typeof AuthenticatedImport
     }
+    '/_authenticated/projects_/$projectId/features/': {
+      id: '/_authenticated/projects_/$projectId/features/'
+      path: '/projects/$projectId/features'
+      fullPath: '/projects/$projectId/features'
+      preLoaderRoute: typeof AuthenticatedProjectsProjectIdFeaturesIndexImport
+      parentRoute: typeof AuthenticatedImport
+    }
   }
 }
 
@@ -266,6 +281,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedProjectsProjectIdRoute: typeof AuthenticatedProjectsProjectIdRoute
   AuthenticatedProjectsIndexRoute: typeof AuthenticatedProjectsIndexRoute
   AuthenticatedProjectsProjectIdFeaturesFeatureIdRoute: typeof AuthenticatedProjectsProjectIdFeaturesFeatureIdRoute
+  AuthenticatedProjectsProjectIdFeaturesIndexRoute: typeof AuthenticatedProjectsProjectIdFeaturesIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -282,6 +298,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedProjectsIndexRoute: AuthenticatedProjectsIndexRoute,
   AuthenticatedProjectsProjectIdFeaturesFeatureIdRoute:
     AuthenticatedProjectsProjectIdFeaturesFeatureIdRoute,
+  AuthenticatedProjectsProjectIdFeaturesIndexRoute:
+    AuthenticatedProjectsProjectIdFeaturesIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
@@ -305,6 +323,7 @@ export interface FileRoutesByFullPath {
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/projects': typeof AuthenticatedProjectsIndexRoute
   '/projects/$projectId/features/$featureId': typeof AuthenticatedProjectsProjectIdFeaturesFeatureIdRoute
+  '/projects/$projectId/features': typeof AuthenticatedProjectsProjectIdFeaturesIndexRoute
 }
 
 export interface FileRoutesByTo {
@@ -324,6 +343,7 @@ export interface FileRoutesByTo {
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/projects': typeof AuthenticatedProjectsIndexRoute
   '/projects/$projectId/features/$featureId': typeof AuthenticatedProjectsProjectIdFeaturesFeatureIdRoute
+  '/projects/$projectId/features': typeof AuthenticatedProjectsProjectIdFeaturesIndexRoute
 }
 
 export interface FileRoutesById {
@@ -344,6 +364,7 @@ export interface FileRoutesById {
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/_authenticated/projects/': typeof AuthenticatedProjectsIndexRoute
   '/_authenticated/projects_/$projectId/features/$featureId': typeof AuthenticatedProjectsProjectIdFeaturesFeatureIdRoute
+  '/_authenticated/projects_/$projectId/features/': typeof AuthenticatedProjectsProjectIdFeaturesIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -365,6 +386,7 @@ export interface FileRouteTypes {
     | '/projects/$projectId'
     | '/projects'
     | '/projects/$projectId/features/$featureId'
+    | '/projects/$projectId/features'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -383,6 +405,7 @@ export interface FileRouteTypes {
     | '/projects/$projectId'
     | '/projects'
     | '/projects/$projectId/features/$featureId'
+    | '/projects/$projectId/features'
   id:
     | '__root__'
     | '/'
@@ -401,6 +424,7 @@ export interface FileRouteTypes {
     | '/_authenticated/projects/$projectId'
     | '/_authenticated/projects/'
     | '/_authenticated/projects_/$projectId/features/$featureId'
+    | '/_authenticated/projects_/$projectId/features/'
   fileRoutesById: FileRoutesById
 }
 
@@ -451,7 +475,8 @@ export const routeTree = rootRoute
         "/_authenticated/tasks",
         "/_authenticated/projects/$projectId",
         "/_authenticated/projects/",
-        "/_authenticated/projects_/$projectId/features/$featureId"
+        "/_authenticated/projects_/$projectId/features/$featureId",
+        "/_authenticated/projects_/$projectId/features/"
       ]
     },
     "/sign-in": {
@@ -506,6 +531,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/projects_/$projectId/features/$featureId": {
       "filePath": "_authenticated/projects_/$projectId/features/$featureId.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/projects_/$projectId/features/": {
+      "filePath": "_authenticated/projects_/$projectId/features/index.tsx",
       "parent": "/_authenticated"
     }
   }

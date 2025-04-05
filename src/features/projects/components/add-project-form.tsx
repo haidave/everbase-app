@@ -11,6 +11,7 @@ import { IconPicker } from '@/components/ui/icon-picker'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import { type ProjectStatus } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
 import { LoaderCircleIcon, PlusIcon } from 'lucide-react'
@@ -28,12 +29,18 @@ export function AddProjectForm({ open, onOpenChange }: AddProjectFormProps) {
   const form = useForm({
     defaultValues: {
       name: '',
+      description: '',
       status: 'backlog' as ProjectStatus,
       icon: 'Folder',
     },
     onSubmit: async ({ value }) => {
       createProject.mutate(
-        { name: value.name, status: value.status, icon: value.icon },
+        {
+          name: value.name,
+          description: value.description,
+          status: value.status,
+          icon: value.icon,
+        },
         {
           onSuccess: () => {
             form.reset()
@@ -71,7 +78,7 @@ export function AddProjectForm({ open, onOpenChange }: AddProjectFormProps) {
                     <Label htmlFor="name">Name</Label>
                     <Input
                       id="name"
-                      placeholder="Add new project"
+                      placeholder="Project name"
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
@@ -82,6 +89,23 @@ export function AddProjectForm({ open, onOpenChange }: AddProjectFormProps) {
                         {field.state.meta.errors.join(', ')}
                       </em>
                     ) : null}
+                  </>
+                )}
+              </form.Field>
+            </div>
+
+            <div className="grid gap-2">
+              <form.Field name="description">
+                {(field) => (
+                  <>
+                    <Label htmlFor="description">Description (Optional)</Label>
+                    <Textarea
+                      id="description"
+                      placeholder="Project description"
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                    />
                   </>
                 )}
               </form.Field>

@@ -296,7 +296,7 @@ export function ProjectKanbanBoard({ projects: propProjects }: ProjectKanbanBoar
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        <div className="grid h-[calc(100vh-10.5rem)] grid-cols-1 gap-4 md:grid-cols-4">
           {PROJECT_STATUSES.map((status) => (
             <ProjectKanbanColumn
               key={status}

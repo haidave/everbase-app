@@ -36,6 +36,7 @@ export const projects = pgTable('projects', {
     .notNull()
     .references(() => users.id),
   name: text('name').notNull(),
+  description: text('description'),
   status: projectStatusEnum('status').default('backlog').notNull(),
   icon: text('icon').default('folder').notNull(), // Store icon name from Lucide
   order: integer('order').default(0),

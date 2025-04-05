@@ -24,11 +24,28 @@ import { TaskKanbanItem } from './parts/task-kanban-item'
 
 type TaskKanbanBoardProps = {
   tasks?: Task[]
+  groupBy?: 'project' | 'feature' | 'none'
+  isProjectView?: boolean
 }
 
-export function TaskKanbanBoard({ tasks: propTasks }: TaskKanbanBoardProps) {
+export function TaskKanbanBoard({
+  tasks: propTasks,
+  groupBy = 'project', // Default to project grouping for backward compatibility
+  isProjectView = false,
+}: TaskKanbanBoardProps) {
   // Get filter values from Zustand store
-  const { projectId, featureId, groupByProject } = useTaskFiltersStore()
+  const { projectId, featureId, groupByProject, groupByFeatureInProjectView } = useTaskFiltersStore()
+
+  // Use the groupBy prop to determine grouping behavior
+  // If in project view, use the project-specific grouping setting
+  // Otherwise use the main grouping setting
+  const effectiveGroupBy = isProjectView
+    ? groupByFeatureInProjectView
+      ? 'feature'
+      : 'none'
+    : !groupByProject
+      ? 'none'
+      : groupBy
 
   // Fetch tasks based on filters
   const { data: fetchedTasks, isLoading, error } = useTasks()
@@ -294,7 +311,7 @@ export function TaskKanbanBoard({ tasks: propTasks }: TaskKanbanBoardProps) {
             title={status.replace('_', ' ')}
             tasks={tasksByStatus[status] || []}
             isActive={activeColumn === `column-${status}`}
-            groupByProject={groupByProject}
+            groupBy={effectiveGroupBy}
           />
         ))}
       </div>

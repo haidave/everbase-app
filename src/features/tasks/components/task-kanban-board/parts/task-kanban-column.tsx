@@ -4,8 +4,10 @@ import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 
 import { cn } from '@/lib/utils'
+import { useTasksFeatures } from '@/hooks/use-task-features'
 import { useTasksProjects } from '@/hooks/use-task-projects'
 
+import { TaskKanbanFeatureGroup } from './task-kanban-feature-group'
 import { TaskKanbanItem } from './task-kanban-item'
 import { TaskKanbanProjectGroup } from './task-kanban-project-group'
 
@@ -14,16 +16,18 @@ type TaskKanbanColumnProps = {
   title: string
   tasks: Task[]
   isActive?: boolean
-  groupByProject?: boolean
+  groupBy?: 'project' | 'feature' | 'none'
 }
 
 // Add this type definition at the top of the file
 type EnhancedTask = Task & {
   projectId: string | null
   projectName: string | null
+  featureId: string | null
+  featureName: string | null
 }
 
-export function TaskKanbanColumn({ id, title, tasks, isActive = false, groupByProject = true }: TaskKanbanColumnProps) {
+export function TaskKanbanColumn({ id, title, tasks, isActive = false, groupBy = 'project' }: TaskKanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id,
   })
@@ -32,69 +36,104 @@ export function TaskKanbanColumn({ id, title, tasks, isActive = false, groupByPr
   const taskIds = useMemo(() => tasks.map((task) => task.id), [tasks])
 
   // Fetch project data for all tasks in this column using the hook
-  const { data: taskProjectMap = {}, isLoading: isLoadingProjects } = useTasksProjects(groupByProject ? taskIds : [])
+  const { data: taskProjectMap = {}, isLoading: isLoadingProjects } = useTasksProjects(
+    groupBy === 'project' ? taskIds : []
+  )
 
-  // Enhance tasks with project information
+  // Fetch feature data for all tasks in this column
+  const { data: taskFeatureMap = {}, isLoading: isLoadingFeatures } = useTasksFeatures(
+    groupBy === 'feature' ? taskIds : []
+  )
+
+  // Enhance tasks with project and/or feature information
   const enhancedTasks = useMemo(() => {
     return tasks.map((task) => {
       const projectInfo = taskProjectMap[task.id]
+      const featureInfo = taskFeatureMap[task.id]
       return {
         ...task,
         projectId: projectInfo?.id || null,
         projectName: projectInfo?.name || null,
+        featureId: featureInfo?.id || null,
+        featureName: featureInfo?.name || null,
       } as EnhancedTask
     })
-  }, [tasks, taskProjectMap])
+  }, [tasks, taskProjectMap, taskFeatureMap])
 
-  // Group tasks by project
-  const tasksByProject = useMemo(() => {
-    if (!groupByProject) {
+  // Group tasks based on the groupBy prop
+  const groupedTasks = useMemo(() => {
+    if (groupBy === 'none') {
       return { null: enhancedTasks }
     }
 
+    if (groupBy === 'project') {
+      return enhancedTasks.reduce(
+        (acc, task) => {
+          const projectId = task.projectId || 'null'
+          if (!acc[projectId]) {
+            acc[projectId] = []
+          }
+          acc[projectId].push(task)
+          return acc
+        },
+        {} as Record<string, EnhancedTask[]>
+      )
+    }
+
+    // Group by feature
     return enhancedTasks.reduce(
       (acc, task) => {
-        const projectId = task.projectId || 'null'
-
-        if (!acc[projectId]) {
-          acc[projectId] = []
+        const featureId = task.featureId || 'null'
+        if (!acc[featureId]) {
+          acc[featureId] = []
         }
-
-        acc[projectId].push(task)
+        acc[featureId].push(task)
         return acc
       },
       {} as Record<string, EnhancedTask[]>
     )
-  }, [enhancedTasks, groupByProject])
+  }, [enhancedTasks, groupBy])
 
-  // Get project names for each group
-  const projectGroups = useMemo(() => {
-    return Object.entries(tasksByProject)
-      .map(([projectId, projectTasks]) => {
+  // Get group names and sort them
+  const groups = useMemo(() => {
+    if (groupBy === 'none') {
+      return [{ id: null, name: null, tasks: enhancedTasks }]
+    }
+
+    return Object.entries(groupedTasks)
+      .map(([id, groupTasks]) => {
         // For the null key (ungrouped tasks)
-        if (projectId === 'null') {
+        if (id === 'null') {
           return {
-            projectId: null,
-            projectName: 'Ungrouped',
-            tasks: projectTasks,
+            id: null,
+            name: 'Ungrouped',
+            tasks: groupTasks,
           }
         }
 
-        // For tasks with project associations
-        return {
-          projectId,
-          projectName: projectTasks[0]?.projectName || 'Unknown Project',
-          tasks: projectTasks,
+        // For tasks with associations
+        if (groupBy === 'project') {
+          return {
+            id,
+            name: groupTasks[0]?.projectName || 'Unknown Project',
+            tasks: groupTasks,
+          }
+        } else {
+          return {
+            id,
+            name: groupTasks[0]?.featureName || 'Unknown Feature',
+            tasks: groupTasks,
+          }
         }
       })
       .sort((a, b) => {
         // Sort null (ungrouped) to the end
-        if (a.projectId === null) return 1
-        if (b.projectId === null) return -1
-        // Sort alphabetically by project name
-        return (a.projectName || '').localeCompare(b.projectName || '')
+        if (a.id === null) return 1
+        if (b.id === null) return -1
+        // Sort alphabetically by name
+        return (a.name || '').localeCompare(b.name || '')
       })
-  }, [tasksByProject])
+  }, [groupedTasks, groupBy, enhancedTasks])
 
   return (
     <div
@@ -112,25 +151,36 @@ export function TaskKanbanColumn({ id, title, tasks, isActive = false, groupByPr
       </div>
 
       <div className="flex flex-1 flex-col gap-2 overflow-y-auto">
-        {groupByProject ? (
-          isLoadingProjects && Object.keys(taskProjectMap).length === 0 ? (
-            <div className="text-muted-foreground text-xs">Loading projects...</div>
-          ) : (
-            projectGroups.map((group) => (
-              <TaskKanbanProjectGroup
-                key={group.projectId || 'ungrouped'}
-                projectId={group.projectId}
-                projectName={group.projectName}
-                tasks={group.tasks}
-              />
-            ))
-          )
-        ) : (
+        {groupBy === 'none' ? (
           <SortableContext items={tasks.map((task) => task.id)} strategy={verticalListSortingStrategy}>
             {tasks.map((task) => (
               <TaskKanbanItem key={task.id} task={task} />
             ))}
           </SortableContext>
+        ) : groupBy === 'project' ? (
+          isLoadingProjects && Object.keys(taskProjectMap).length === 0 ? (
+            <div className="text-muted-foreground text-xs">Loading projects...</div>
+          ) : (
+            groups.map((group) => (
+              <TaskKanbanProjectGroup
+                key={group.id || 'ungrouped'}
+                projectId={group.id}
+                projectName={group.name}
+                tasks={group.tasks}
+              />
+            ))
+          )
+        ) : isLoadingFeatures && Object.keys(taskFeatureMap).length === 0 ? (
+          <div className="text-muted-foreground text-xs">Loading features...</div>
+        ) : (
+          groups.map((group) => (
+            <TaskKanbanFeatureGroup
+              key={group.id || 'ungrouped'}
+              featureId={group.id}
+              featureName={group.name}
+              tasks={group.tasks}
+            />
+          ))
         )}
       </div>
     </div>
