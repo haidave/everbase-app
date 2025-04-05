@@ -35,6 +35,7 @@ export type NewProject = {
   status?: ProjectStatus
   userId: string
   icon?: string
+  order?: number
 }
 
 export type NewHabit = {
@@ -208,7 +209,14 @@ export const api = {
 
   projects: {
     getAll: async (): Promise<Project[]> => {
-      const { data, error } = await supabase.from('projects').select('*').order('created_at', { ascending: false })
+      const { data: userData } = await supabase.auth.getUser()
+
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('user_id', userData.user?.id)
+        .order('status')
+        .order('order', { ascending: true }) // Lower order values first
 
       if (error) throw error
       return transformArraySnakeToCamel<Project>(data)
@@ -223,11 +231,26 @@ export const api = {
 
     create: async (project: Omit<NewProject, 'userId'>): Promise<Project> => {
       const { data: userData } = await supabase.auth.getUser()
+      const status = project.status || 'backlog'
+
+      // Find the minimum order value in the same status column
+      const { data: minOrderProject } = await supabase
+        .from('projects')
+        .select('order')
+        .eq('status', status)
+        .eq('user_id', userData.user?.id)
+        .order('order', { ascending: true })
+        .limit(1)
+        .single()
+
+      // Calculate new order value
+      const newOrder = minOrderProject ? minOrderProject.order - 10 : 1000
 
       const supabaseProject = {
         name: project.name,
-        status: project.status || 'backlog',
-        icon: project.icon || 'Folder',
+        status: status,
+        icon: project.icon || 'folder',
+        order: newOrder,
         user_id: userData.user?.id,
       }
 
@@ -237,9 +260,16 @@ export const api = {
       return snakeToCamelCase<Project>(data)
     },
 
-    update: async (project: Pick<Project, 'id' | 'name' | 'status' | 'icon'>): Promise<Project> => {
-      const { id, ...updates } = project
-      const { data, error } = await supabase.from('projects').update(updates).eq('id', id).select().single()
+    update: async (updates: Partial<Project> & { id: string }): Promise<Project> => {
+      const { id, ...projectUpdates } = updates
+      const dbUpdates: Record<string, unknown> = {}
+
+      if (projectUpdates.name !== undefined) dbUpdates.name = projectUpdates.name
+      if (projectUpdates.status !== undefined) dbUpdates.status = projectUpdates.status
+      if (projectUpdates.icon !== undefined) dbUpdates.icon = projectUpdates.icon
+      if (projectUpdates.order !== undefined) dbUpdates.order = projectUpdates.order
+
+      const { data, error } = await supabase.from('projects').update(dbUpdates).eq('id', id).select().single()
 
       if (error) throw error
       return snakeToCamelCase<Project>(data)
@@ -250,16 +280,20 @@ export const api = {
       if (error) throw error
     },
 
-    // Get tasks for a specific project
     getTasks: async (projectId: string): Promise<Task[]> => {
       const { data, error } = await supabase.from('task_projects').select('task_id').eq('project_id', projectId)
 
       if (error) throw error
 
-      if (!data.length) return []
+      if (data.length === 0) return []
 
-      const taskIds = data.map((tp) => tp.task_id)
-      const { data: tasks, error: tasksError } = await supabase.from('tasks').select('*').in('id', taskIds)
+      const taskIds = data.map((item) => item.task_id)
+      const { data: tasks, error: tasksError } = await supabase
+        .from('tasks')
+        .select('*')
+        .in('id', taskIds)
+        .order('status')
+        .order('order', { ascending: true })
 
       if (tasksError) throw tasksError
       return transformArraySnakeToCamel<Task>(tasks)

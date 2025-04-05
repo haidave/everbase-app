@@ -1,4 +1,4 @@
-import { ProjectList } from '@/features/projects/components/project-list'
+import { ProjectKanbanBoard } from '@/features/projects/components/project-kanban-board/project-kanban-board'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_authenticated/projects/')({
@@ -15,7 +15,7 @@ export const Route = createFileRoute('/_authenticated/projects/')({
 function ProjectsPage() {
   return (
     <section>
-      <ProjectList />
+      <ProjectKanbanBoard />
     </section>
   )
 }
