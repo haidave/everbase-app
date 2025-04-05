@@ -281,11 +281,13 @@ export function ProjectKanbanBoard({ projects: propProjects }: ProjectKanbanBoar
   }
 
   return (
-    <div className="space-y-6">
-      <Button onClick={() => setIsAddDialogOpen(true)}>
-        <PlusIcon />
-        Add Project
-      </Button>
+    <div className="grid gap-6">
+      <div>
+        <Button onClick={() => setIsAddDialogOpen(true)}>
+          <PlusIcon />
+          Add Project
+        </Button>
+      </div>
 
       <DndContext
         sensors={sensors}
