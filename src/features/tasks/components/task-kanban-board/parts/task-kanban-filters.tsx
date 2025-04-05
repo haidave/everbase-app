@@ -2,13 +2,15 @@ import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useTaskFiltersStore } from '@/store/use-task-filters-store'
+import { GroupIcon, UngroupIcon } from 'lucide-react'
 
 import { useFeatures } from '@/hooks/use-features'
 import { useProjects } from '@/hooks/use-projects'
 
 export function TaskKanbanFilters() {
   // Get state from Zustand store
-  const { projectId, featureId, setProjectId, setFeatureId, reset } = useTaskFiltersStore()
+  const { projectId, featureId, groupByProject, setProjectId, setFeatureId, setGroupByProject, reset } =
+    useTaskFiltersStore()
 
   // Fetch data
   const { data: projects, isLoading: isLoadingProjects } = useProjects()
@@ -28,58 +30,69 @@ export function TaskKanbanFilters() {
   const hasFeatures = features && features.length > 0
 
   return (
-    <div className="flex flex-wrap items-end gap-4">
-      <div className="grid gap-2">
-        {isLoadingProjects ? (
-          <Skeleton className="h-8 w-24" />
-        ) : (
-          <Combobox
-            size="default"
-            isContentSameWidth={false}
-            options={
-              projects?.map((project) => ({
-                value: project.id,
-                label: project.name,
-              })) || []
-            }
-            value={projectId || ''}
-            onValueChange={handleProjectChange}
-            placeholder="Project"
-            emptyMessage="No projects found."
-            searchPlaceholder="Search projects..."
-          />
-        )}
-      </div>
-
-      {projectId && hasFeatures && (
+    <div className="flex w-full items-center justify-between gap-4">
+      <div className="flex flex-wrap items-end gap-4">
         <div className="grid gap-2">
-          {isLoadingFeatures ? (
+          {isLoadingProjects ? (
             <Skeleton className="h-8 w-24" />
           ) : (
             <Combobox
               size="default"
               isContentSameWidth={false}
               options={
-                features?.map((feature) => ({
-                  value: feature.id,
-                  label: feature.name,
+                projects?.map((project) => ({
+                  value: project.id,
+                  label: project.name,
                 })) || []
               }
-              value={featureId || ''}
-              onValueChange={handleFeatureChange}
-              placeholder="Feature"
-              emptyMessage="No features found."
-              searchPlaceholder="Search features..."
+              value={projectId || ''}
+              onValueChange={handleProjectChange}
+              placeholder="Project"
+              emptyMessage="No projects found."
+              searchPlaceholder="Search projects..."
             />
           )}
         </div>
-      )}
 
-      {projectId || featureId ? (
-        <Button variant="ghost" onClick={reset} title="Reset filters" className="text-muted-foreground self-end">
-          Clear filters
-        </Button>
-      ) : null}
+        {projectId && hasFeatures && (
+          <div className="grid gap-2">
+            {isLoadingFeatures ? (
+              <Skeleton className="h-8 w-24" />
+            ) : (
+              <Combobox
+                size="default"
+                isContentSameWidth={false}
+                options={
+                  features?.map((feature) => ({
+                    value: feature.id,
+                    label: feature.name,
+                  })) || []
+                }
+                value={featureId || ''}
+                onValueChange={handleFeatureChange}
+                placeholder="Feature"
+                emptyMessage="No features found."
+                searchPlaceholder="Search features..."
+              />
+            )}
+          </div>
+        )}
+
+        {projectId || featureId ? (
+          <Button variant="ghost" onClick={reset} title="Reset filters" className="text-muted-foreground self-end">
+            Clear filters
+          </Button>
+        ) : null}
+      </div>
+
+      <Button
+        variant="outline"
+        onClick={() => setGroupByProject(!groupByProject)}
+        className="text-muted-foreground flex items-center gap-1"
+      >
+        {groupByProject ? <UngroupIcon /> : <GroupIcon />}
+        {groupByProject ? 'Ungroup' : 'Group by Project'}
+      </Button>
     </div>
   )
 }

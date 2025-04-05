@@ -28,7 +28,7 @@ type TaskKanbanBoardProps = {
 
 export function TaskKanbanBoard({ tasks: propTasks }: TaskKanbanBoardProps) {
   // Get filter values from Zustand store
-  const { projectId, featureId } = useTaskFiltersStore()
+  const { projectId, featureId, groupByProject } = useTaskFiltersStore()
 
   // Fetch tasks based on filters
   const { data: fetchedTasks, isLoading, error } = useTasks()
@@ -79,7 +79,7 @@ export function TaskKanbanBoard({ tasks: propTasks }: TaskKanbanBoardProps) {
     })
   )
 
-  // Group tasks by status - use tempTasks during drag operations for visual feedback
+  // Group tasks by status
   const tasksByStatus = useMemo(() => {
     const tasksToUse = activeId ? tempTasks : localTasks
 
@@ -294,6 +294,7 @@ export function TaskKanbanBoard({ tasks: propTasks }: TaskKanbanBoardProps) {
             title={status.replace('_', ' ')}
             tasks={tasksByStatus[status] || []}
             isActive={activeColumn === `column-${status}`}
+            groupByProject={groupByProject}
           />
         ))}
       </div>

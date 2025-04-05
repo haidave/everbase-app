@@ -9,6 +9,7 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu'
 import { type Task } from '@/db/schema'
+import { useTaskFiltersStore } from '@/store/use-task-filters-store'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { FolderIcon, FoldersIcon, Pencil, Trash2 } from 'lucide-react'
@@ -40,7 +41,7 @@ export function TaskKanbanItem({ task, isDragging = false }: TaskKanbanItemProps
       task,
     },
   })
-
+  const { groupByProject } = useTaskFiltersStore()
   const deleteTask = useDeleteTask()
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -81,18 +82,22 @@ export function TaskKanbanItem({ task, isDragging = false }: TaskKanbanItemProps
             <p className={cn('line-clamp-3 text-sm', isDone && 'text-muted-foreground line-through')}>{task.title}</p>
 
             <div className={cn('flex flex-wrap items-center gap-2 text-xs', currentProject && 'mt-2')}>
-              {isLoadingProjects ? (
-                <div className="text-muted-foreground flex animate-pulse items-center gap-1">
-                  <FolderIcon className="size-3" />
-                  <span className="bg-muted h-5.5 w-16 rounded"></span>
-                </div>
-              ) : (
-                currentProject && (
-                  <Badge className="text-muted-foreground flex items-center gap-1 font-normal">
-                    <FolderIcon className="size-3" />
-                    <span>{currentProject.name}</span>
-                  </Badge>
-                )
+              {!groupByProject && (
+                <>
+                  {isLoadingProjects ? (
+                    <div className="text-muted-foreground flex animate-pulse items-center gap-1">
+                      <FolderIcon className="size-3" />
+                      <span className="bg-muted h-5.5 w-16 rounded"></span>
+                    </div>
+                  ) : (
+                    currentProject && (
+                      <Badge className="text-muted-foreground flex items-center gap-1 font-normal">
+                        <FolderIcon className="size-3" />
+                        <span>{currentProject.name}</span>
+                      </Badge>
+                    )
+                  )}
+                </>
               )}
 
               {isLoadingFeatures ? (

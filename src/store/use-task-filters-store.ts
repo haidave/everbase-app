@@ -4,8 +4,10 @@ import { persist } from 'zustand/middleware'
 interface TaskFiltersState {
   projectId: string | null
   featureId: string | null
+  groupByProject: boolean
   setProjectId: (id: string | null) => void
   setFeatureId: (id: string | null) => void
+  setGroupByProject: (value: boolean) => void
   reset: () => void
 }
 
@@ -14,6 +16,7 @@ export const useTaskFiltersStore = create<TaskFiltersState>()(
     (set) => ({
       projectId: null,
       featureId: null,
+      groupByProject: true,
       setProjectId: (id) =>
         set({
           projectId: id,
@@ -21,6 +24,7 @@ export const useTaskFiltersStore = create<TaskFiltersState>()(
           featureId: id ? null : null,
         }),
       setFeatureId: (id) => set({ featureId: id }),
+      setGroupByProject: (value) => set({ groupByProject: value }),
       reset: () => set({ projectId: null, featureId: null }),
     }),
     {
