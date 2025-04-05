@@ -29,6 +29,21 @@ const ROUTE_BREADCRUMBS: Record<string, BreadcrumbConfig> = {
       },
     ],
   },
+  '/_authenticated/projects_/$projectId/features/': {
+    levels: [
+      {
+        title: 'Projects',
+        to: '/projects',
+      },
+      {
+        title: (loaderData) => {
+          return (loaderData as { project?: { name?: string } })?.project?.name || 'Project'
+        },
+        to: '/projects/$projectId',
+        routeId: '/_authenticated/projects_/$projectId/features/',
+      },
+    ],
+  },
   '/_authenticated/projects_/$projectId/features/$featureId': {
     levels: [
       {
