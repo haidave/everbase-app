@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { type Event } from '@/db/schema'
 import { format } from 'date-fns'
-import { Pencil, Trash2 } from 'lucide-react'
 
 import { AddEventForm } from './add-event-form'
 
@@ -17,25 +16,25 @@ export function EventListItem({ event, onDelete }: EventListItemProps) {
 
   return (
     <>
-      <div className="group flex items-center justify-between gap-2">
-        <div className="grid gap-1">
-          <p className="text-muted-foreground text-sm">{format(eventDate, 'do')}</p>
-          <p className="font-medium">
-            {event.title}
+      <Button variant="ghost" onClick={() => setIsEditDialogOpen(true)} className="h-max justify-start">
+        <div className="grid gap-1 text-left">
+          <p className="text-muted-foreground">{format(eventDate, 'do')}</p>
+          <div>
+            <span className="text-sm">{event.title}</span>
             {event.description && <span className="text-muted-foreground ml-2 text-xs">({event.description})</span>}
-          </p>
+          </div>
         </div>
-        <div className="flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-          <Button variant="ghost" size="icon" onClick={() => setIsEditDialogOpen(true)}>
-            <Pencil />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => onDelete(event)}>
-            <Trash2 />
-          </Button>
-        </div>
-      </div>
+      </Button>
 
-      <AddEventForm open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} event={event} />
+      <AddEventForm
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        event={event}
+        onDelete={() => {
+          onDelete(event)
+          setIsEditDialogOpen(false)
+        }}
+      />
     </>
   )
 }

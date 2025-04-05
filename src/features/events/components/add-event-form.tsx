@@ -25,9 +25,10 @@ type AddEventFormProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   event?: Event
+  onDelete?: () => void
 }
 
-export function AddEventForm({ open, onOpenChange, event }: AddEventFormProps) {
+export function AddEventForm({ open, onOpenChange, event, onDelete }: AddEventFormProps) {
   const createEvent = useCreateEvent()
   const updateEvent = useUpdateEvent()
   const isEditing = !!event
@@ -176,7 +177,12 @@ export function AddEventForm({ open, onOpenChange, event }: AddEventFormProps) {
             </form.Field>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="flex justify-between gap-2">
+            {isEditing && onDelete && (
+              <Button type="button" variant="destructive" onClick={onDelete}>
+                Delete Event
+              </Button>
+            )}
             <Button type="submit" disabled={isPending}>
               {isPending ? <LoaderCircleIcon className="animate-spin" /> : isEditing ? <SaveIcon /> : <PlusIcon />}
               {isEditing ? 'Save Changes' : 'Add Event'}
