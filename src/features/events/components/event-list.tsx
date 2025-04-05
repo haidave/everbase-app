@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Calendar } from '@/components/ui/calendar'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { type Event } from '@/db/schema'
-import { format, getMonth } from 'date-fns'
+import { format, getMonth, isSameMonth } from 'date-fns'
 import { CalendarIcon, PlusIcon } from 'lucide-react'
 
+import { formatDateString } from '@/lib/formatters'
 import { useDeleteEvent, useEvents } from '@/hooks/use-events'
 
 import { AddEventForm } from './add-event-form'
@@ -14,7 +16,6 @@ import { EventListItem } from './event-list-item'
 export function EventList() {
   const { data: events, isLoading } = useEvents()
   const deleteEvent = useDeleteEvent()
-
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [eventToDelete, setEventToDelete] = useState<Event | null>(null)
 
@@ -61,27 +62,64 @@ export function EventList() {
       </Button>
 
       {events && events.length > 0 ? (
-        <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
           {Array.from({ length: 12 }, (_, i) => {
             const monthEvents = eventsByMonth?.[i] || []
             if (monthEvents.length === 0) return null
 
             // Create a date object for the current month to get its name
-            const monthDate = new Date(2024, i, 1)
+            const currentYear = new Date().getFullYear()
+            const monthDate = new Date(currentYear, i, 1)
             const monthName = format(monthDate, 'LLLL')
+
+            // Create a Set of event dates for easier lookup
+            const eventDates = new Set(
+              monthEvents.map((event) => {
+                const eventDate = new Date(event.date)
+                return formatDateString(eventDate)
+              })
+            )
 
             return (
               <Card key={monthName}>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-3">
-                    <CalendarIcon className="size-5" />
+                  <span className="text-foreground-primary flex items-center gap-2">
+                    <CalendarIcon className="size-4" />
                     {monthName}
-                  </CardTitle>
+                  </span>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  {monthEvents.map((event) => (
-                    <EventListItem key={event.id} event={event} onDelete={handleDeleteEvent} />
-                  ))}
+                <CardContent>
+                  <div className="flex flex-col gap-4 xl:flex-row">
+                    <div className="w-full md:w-auto">
+                      <Calendar
+                        mode="default"
+                        month={monthDate}
+                        selected={undefined}
+                        className="rounded-md border"
+                        modifiers={{
+                          hasEvent: (date) => {
+                            const dayStr = formatDateString(date)
+                            return eventDates.has(dayStr)
+                          },
+                          outsideCurrentMonth: (date) => !isSameMonth(date, monthDate),
+                        }}
+                        modifiersClassNames={{
+                          hasEvent: 'bg-hover',
+                          outsideCurrentMonth: 'text-muted-foreground opacity-50',
+                        }}
+                        disableNavigation
+                      />
+                    </div>
+                    <div className="flex max-h-[300px] w-full flex-col gap-2 overflow-y-auto">
+                      {monthEvents.length > 0 ? (
+                        monthEvents.map((event) => (
+                          <EventListItem key={event.id} event={event} onDelete={handleDeleteEvent} />
+                        ))
+                      ) : (
+                        <p className="text-muted-foreground py-4 text-center">No events this month</p>
+                      )}
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             )
