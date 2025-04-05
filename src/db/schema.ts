@@ -18,7 +18,8 @@ export const tasks = pgTable('tasks', {
   userId: uuid('user_id')
     .notNull()
     .references(() => users.id),
-  text: text('text').notNull(),
+  title: text('title').notNull(),
+  description: text('description'),
   status: taskStatusEnum('status').default('todo').notNull(),
   order: integer('order').default(0),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),

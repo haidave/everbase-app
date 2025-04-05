@@ -18,6 +18,8 @@ type ComboboxProps = {
   placeholder?: string
   emptyMessage?: string
   searchPlaceholder?: string
+  size?: 'default' | 'input' | 'icon'
+  isContentSameWidth?: boolean
   className?: string
   triggerClassName?: string
 }
@@ -29,8 +31,10 @@ export function Combobox({
   placeholder = 'Select option...',
   emptyMessage = 'No option found.',
   searchPlaceholder = 'Search...',
+  size = 'input',
   className,
   triggerClassName,
+  isContentSameWidth = true,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false)
 
@@ -39,20 +43,20 @@ export function Combobox({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          size="input"
+          size={size}
           role="combobox"
           aria-expanded={open}
           className={cn('text-muted-foreground w-full justify-between', triggerClassName)}
         >
           {value ? options.find((option) => option.value === value)?.label : placeholder}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent
         className={cn('p-0', className)}
         align="start"
         sideOffset={5}
-        style={{ width: 'var(--radix-popover-trigger-width)' }}
+        style={{ width: isContentSameWidth ? 'var(--radix-popover-trigger-width)' : 'auto' }}
       >
         <Command>
           <CommandInput placeholder={searchPlaceholder} />

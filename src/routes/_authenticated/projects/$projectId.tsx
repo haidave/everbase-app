@@ -6,7 +6,7 @@ import { DynamicIcon } from '@/components/ui/dynamic-icon'
 import { EditProjectForm } from '@/features/projects/components/edit-project-form'
 import { FeatureList } from '@/features/projects/components/feature-list'
 import { AddTaskForm } from '@/features/tasks/components/add-task-form'
-import { TaskList } from '@/features/tasks/components/task-list'
+import { TaskKanbanBoard } from '@/features/tasks/components/task-kanban-board/task-kanban-board'
 import { createFileRoute } from '@tanstack/react-router'
 import { LoaderCircleIcon, Pencil, PlusIcon } from 'lucide-react'
 
@@ -94,7 +94,7 @@ function ProjectDetailPage() {
               <LoaderCircleIcon className="text-muted-foreground h-5 w-5 animate-spin" />
             </div>
           ) : relatedTasks && relatedTasks.length > 0 ? (
-            <TaskList tasks={relatedTasks} />
+            <TaskKanbanBoard tasks={relatedTasks} />
           ) : (
             <p className="text-muted-foreground text-sm">No tasks assigned to this project yet.</p>
           )}

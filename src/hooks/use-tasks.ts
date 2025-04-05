@@ -2,6 +2,7 @@ import type { TaskStatus } from '@/db/schema'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { api, type Task } from '@/lib/api'
+import { supabase } from '@/lib/supabase'
 
 import { useAuth } from './use-auth'
 
@@ -31,9 +32,38 @@ export function useCreateTask() {
   const { user } = useAuth()
 
   return useMutation({
-    mutationFn: async (task: { text: string; projectId?: string; featureId?: string; status?: TaskStatus }) => {
-      // Create the task
-      const newTask = await api.tasks.create({ text: task.text })
+    mutationFn: async (task: {
+      title: string
+      description?: string
+      projectId?: string
+      featureId?: string
+      status?: TaskStatus
+      order?: number
+    }) => {
+      if (!user?.id) throw new Error('User not authenticated')
+
+      const status = task.status || 'todo'
+
+      // Find the minimum order value in the same status column
+      const { data: minOrderTask } = await supabase
+        .from('tasks')
+        .select('order')
+        .eq('status', status)
+        .eq('user_id', user.id)
+        .order('order', { ascending: true })
+        .limit(1)
+        .single()
+
+      // Calculate new order value
+      const newOrder = minOrderTask ? minOrderTask.order - 10 : 1000
+
+      // Create the task with the new order value
+      const newTask = await api.tasks.create({
+        title: task.title,
+        description: task.description || undefined,
+        status,
+        order: newOrder,
+      })
 
       // If projectId is provided, associate with project
       if (task.projectId) {
@@ -51,6 +81,9 @@ export function useCreateTask() {
       // Invalidate tasks list
       queryClient.invalidateQueries({ queryKey: ['tasks', user?.id] })
 
+      // Invalidate all tasks
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+
       // Invalidate project tasks if needed
       if (variables.projectId) {
         queryClient.invalidateQueries({
@@ -66,6 +99,24 @@ export function useCreateTask() {
           exact: true,
         })
       }
+
+      // Directly invalidate the project tasks query pattern
+      queryClient.invalidateQueries({
+        queryKey: ['projects'],
+        predicate: (query) => {
+          const queryKey = query.queryKey
+          return Array.isArray(queryKey) && queryKey.length === 3 && queryKey[2] === 'tasks'
+        },
+      })
+
+      // Add this to invalidate feature tasks queries
+      queryClient.invalidateQueries({
+        queryKey: ['features'],
+        predicate: (query) => {
+          const queryKey = query.queryKey
+          return Array.isArray(queryKey) && queryKey.length === 3 && queryKey[2] === 'tasks'
+        },
+      })
     },
   })
 }
@@ -76,7 +127,10 @@ export function useUpdateTask() {
   const { user } = useAuth()
 
   return useMutation({
-    mutationFn: ({ id, ...updates }: { id: string } & Partial<Pick<Task, 'text' | 'status' | 'order'>>) =>
+    mutationFn: ({
+      id,
+      ...updates
+    }: { id: string } & Partial<Pick<Task, 'title' | 'description' | 'status' | 'order'>>) =>
       api.tasks.update(id, updates),
     onSuccess: (_, variables) => {
       // Invalidate tasks

@@ -3,7 +3,6 @@ import { UpcomingEvents } from '@/features/dashboard/components/upcoming-events/
 import { DashboardHabits } from '@/features/habits/components/dashboard-habits'
 import { AddJournalForm } from '@/features/journals/components/add-journal-form'
 import { DashboardMonthlyChecklist } from '@/features/monthly-checklist/components/dashboard-monthly-checklist'
-import { RecentTaskList } from '@/features/tasks/components/recent-task-list'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_authenticated/dashboard')({
@@ -40,10 +39,6 @@ function DashboardPage() {
           <DashboardMonthlyChecklist />
         </section>
       </div>
-
-      <section className="bg-card break-inside-avoid rounded-lg border p-4 lg:col-span-3">
-        <RecentTaskList limit={5} />
-      </section>
 
       <section className="bg-card break-inside-avoid rounded-lg border p-4 lg:col-span-1">
         <QuoteOfTheDay />

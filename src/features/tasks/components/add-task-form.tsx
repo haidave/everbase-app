@@ -12,6 +12,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import type { TaskStatus } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
 import { LoaderCircleIcon, PlusIcon } from 'lucide-react'
@@ -40,7 +41,8 @@ const AddTaskForm = ({ open, onOpenChange, defaultProjectId, defaultFeatureId }:
 
   const form = useForm({
     defaultValues: {
-      text: '',
+      title: '',
+      description: '',
       projectId: defaultProjectId || '',
       featureId: defaultFeatureId || '',
       status: 'todo',
@@ -49,7 +51,8 @@ const AddTaskForm = ({ open, onOpenChange, defaultProjectId, defaultFeatureId }:
       setIsSubmitting(true)
       try {
         await createTask.mutateAsync({
-          text: value.text.trim(),
+          title: value.title.trim(),
+          description: value.description || undefined,
           projectId: value.projectId || undefined,
           featureId: value.featureId || undefined,
           status: value.status as TaskStatus,
@@ -103,16 +106,16 @@ const AddTaskForm = ({ open, onOpenChange, defaultProjectId, defaultFeatureId }:
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <form.Field
-                name="text"
+                name="title"
                 validators={{
                   onSubmit: ({ value }) => (!value?.trim() ? 'Task title cannot be empty' : null),
                 }}
               >
                 {(field) => (
                   <>
-                    <Label htmlFor="text">Title</Label>
+                    <Label htmlFor="title">Title</Label>
                     <Input
-                      id="text"
+                      id="title"
                       placeholder="Task title"
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
@@ -124,6 +127,24 @@ const AddTaskForm = ({ open, onOpenChange, defaultProjectId, defaultFeatureId }:
                         {field.state.meta.errors.join(', ')}
                       </em>
                     ) : null}
+                  </>
+                )}
+              </form.Field>
+            </div>
+
+            <div className="grid gap-2">
+              <form.Field name="description">
+                {(field) => (
+                  <>
+                    <Label htmlFor="description">Description (optional)</Label>
+                    <Textarea
+                      id="description"
+                      className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-20 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                      placeholder="Task description"
+                      value={field.state.value || ''}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                    />
                   </>
                 )}
               </form.Field>

@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { AddTaskForm } from '@/features/tasks/components/add-task-form'
-import { TaskKanbanBoard } from '@/features/tasks/components/task-kanban-board'
-import { TaskList } from '@/features/tasks/components/task-list'
+import { TaskKanbanFilters } from '@/features/tasks/components/task-kanban-board/parts/task-kanban-filters'
+import { TaskKanbanBoard } from '@/features/tasks/components/task-kanban-board/task-kanban-board'
 import { createFileRoute } from '@tanstack/react-router'
-import { KanbanIcon, ListIcon, PlusIcon } from 'lucide-react'
+import { PlusIcon } from 'lucide-react'
 
 export const Route = createFileRoute('/_authenticated/tasks')({
   component: TasksPage,
@@ -19,29 +19,19 @@ export const Route = createFileRoute('/_authenticated/tasks')({
 
 function TasksPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban')
 
   return (
     <section className="relative grid gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center gap-4">
         <Button onClick={() => setIsAddDialogOpen(true)} className="w-fit">
           <PlusIcon />
           Add Task
         </Button>
 
-        <div className="flex gap-2">
-          <Button variant={viewMode === 'kanban' ? 'default' : 'outline'} onClick={() => setViewMode('kanban')}>
-            <KanbanIcon />
-            Kanban
-          </Button>
-          <Button variant={viewMode === 'list' ? 'default' : 'outline'} onClick={() => setViewMode('list')}>
-            <ListIcon />
-            List
-          </Button>
-        </div>
+        <TaskKanbanFilters />
       </div>
 
-      {viewMode === 'kanban' ? <TaskKanbanBoard /> : <TaskList />}
+      <TaskKanbanBoard />
 
       <AddTaskForm open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />
     </section>

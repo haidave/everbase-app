@@ -5,7 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { DynamicIcon } from '@/components/ui/dynamic-icon'
 import { EditFeatureForm } from '@/features/projects/components/edit-feature-form'
 import { AddTaskForm } from '@/features/tasks/components/add-task-form'
-import { TaskList } from '@/features/tasks/components/task-list'
+import { TaskKanbanBoard } from '@/features/tasks/components/task-kanban-board/task-kanban-board'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { LoaderCircleIcon, Pencil, PlusIcon } from 'lucide-react'
 
@@ -103,7 +103,7 @@ function FeatureDetailPage() {
               <LoaderCircleIcon className="text-muted-foreground h-5 w-5 animate-spin" />
             </div>
           ) : tasks && tasks.length > 0 ? (
-            <TaskList tasks={tasks} />
+            <TaskKanbanBoard tasks={tasks} />
           ) : (
             <p className="text-muted-foreground">No tasks assigned to this feature yet.</p>
           )}

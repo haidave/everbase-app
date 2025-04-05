@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Badge } from '@/components/ui/badge'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import {
   ContextMenu,
@@ -8,6 +9,7 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu'
 import { type Task } from '@/db/schema'
+import { useTaskFiltersStore } from '@/store/use-task-filters-store'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { FolderIcon, FoldersIcon, Pencil, Trash2 } from 'lucide-react'
@@ -17,7 +19,7 @@ import { useTaskFeatures } from '@/hooks/use-features'
 import { useTaskProjects } from '@/hooks/use-task-projects'
 import { useDeleteTask } from '@/hooks/use-tasks'
 
-import { EditTaskForm } from './edit-task-form'
+import { EditTaskForm } from '../../edit-task-form'
 
 type TaskKanbanItemProps = {
   task: Task
@@ -39,7 +41,7 @@ export function TaskKanbanItem({ task, isDragging = false }: TaskKanbanItemProps
       task,
     },
   })
-
+  const { groupByProject } = useTaskFiltersStore()
   const deleteTask = useDeleteTask()
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -47,8 +49,8 @@ export function TaskKanbanItem({ task, isDragging = false }: TaskKanbanItemProps
   const isDone = task.status === 'done'
 
   // Get current project and feature associations
-  const { data: taskProjects } = useTaskProjects(task.id)
-  const { data: taskFeatures } = useTaskFeatures(task.id)
+  const { data: taskProjects, isLoading: isLoadingProjects } = useTaskProjects(task.id)
+  const { data: taskFeatures, isLoading: isLoadingFeatures } = useTaskFeatures(task.id)
 
   const currentProject = taskProjects && taskProjects.length > 0 ? taskProjects[0] : null
   const currentFeature = taskFeatures && taskFeatures.length > 0 ? taskFeatures[0] : null
@@ -73,25 +75,43 @@ export function TaskKanbanItem({ task, isDragging = false }: TaskKanbanItemProps
             {...attributes}
             {...listeners}
             className={cn(
-              'bg-card hover:bg-accent flex cursor-grab flex-col gap-2 rounded-md border p-3 shadow-sm active:cursor-grabbing',
+              'bg-card hover:bg-accent flex cursor-grab flex-col rounded-md border p-3 shadow-sm active:cursor-grabbing',
               (isDragging || isSortableDragging) && 'opacity-50'
             )}
           >
-            <p className={cn('line-clamp-3 text-sm', isDone && 'text-muted-foreground line-through')}>{task.text}</p>
+            <p className={cn('line-clamp-3 text-sm', isDone && 'text-muted-foreground line-through')}>{task.title}</p>
 
-            <div className="flex flex-wrap items-center gap-4 text-xs">
-              {currentProject && (
-                <div className="text-muted-foreground flex items-center gap-1">
-                  <FolderIcon className="size-3" />
-                  <span>{currentProject.name}</span>
-                </div>
+            <div className={cn('flex flex-wrap items-center gap-2 text-xs', currentProject && 'mt-2')}>
+              {!groupByProject && (
+                <>
+                  {isLoadingProjects ? (
+                    <div className="text-muted-foreground flex animate-pulse items-center gap-1">
+                      <FolderIcon className="size-3" />
+                      <span className="bg-muted h-5.5 w-16 rounded"></span>
+                    </div>
+                  ) : (
+                    currentProject && (
+                      <Badge className="text-muted-foreground flex items-center gap-1 font-normal">
+                        <FolderIcon className="size-3" />
+                        <span>{currentProject.name}</span>
+                      </Badge>
+                    )
+                  )}
+                </>
               )}
 
-              {currentFeature && (
-                <div className="text-muted-foreground flex items-center gap-1">
+              {isLoadingFeatures ? (
+                <div className="text-muted-foreground flex animate-pulse items-center gap-1">
                   <FoldersIcon className="size-3" />
-                  <span>{currentFeature.name}</span>
+                  <span className="bg-muted h-5.5 w-16 rounded"></span>
                 </div>
+              ) : (
+                currentFeature && (
+                  <Badge className="text-muted-foreground flex items-center gap-1 font-normal">
+                    <FoldersIcon className="size-3" />
+                    <span>{currentFeature.name}</span>
+                  </Badge>
+                )
               )}
             </div>
           </div>
@@ -115,7 +135,7 @@ export function TaskKanbanItem({ task, isDragging = false }: TaskKanbanItemProps
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         title="Delete Task"
-        description={`Are you sure you want to delete "${task.text}"? This action cannot be undone.`}
+        description={`Are you sure you want to delete "${task.title}"? This action cannot be undone.`}
         onConfirm={handleDelete}
         isLoading={deleteTask.isPending}
       />
