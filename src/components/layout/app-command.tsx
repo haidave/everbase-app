@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { AddEventForm } from '@/features/events/components/add-event-form'
 import { AddTaskForm } from '@/features/tasks/components/add-task-form'
 import { useNavigate } from '@tanstack/react-router'
-import { CalendarPlusIcon, FolderIcon, LogOutIcon, MoonIcon, PlusIcon, SearchIcon, SunIcon } from 'lucide-react'
+import { CalendarPlusIcon, LogOutIcon, MoonIcon, PlusIcon, SearchIcon, SunIcon } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
 
 import { NAVIGATION_ITEMS } from '@/config/app-layout.config'
@@ -90,15 +90,6 @@ const AppCommand = ({ projects }: AppCommandProps) => {
                 <span>{item.title}</span>
               </CommandItem>
             ))}
-            <CommandItem
-              onSelect={() => {
-                setOpen(false)
-                navigate({ to: '/projects' })
-              }}
-            >
-              <FolderIcon className="size-4" />
-              <span>Projects</span>
-            </CommandItem>
           </CommandGroup>
 
           {projects && projects.length > 0 && (

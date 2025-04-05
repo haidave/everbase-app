@@ -34,6 +34,14 @@ export function AppSidebar() {
 
   const isPathActive = useCallback(
     (path: string) => {
+      if (path === '/projects') {
+        const isExactProjectsPage = matches.some(
+          (match) => match.pathname === '/projects' || match.pathname === '/projects/'
+        )
+
+        return isExactProjectsPage
+      }
+
       return matches.some((match) => match.pathname === path)
     },
     [matches]
@@ -101,11 +109,7 @@ export function AppSidebar() {
 
         {isLoadingStarredProjects || (starredProjects && starredProjects.length > 0) ? (
           <SidebarGroup>
-            <SidebarGroupLabel>
-              <Link to="/projects" className="hover:text-muted-foreground">
-                Starred Projects
-              </Link>
-            </SidebarGroupLabel>
+            <SidebarGroupLabel>Starred Projects</SidebarGroupLabel>
             <SidebarMenu>
               {isLoadingStarredProjects ? (
                 <>
@@ -117,7 +121,7 @@ export function AppSidebar() {
                   <SidebarMenuItem key={project.id}>
                     <SidebarMenuButton
                       asChild
-                      isActive={isPathActive(`/projects/${project.id}`)}
+                      isActive={matches.some((match) => match.pathname.includes(`/projects/${project.id}`))}
                       className="group-data-[collapsible=icon]:outline-hover group-data-[collapsible=icon]:outline group-data-[collapsible=icon]:outline-dashed"
                     >
                       <Link to="/projects/$projectId" params={{ projectId: project.id }}>

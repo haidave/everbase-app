@@ -3,6 +3,7 @@ import {
   CalendarCheckIcon,
   CalendarIcon,
   CalendarSyncIcon,
+  FolderKanbanIcon,
   LayoutDashboardIcon,
   ListTodoIcon,
   NotebookPenIcon,
@@ -38,6 +39,11 @@ export const NAVIGATION_ITEMS: NavigationRoute[] = [
     title: 'Habits',
     url: '/habits',
     icon: SproutIcon,
+  },
+  {
+    title: 'Projects',
+    url: '/projects',
+    icon: FolderKanbanIcon,
   },
   {
     title: 'Journal',
