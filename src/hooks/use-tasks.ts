@@ -33,7 +33,8 @@ export function useCreateTask() {
 
   return useMutation({
     mutationFn: async (task: {
-      text: string
+      title: string
+      description?: string
       projectId?: string
       featureId?: string
       status?: TaskStatus
@@ -54,13 +55,12 @@ export function useCreateTask() {
         .single()
 
       // Calculate new order value
-      // If there are no tasks, use 1000 as a starting point
-      // If there are tasks, use a value smaller than the current minimum
       const newOrder = minOrderTask ? minOrderTask.order - 10 : 1000
 
       // Create the task with the new order value
       const newTask = await api.tasks.create({
-        text: task.text,
+        title: task.title,
+        description: task.description || undefined,
         status,
         order: newOrder,
       })
@@ -127,7 +127,10 @@ export function useUpdateTask() {
   const { user } = useAuth()
 
   return useMutation({
-    mutationFn: ({ id, ...updates }: { id: string } & Partial<Pick<Task, 'text' | 'status' | 'order'>>) =>
+    mutationFn: ({
+      id,
+      ...updates
+    }: { id: string } & Partial<Pick<Task, 'title' | 'description' | 'status' | 'order'>>) =>
       api.tasks.update(id, updates),
     onSuccess: (_, variables) => {
       // Invalidate tasks

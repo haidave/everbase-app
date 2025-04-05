@@ -23,7 +23,8 @@ import { getUTCDayRange } from './utils'
 
 // Define API-specific types
 export type NewTask = {
-  text: string
+  title: string
+  description?: string
   status?: TaskStatus
   userId: string
   order?: number
@@ -137,7 +138,8 @@ export const api = {
       const { data: userData } = await supabase.auth.getUser()
 
       const supabaseTask = {
-        text: task.text,
+        title: task.title,
+        description: task.description,
         status: task.status || 'todo',
         order: task.order !== undefined ? task.order : 1000,
         user_id: userData.user?.id,
@@ -149,10 +151,14 @@ export const api = {
       return snakeToCamelCase<Task>(data)
     },
 
-    update: async (id: string, updates: Partial<Pick<Task, 'text' | 'status' | 'order'>>): Promise<Task> => {
+    update: async (
+      id: string,
+      updates: Partial<Pick<Task, 'title' | 'description' | 'status' | 'order'>>
+    ): Promise<Task> => {
       const dbUpdates: Record<string, unknown> = {}
 
-      if (updates.text !== undefined) dbUpdates.text = updates.text
+      if (updates.title !== undefined) dbUpdates.title = updates.title
+      if (updates.description !== undefined) dbUpdates.description = updates.description
       if (updates.status !== undefined) dbUpdates.status = updates.status
       if (updates.order !== undefined) dbUpdates.order = updates.order
 

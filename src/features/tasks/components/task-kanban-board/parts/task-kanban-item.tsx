@@ -78,13 +78,13 @@ export function TaskKanbanItem({ task, isDragging = false }: TaskKanbanItemProps
               (isDragging || isSortableDragging) && 'opacity-50'
             )}
           >
-            <p className={cn('line-clamp-3 text-sm', isDone && 'text-muted-foreground line-through')}>{task.text}</p>
+            <p className={cn('line-clamp-3 text-sm', isDone && 'text-muted-foreground line-through')}>{task.title}</p>
 
             <div className={cn('flex flex-wrap items-center gap-2 text-xs', currentProject && 'mt-2')}>
               {isLoadingProjects ? (
                 <div className="text-muted-foreground flex animate-pulse items-center gap-1">
                   <FolderIcon className="size-3" />
-                  <span className="bg-muted h-3 w-16 rounded"></span>
+                  <span className="bg-muted h-5.5 w-16 rounded"></span>
                 </div>
               ) : (
                 currentProject && (
@@ -98,7 +98,7 @@ export function TaskKanbanItem({ task, isDragging = false }: TaskKanbanItemProps
               {isLoadingFeatures ? (
                 <div className="text-muted-foreground flex animate-pulse items-center gap-1">
                   <FoldersIcon className="size-3" />
-                  <span className="bg-muted h-3 w-16 rounded"></span>
+                  <span className="bg-muted h-5.5 w-16 rounded"></span>
                 </div>
               ) : (
                 currentFeature && (
@@ -130,7 +130,7 @@ export function TaskKanbanItem({ task, isDragging = false }: TaskKanbanItemProps
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         title="Delete Task"
-        description={`Are you sure you want to delete "${task.text}"? This action cannot be undone.`}
+        description={`Are you sure you want to delete "${task.title}"? This action cannot be undone.`}
         onConfirm={handleDelete}
         isLoading={deleteTask.isPending}
       />
