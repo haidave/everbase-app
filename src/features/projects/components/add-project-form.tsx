@@ -17,12 +17,12 @@ import { LoaderCircleIcon, PlusIcon } from 'lucide-react'
 
 import { useCreateProject } from '@/hooks/use-projects'
 
-type ProjectFormProps = {
+type AddProjectFormProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export function ProjectForm({ open, onOpenChange }: ProjectFormProps) {
+export function AddProjectForm({ open, onOpenChange }: AddProjectFormProps) {
   const createProject = useCreateProject()
 
   const form = useForm({

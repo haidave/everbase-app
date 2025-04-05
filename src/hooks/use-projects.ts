@@ -43,7 +43,7 @@ export function useUpdateProject() {
   const { user } = useAuth()
 
   return useMutation({
-    mutationFn: (project: Pick<Project, 'id' | 'name' | 'status' | 'icon'>) => api.projects.update(project),
+    mutationFn: (project: Partial<Project> & { id: string }) => api.projects.update(project),
     onSuccess: (_, variables) => {
       // Only invalidate the specific project
       queryClient.invalidateQueries({
