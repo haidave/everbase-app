@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Calendar } from '@/components/ui/calendar'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { type Birthday } from '@/db/schema'
-import { format, getMonth } from 'date-fns'
+import { format, getMonth, isSameMonth } from 'date-fns'
 import { CalendarDaysIcon, PlusIcon } from 'lucide-react'
 
+import { formatDateString } from '@/lib/formatters'
 import { useBirthdays, useDeleteBirthday } from '@/hooks/use-birthdays'
 
 import { AddBirthdayForm } from './add-birthday-form'
@@ -61,27 +63,60 @@ export function BirthdayList() {
       </Button>
 
       {birthdays && birthdays.length > 0 ? (
-        <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
           {Array.from({ length: 12 }, (_, i) => {
             const monthBirthdays = birthdaysByMonth?.[i] || []
             if (monthBirthdays.length === 0) return null
 
-            // Create a date object for the current month to get its name
-            const monthDate = new Date(2024, i, 1)
+            const currentYear = new Date().getFullYear()
+            const monthDate = new Date(currentYear, i, 1)
             const monthName = format(monthDate, 'LLLL')
+
+            // Create a Set of birthday dates for easier lookup
+            const birthdayDates = new Set(
+              monthBirthdays.map((birthday) => {
+                const birthDate = new Date(birthday.birthDate)
+                const thisYearBirthday = new Date(currentYear, i, birthDate.getDate())
+                return formatDateString(thisYearBirthday)
+              })
+            )
 
             return (
               <Card key={monthName}>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-3">
-                    <CalendarDaysIcon className="size-5" />
+                  <span className="text-foreground-primary flex items-center gap-2">
+                    <CalendarDaysIcon className="size-4" />
                     {monthName}
-                  </CardTitle>
+                  </span>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  {monthBirthdays.map((birthday) => (
-                    <BirthdayListItem key={birthday.id} birthday={birthday} onDelete={handleDeleteBirthday} />
-                  ))}
+                <CardContent>
+                  <div className="flex flex-col gap-4 xl:flex-row">
+                    <div className="w-full md:w-auto">
+                      <Calendar
+                        mode="default"
+                        month={monthDate}
+                        selected={undefined}
+                        className="rounded-md border"
+                        modifiers={{
+                          hasBirthday: (date) => {
+                            const dayStr = formatDateString(date)
+                            return birthdayDates.has(dayStr)
+                          },
+                          outsideCurrentMonth: (date) => !isSameMonth(date, monthDate),
+                        }}
+                        modifiersClassNames={{
+                          hasBirthday: 'bg-hover',
+                          outsideCurrentMonth: 'text-muted-foreground opacity-50',
+                        }}
+                        disableNavigation
+                      />
+                    </div>
+                    <div className="flex max-h-[300px] w-full flex-col gap-2 overflow-y-auto">
+                      {monthBirthdays.map((birthday) => (
+                        <BirthdayListItem key={birthday.id} birthday={birthday} onDelete={handleDeleteBirthday} />
+                      ))}
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             )
