@@ -81,7 +81,12 @@ export function TaskKanbanItem({ task, isDragging = false }: TaskKanbanItemProps
           >
             <p className={cn('line-clamp-3 text-sm', isDone && 'text-muted-foreground line-through')}>{task.title}</p>
 
-            <div className={cn('flex flex-wrap items-center gap-2 text-xs', currentProject && 'mt-2')}>
+            <div
+              className={cn(
+                'flex flex-wrap items-center gap-2 text-xs',
+                (currentProject && !groupByProject) || (groupByProject && currentFeature) ? 'mt-2' : ''
+              )}
+            >
               {!groupByProject && (
                 <>
                   {isLoadingProjects ? (
