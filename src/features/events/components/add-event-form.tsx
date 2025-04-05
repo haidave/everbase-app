@@ -19,6 +19,7 @@ import { format } from 'date-fns'
 import { CalendarIcon, LoaderCircleIcon, PlusIcon, SaveIcon } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
 
+import { cn } from '@/lib/utils'
 import { useCreateEvent, useUpdateEvent } from '@/hooks/use-events'
 
 type AddEventFormProps = {
@@ -176,7 +177,7 @@ export function AddEventForm({ open, onOpenChange, event, onDelete }: AddEventFo
             </form.Field>
           </div>
 
-          <DialogFooter className="flex justify-between gap-2">
+          <DialogFooter className={cn(isEditing && 'justify-between gap-2')}>
             {isEditing && onDelete && (
               <Button type="button" variant="destructive" onClick={onDelete}>
                 Delete Event
