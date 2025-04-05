@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
+import { TextareaAutosize } from '@/components/ui/textarea'
 import { type MonthlyChecklist } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
 import { LoaderCircleIcon, PlusIcon, SaveIcon } from 'lucide-react'
@@ -133,7 +133,7 @@ export function AddMonthlyChecklistForm({ open, onOpenChange, monthlyChecklist }
               {(field) => (
                 <>
                   <Label htmlFor="description">Description (Optional)</Label>
-                  <Textarea
+                  <TextareaAutosize
                     id="description"
                     placeholder="e.g., Due on the 1st of each month"
                     value={field.state.value}

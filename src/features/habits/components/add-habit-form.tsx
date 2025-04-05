@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
+import { TextareaAutosize } from '@/components/ui/textarea'
 import { type Habit } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
 import { LoaderCircleIcon, PlusIcon, SaveIcon } from 'lucide-react'
@@ -131,13 +131,12 @@ export function AddHabitForm({ open, onOpenChange, habit }: AddHabitFormProps) {
               {(field) => (
                 <>
                   <Label htmlFor="description">Description (optional)</Label>
-                  <Textarea
+                  <TextareaAutosize
                     id="description"
                     placeholder="Add some details about this habit..."
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
-                    rows={3}
                   />
                 </>
               )}

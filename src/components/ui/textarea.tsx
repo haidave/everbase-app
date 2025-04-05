@@ -16,7 +16,14 @@ Textarea.displayName = 'Textarea'
 const TextareaAutosize = React.forwardRef<HTMLTextAreaElement, React.ComponentProps<typeof TextareaAutosizeComponent>>(
   ({ className, ...props }, ref) => {
     return (
-      <TextareaAutosizeComponent data-slot="textarea" className={cn(textareaStyles, className)} ref={ref} {...props} />
+      <TextareaAutosizeComponent
+        data-slot="textarea"
+        className={cn(textareaStyles, className)}
+        ref={ref}
+        minRows={3}
+        maxRows={10}
+        {...props}
+      />
     )
   }
 )

@@ -177,7 +177,6 @@ export function AddBirthdayForm({ open, onOpenChange, birthday, onDelete }: AddB
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
-                    minRows={3}
                   />
                 </>
               )}

@@ -12,7 +12,7 @@ import {
 import { IconPicker } from '@/components/ui/icon-picker'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
+import { TextareaAutosize } from '@/components/ui/textarea'
 import { useForm } from '@tanstack/react-form'
 import { useNavigate } from '@tanstack/react-router'
 import { LoaderCircleIcon } from 'lucide-react'
@@ -98,7 +98,7 @@ export function EditFeatureForm({ feature, open, onOpenChange }: EditFeatureForm
               {(field) => (
                 <>
                   <Label htmlFor="description">Description (Optional)</Label>
-                  <Textarea
+                  <TextareaAutosize
                     id="description"
                     placeholder="Describe this feature"
                     value={field.state.value}

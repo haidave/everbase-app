@@ -170,7 +170,6 @@ export function AddEventForm({ open, onOpenChange, event, onDelete }: AddEventFo
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
-                    minRows={3}
                   />
                 </>
               )}

@@ -11,7 +11,7 @@ import { IconPicker } from '@/components/ui/icon-picker'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
+import { TextareaAutosize } from '@/components/ui/textarea'
 import { type ProjectStatus } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
 import { LoaderCircleIcon, PlusIcon } from 'lucide-react'
@@ -99,7 +99,7 @@ export function AddProjectForm({ open, onOpenChange }: AddProjectFormProps) {
                 {(field) => (
                   <>
                     <Label htmlFor="description">Description (Optional)</Label>
-                    <Textarea
+                    <TextareaAutosize
                       id="description"
                       placeholder="Project description"
                       value={field.state.value}
