@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { LoadingScreen } from '@/components/ui/loading-screen'
+import { Toaster } from '@/components/ui/toaster'
 import { createRootRoute, HeadContent, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 
@@ -37,6 +38,7 @@ function RootLayout() {
   return (
     <>
       <Outlet />
+      <Toaster />
       {process.env.SHOW_DEVTOOLS === 'true' && <TanStackRouterDevtools />}
     </>
   )
