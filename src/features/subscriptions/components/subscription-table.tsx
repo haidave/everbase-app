@@ -10,7 +10,21 @@ import {
   type ColumnDef,
   type SortingState,
 } from '@tanstack/react-table'
-import { format } from 'date-fns'
+import {
+  addMonths,
+  addYears,
+  differenceInMonths,
+  differenceInYears,
+  format,
+  getDate,
+  isAfter,
+  isBefore,
+  setDate,
+  setMonth,
+  startOfDay,
+  startOfMonth,
+  startOfYear,
+} from 'date-fns'
 import { ArrowUpDown, Pencil, Trash2 } from 'lucide-react'
 
 interface SubscriptionTableProps {
@@ -27,30 +41,59 @@ export function SubscriptionTable({ data, onEdit, onDelete }: SubscriptionTableP
     },
   ])
 
-  // Function to calculate next renewal date
   const getNextRenewalDate = (subscription: Subscription): Date => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
+    const today = startOfDay(new Date())
 
     if (subscription.frequency === 'monthly') {
-      const currentMonth = today.getMonth()
-      const currentYear = today.getFullYear()
-      const thisMonthRenewal = new Date(currentYear, currentMonth, subscription.renewalDay)
+      // Create this month's renewal date
+      const thisMonthRenewal = setDate(startOfMonth(today), subscription.renewalDay)
 
-      if (today > thisMonthRenewal) {
-        return new Date(currentYear, currentMonth + 1, subscription.renewalDay)
-      }
-      return thisMonthRenewal
+      // If today is past this month's renewal, get next month's date
+      return isAfter(today, thisMonthRenewal) ? addMonths(thisMonthRenewal, 1) : thisMonthRenewal
     } else {
-      const renewalMonth = subscription.renewalMonth || 1
-      const renewalDay = subscription.renewalDay
-      const currentYear = today.getFullYear()
-      const thisYearRenewal = new Date(currentYear, renewalMonth - 1, renewalDay)
+      // Create this year's renewal date
+      const thisYearRenewal = setDate(
+        setMonth(startOfYear(today), (subscription.renewalMonth || 1) - 1),
+        subscription.renewalDay
+      )
 
-      if (today > thisYearRenewal) {
-        return new Date(currentYear + 1, renewalMonth - 1, renewalDay)
-      }
-      return thisYearRenewal
+      // If today is past this year's renewal, get next year's date
+      return isAfter(today, thisYearRenewal) ? addYears(thisYearRenewal, 1) : thisYearRenewal
+    }
+  }
+
+  const calculateTotalSpent = (subscription: Subscription): number => {
+    const startDate = new Date(subscription.startDate)
+    const today = startOfDay(new Date())
+    const price = parseFloat(subscription.price)
+
+    if (subscription.frequency === 'monthly') {
+      const monthsDiff = differenceInMonths(today, startDate)
+
+      // Check if we need to include current month based on renewal day
+      const currentMonthShouldCount =
+        getDate(today) >= subscription.renewalDay && getDate(startDate) <= subscription.renewalDay
+
+      return price * (monthsDiff + (currentMonthShouldCount ? 1 : 0))
+    } else {
+      // For yearly subscriptions
+      const renewalDate = new Date(today.getFullYear(), (subscription.renewalMonth || 1) - 1, subscription.renewalDay)
+
+      // Get complete years between start and today
+      const yearsDiff = differenceInYears(today, startDate)
+
+      // Check if this year's renewal has happened
+      const thisYearRenewalPassed = isAfter(today, renewalDate)
+
+      // Adjust count based on start date's position relative to renewal date
+      const startYearRenewalDate = new Date(
+        startDate.getFullYear(),
+        (subscription.renewalMonth || 1) - 1,
+        subscription.renewalDay
+      )
+      const startYearAdjustment = isBefore(startDate, startYearRenewalDate) ? 0 : -1
+
+      return price * (yearsDiff + (thisYearRenewalPassed ? 1 : 0) + startYearAdjustment)
     }
   }
 
@@ -128,6 +171,26 @@ export function SubscriptionTable({ data, onEdit, onDelete }: SubscriptionTableP
         } catch {
           return 'Invalid date'
         }
+      },
+    },
+    {
+      id: 'totalSpent',
+      accessorFn: (row) => calculateTotalSpent(row),
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+            className="-ml-4"
+          >
+            Total Spent
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        )
+      },
+      cell: ({ row }) => {
+        const total = calculateTotalSpent(row.original)
+        return `${total} ${row.original.currency}`
       },
     },
     {
