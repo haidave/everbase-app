@@ -99,8 +99,6 @@ export function EditFeatureForm({ feature, open, onOpenChange }: EditFeatureForm
                 <>
                   <Label htmlFor="description">Description (Optional)</Label>
                   <TextareaAutosize
-                    minRows={3}
-                    maxRows={10}
                     id="description"
                     placeholder="Describe this feature"
                     value={field.state.value}

@@ -97,8 +97,6 @@ export function EditProjectForm({ project, open, onOpenChange }: EditProjectForm
                 <>
                   <Label htmlFor="description">Description (Optional)</Label>
                   <TextareaAutosize
-                    minRows={3}
-                    maxRows={10}
                     id="description"
                     placeholder="Describe this project"
                     value={field.state.value}

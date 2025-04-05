@@ -100,8 +100,6 @@ export function AddProjectForm({ open, onOpenChange }: AddProjectFormProps) {
                   <>
                     <Label htmlFor="description">Description (Optional)</Label>
                     <TextareaAutosize
-                      minRows={3}
-                      maxRows={10}
                       id="description"
                       placeholder="Project description"
                       value={field.state.value}

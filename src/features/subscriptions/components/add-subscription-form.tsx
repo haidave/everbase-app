@@ -389,8 +389,6 @@ export function AddSubscriptionForm({ open, onOpenChange, subscription }: AddSub
                 <div className="grid gap-2">
                   <Label htmlFor="description">Description (Optional)</Label>
                   <TextareaAutosize
-                    minRows={3}
-                    maxRows={10}
                     id="description"
                     placeholder="Add some details about this subscription..."
                     value={field.state.value}

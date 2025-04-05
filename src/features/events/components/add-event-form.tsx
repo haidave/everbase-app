@@ -165,8 +165,6 @@ export function AddEventForm({ open, onOpenChange, event, onDelete }: AddEventFo
                 <>
                   <Label htmlFor="description">Description (optional)</Label>
                   <TextareaAutosize
-                    minRows={3}
-                    maxRows={10}
                     id="description"
                     placeholder="Add some details about this event..."
                     value={field.state.value}

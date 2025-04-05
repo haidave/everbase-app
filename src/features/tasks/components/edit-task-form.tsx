@@ -164,8 +164,6 @@ export function EditTaskForm({ task, open, onOpenChange }: EditTaskFormProps) {
                   <>
                     <Label htmlFor="description">Description (optional)</Label>
                     <TextareaAutosize
-                      minRows={3}
-                      maxRows={10}
                       id="description"
                       placeholder="Task description"
                       value={field.state.value || ''}

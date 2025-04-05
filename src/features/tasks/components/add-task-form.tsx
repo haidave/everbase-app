@@ -138,8 +138,6 @@ const AddTaskForm = ({ open, onOpenChange, defaultProjectId, defaultFeatureId }:
                   <>
                     <Label htmlFor="description">Description (optional)</Label>
                     <TextareaAutosize
-                      minRows={3}
-                      maxRows={10}
                       id="description"
                       placeholder="Task description"
                       value={field.state.value || ''}

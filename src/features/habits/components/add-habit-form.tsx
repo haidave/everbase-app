@@ -132,8 +132,6 @@ export function AddHabitForm({ open, onOpenChange, habit }: AddHabitFormProps) {
                 <>
                   <Label htmlFor="description">Description (optional)</Label>
                   <TextareaAutosize
-                    minRows={3}
-                    maxRows={10}
                     id="description"
                     placeholder="Add some details about this habit..."
                     value={field.state.value}

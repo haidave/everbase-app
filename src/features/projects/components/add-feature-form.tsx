@@ -77,8 +77,6 @@ export function AddFeatureForm({ projectId, open, onOpenChange }: AddFeatureForm
                 <>
                   <Label htmlFor="description">Description (Optional)</Label>
                   <TextareaAutosize
-                    minRows={3}
-                    maxRows={10}
                     id="description"
                     placeholder="Describe this feature"
                     value={field.state.value}

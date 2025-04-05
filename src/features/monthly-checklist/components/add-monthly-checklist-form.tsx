@@ -134,8 +134,6 @@ export function AddMonthlyChecklistForm({ open, onOpenChange, monthlyChecklist }
                 <>
                   <Label htmlFor="description">Description (Optional)</Label>
                   <TextareaAutosize
-                    minRows={3}
-                    maxRows={10}
                     id="description"
                     placeholder="e.g., Due on the 1st of each month"
                     value={field.state.value}
