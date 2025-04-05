@@ -61,8 +61,8 @@ function ProjectDetailPage() {
           <CardHeader className="flex flex-row items-center justify-between pb-0">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <DynamicIcon name={displayProject.icon} className="size-5" />
-                <CardTitle className="text-xl">{displayProject.name}</CardTitle>
+                <DynamicIcon name={displayProject.icon} className="size-4" />
+                <CardTitle className="text-base">{displayProject.name}</CardTitle>
               </div>
               <Badge>{displayProject.status}</Badge>
             </div>

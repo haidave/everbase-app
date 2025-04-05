@@ -45,7 +45,7 @@ const HabitList = () => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <Button onClick={() => setIsAddDialogOpen(true)}>
         <PlusIcon />
         Add Habit

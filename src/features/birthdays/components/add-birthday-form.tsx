@@ -183,7 +183,7 @@ export function AddBirthdayForm({ open, onOpenChange, birthday, onDelete }: AddB
             </form.Field>
           </div>
 
-          <DialogFooter className="flex justify-between gap-2">
+          <DialogFooter className={cn(isEditing && 'justify-between gap-2')}>
             {isEditing && onDelete && (
               <Button type="button" variant="destructive" onClick={onDelete}>
                 Delete Birthday

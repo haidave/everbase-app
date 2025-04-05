@@ -281,8 +281,8 @@ export function ProjectKanbanBoard({ projects: propProjects }: ProjectKanbanBoar
   }
 
   return (
-    <>
-      <div className="mb-4">
+    <div className="grid gap-6">
+      <div>
         <Button onClick={() => setIsAddDialogOpen(true)}>
           <PlusIcon />
           Add Project
@@ -314,6 +314,6 @@ export function ProjectKanbanBoard({ projects: propProjects }: ProjectKanbanBoar
       </DndContext>
 
       <AddProjectForm open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />
-    </>
+    </div>
   )
 }

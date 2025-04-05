@@ -139,7 +139,7 @@ export function EditProjectForm({ project, open, onOpenChange }: EditProjectForm
             </form.Field>
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="justify-between gap-2">
             <Button variant="destructive" type="button" onClick={() => setIsDeleteDialogOpen(true)}>
               Delete Project
             </Button>
