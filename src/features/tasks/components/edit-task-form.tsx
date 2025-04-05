@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import {
   Dialog,
   DialogContent,
@@ -22,7 +23,7 @@ import { useFeatures, useTaskFeatures } from '@/hooks/use-features'
 import { useProjects } from '@/hooks/use-projects'
 import { useUpdateTaskAssociations } from '@/hooks/use-task-associations'
 import { useTaskProjects } from '@/hooks/use-task-projects'
-import { useUpdateTask } from '@/hooks/use-tasks'
+import { useDeleteTask, useUpdateTask } from '@/hooks/use-tasks'
 
 type EditTaskFormProps = {
   task: Task
@@ -32,6 +33,8 @@ type EditTaskFormProps = {
 
 export function EditTaskForm({ task, open, onOpenChange }: EditTaskFormProps) {
   const updateTask = useUpdateTask()
+  const deleteTask = useDeleteTask()
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const { data: projects } = useProjects()
   const formRef = useRef<HTMLFormElement>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -112,6 +115,15 @@ export function EditTaskForm({ task, open, onOpenChange }: EditTaskFormProps) {
     form.setFieldValue('projectId', projectId)
     form.setFieldValue('featureId', '') // Reset feature when project changes
     setSelectedProjectId(projectId)
+  }
+
+  const handleDelete = () => {
+    deleteTask.mutate(task.id, {
+      onSuccess: () => {
+        setIsDeleteDialogOpen(false)
+        onOpenChange(false)
+      },
+    })
   }
 
   return (
@@ -264,7 +276,10 @@ export function EditTaskForm({ task, open, onOpenChange }: EditTaskFormProps) {
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="justify-between gap-2">
+            <Button type="button" variant="destructive" onClick={() => setIsDeleteDialogOpen(true)}>
+              Delete
+            </Button>
             <Button type="submit" disabled={isSubmitting || updateTask.isPending || !form.state.canSubmit}>
               {isSubmitting || updateTask.isPending ? (
                 <>
@@ -281,6 +296,15 @@ export function EditTaskForm({ task, open, onOpenChange }: EditTaskFormProps) {
           </DialogFooter>
         </form>
       </DialogContent>
+
+      <ConfirmationDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        title="Delete Task"
+        description={`Are you sure you want to delete "${task.title}"? This action cannot be undone.`}
+        onConfirm={handleDelete}
+        isLoading={deleteTask.isPending}
+      />
     </Dialog>
   )
 }
