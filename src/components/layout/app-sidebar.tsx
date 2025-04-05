@@ -20,14 +20,15 @@ import { Link, useMatches } from '@tanstack/react-router'
 import { ChevronDown, FileStackIcon } from 'lucide-react'
 
 import { NAVIGATION_ITEMS } from '@/config/app-layout.config'
-import { useProjects } from '@/hooks/use-projects'
+import { useProjects, useStarredProjects } from '@/hooks/use-projects'
 
 import { DynamicIcon } from '../ui/dynamic-icon'
 import { UserMenu } from '../ui/user-menu'
 import { AppCommand } from './app-command'
 
 export function AppSidebar() {
-  const { data: projects, isLoading: isLoadingProjects } = useProjects()
+  const { data: projects } = useProjects()
+  const { data: starredProjects, isLoading: isLoadingStarredProjects } = useStarredProjects()
   const matches = useMatches()
   const [isOtherOpen, setIsOtherOpen] = useState(false)
 
@@ -98,22 +99,21 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
-        {isLoadingProjects || (projects && projects.length > 0) ? (
+        {isLoadingStarredProjects || (starredProjects && starredProjects.length > 0) ? (
           <SidebarGroup>
             <SidebarGroupLabel>
               <Link to="/projects" className="hover:text-muted-foreground">
-                Projects
+                Starred Projects
               </Link>
             </SidebarGroupLabel>
             <SidebarMenu>
-              {isLoadingProjects ? (
+              {isLoadingStarredProjects ? (
                 <>
-                  <SidebarMenuSkeleton showIcon />
                   <SidebarMenuSkeleton showIcon />
                   <SidebarMenuSkeleton showIcon />
                 </>
               ) : (
-                projects?.map((project) => (
+                starredProjects?.map((project) => (
                   <SidebarMenuItem key={project.id}>
                     <SidebarMenuButton
                       asChild

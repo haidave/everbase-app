@@ -39,6 +39,7 @@ export const projects = pgTable('projects', {
   status: projectStatusEnum('status').default('backlog').notNull(),
   icon: text('icon').default('folder').notNull(), // Store icon name from Lucide
   order: integer('order').default(0),
+  starred: boolean('starred').default(false).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })
