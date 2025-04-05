@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
 import {
   Dialog,
   DialogContent,
@@ -10,22 +11,25 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { TextareaAutosize } from '@/components/ui/textarea'
 import { type Birthday } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
 import { format } from 'date-fns'
-import { LoaderCircleIcon, PlusIcon, SaveIcon } from 'lucide-react'
+import { CalendarIcon, LoaderCircleIcon, PlusIcon, SaveIcon } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
 
+import { cn } from '@/lib/utils'
 import { useCreateBirthday, useUpdateBirthday } from '@/hooks/use-birthdays'
 
 type AddBirthdayFormProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   birthday?: Birthday
+  onDelete?: () => void
 }
 
-export function AddBirthdayForm({ open, onOpenChange, birthday }: AddBirthdayFormProps) {
+export function AddBirthdayForm({ open, onOpenChange, birthday, onDelete }: AddBirthdayFormProps) {
   const createBirthday = useCreateBirthday()
   const updateBirthday = useUpdateBirthday()
   const isEditing = !!birthday
@@ -136,19 +140,27 @@ export function AddBirthdayForm({ open, onOpenChange, birthday }: AddBirthdayFor
               {(field) => (
                 <>
                   <Label htmlFor="birthDate">Birth Date</Label>
-                  <Input
-                    id="birthDate"
-                    type="date"
-                    value={format(field.state.value, 'yyyy-MM-dd')}
-                    onChange={(e) => {
-                      const date = e.target.value ? new Date(e.target.value) : new Date()
-                      field.handleChange(date)
-                    }}
-                    onBlur={field.handleBlur}
-                  />
-                  {field.state.meta.errors.length > 0 ? (
-                    <p className="text-destructive text-sm">{field.state.meta.errors.join(', ')}</p>
-                  ) : null}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          'w-full justify-start text-left font-normal',
+                          !field.state.value && 'text-muted-foreground'
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 size-4" />
+                        {field.state.value ? format(field.state.value, 'PPP') : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={field.state.value}
+                        onSelect={(date) => field.handleChange(date || new Date())}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </>
               )}
             </form.Field>
@@ -172,7 +184,12 @@ export function AddBirthdayForm({ open, onOpenChange, birthday }: AddBirthdayFor
             </form.Field>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="flex justify-between gap-2">
+            {isEditing && onDelete && (
+              <Button type="button" variant="destructive" onClick={onDelete}>
+                Delete Birthday
+              </Button>
+            )}
             <Button type="submit" disabled={isPending}>
               {isPending ? <LoaderCircleIcon className="animate-spin" /> : isEditing ? <SaveIcon /> : <PlusIcon />}
               {isEditing ? 'Save Changes' : 'Add Birthday'}
