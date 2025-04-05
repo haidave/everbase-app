@@ -36,6 +36,7 @@ export type NewProject = {
   userId: string
   icon?: string
   order?: number
+  starred?: boolean
 }
 
 export type NewHabit = {
@@ -297,6 +298,13 @@ export const api = {
 
       if (tasksError) throw tasksError
       return transformArraySnakeToCamel<Task>(tasks)
+    },
+
+    toggleStarred: async (id: string, starred: boolean): Promise<Project> => {
+      const { data, error } = await supabase.from('projects').update({ starred }).eq('id', id).select('*').single()
+
+      if (error) throw error
+      return snakeToCamelCase<Project>(data)
     },
   },
 

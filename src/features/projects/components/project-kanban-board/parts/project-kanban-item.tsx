@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Button } from '@/components/ui/button'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import {
   ContextMenu,
@@ -12,10 +13,10 @@ import { type Project } from '@/db/schema'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Link } from '@tanstack/react-router'
-import { Pencil, Trash2 } from 'lucide-react'
+import { Pencil, Star, StarOff, Trash2 } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
-import { useDeleteProject } from '@/hooks/use-projects'
+import { useDeleteProject, useToggleProjectStarred } from '@/hooks/use-projects'
 
 import { EditProjectForm } from '../../edit-project-form'
 
@@ -41,6 +42,7 @@ export function ProjectKanbanItem({ project, isDragging = false }: ProjectKanban
   })
 
   const deleteProject = useDeleteProject()
+  const toggleStarred = useToggleProjectStarred()
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
@@ -52,6 +54,11 @@ export function ProjectKanbanItem({ project, isDragging = false }: ProjectKanban
   const handleDelete = () => {
     deleteProject.mutate(project.id)
     setIsDeleteDialogOpen(false)
+  }
+
+  const handleToggleStar = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    toggleStarred.mutate({ id: project.id, starred: !project.starred })
   }
 
   return (
@@ -73,6 +80,9 @@ export function ProjectKanbanItem({ project, isDragging = false }: ProjectKanban
                 <DynamicIcon name={project.icon} className="size-4" />
                 <p className="font-medium">{project.name}</p>
               </div>
+              <Button variant="ghost" size="icon" onClick={handleToggleStar}>
+                {project.starred ? <Star className="fill-current" /> : <Star />}
+              </Button>
             </div>
 
             <div className="mt-2 flex justify-end">
@@ -92,6 +102,19 @@ export function ProjectKanbanItem({ project, isDragging = false }: ProjectKanban
             <Pencil className="mr-2 size-4" />
             Edit
           </ContextMenuItem>
+          <ContextMenuItem onClick={handleToggleStar}>
+            {project.starred ? (
+              <>
+                <StarOff className="mr-2 size-4" />
+                Unstar
+              </>
+            ) : (
+              <>
+                <Star className="mr-2 size-4" />
+                Star
+              </>
+            )}
+          </ContextMenuItem>
           <ContextMenuSeparator />
           <ContextMenuItem onClick={() => setIsDeleteDialogOpen(true)} className="text-destructive">
             <Trash2 className="mr-2 size-4" />
@@ -108,6 +131,7 @@ export function ProjectKanbanItem({ project, isDragging = false }: ProjectKanban
         title="Delete Project"
         description="Are you sure you want to delete this project? This action cannot be undone."
         onConfirm={handleDelete}
+        isLoading={deleteProject.isPending}
       />
     </>
   )

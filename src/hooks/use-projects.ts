@@ -127,3 +127,46 @@ export function useRemoveTaskFromProject() {
     },
   })
 }
+
+// Hook for toggling project starred status
+export function useToggleProjectStarred() {
+  const queryClient = useQueryClient()
+  const { user } = useAuth()
+
+  return useMutation({
+    mutationFn: ({ id, starred }: { id: string; starred: boolean }) => api.projects.toggleStarred(id, starred),
+    onSuccess: (_, variables) => {
+      // Invalidate the specific project
+      queryClient.invalidateQueries({
+        queryKey: ['projects', variables.id],
+        exact: true,
+      })
+
+      // Invalidate the user's projects list
+      queryClient.invalidateQueries({
+        queryKey: ['projects', user?.id],
+        exact: true,
+      })
+
+      // Invalidate starred projects
+      queryClient.invalidateQueries({
+        queryKey: ['projects', 'starred'],
+        exact: true,
+      })
+    },
+  })
+}
+
+// Hook for fetching starred projects
+export function useStarredProjects() {
+  const { user } = useAuth()
+
+  return useQuery({
+    queryKey: ['projects', 'starred'],
+    queryFn: async () => {
+      const projects = await api.projects.getAll()
+      return projects.filter((project) => project.starred)
+    },
+    enabled: !!user,
+  })
+}
