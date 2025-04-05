@@ -65,8 +65,8 @@ function FeatureDetailPage() {
           <CardHeader className="flex flex-row items-center justify-between pb-0">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <DynamicIcon name={displayFeature.icon} className="size-5" />
-                <CardTitle className="text-xl">{displayFeature.name}</CardTitle>
+                <DynamicIcon name={displayFeature.icon} className="size-4" />
+                <CardTitle className="text-base">{displayFeature.name}</CardTitle>
               </div>
               <Badge>
                 <Link to="/projects/$projectId" params={{ projectId }}>
