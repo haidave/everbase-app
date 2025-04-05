@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { TASK_STATUSES, type Task, type TaskStatus } from '@/db/schema'
+import { useTaskFiltersStore } from '@/store/use-task-filters-store'
 import {
   closestCenter,
   DndContext,
@@ -14,6 +15,8 @@ import {
 import { restrictToWindowEdges } from '@dnd-kit/modifiers'
 import { arrayMove } from '@dnd-kit/sortable'
 
+import { useFeatureTasks } from '@/hooks/use-features'
+import { useProjectTasks } from '@/hooks/use-projects'
 import { useTasks, useUpdateTask } from '@/hooks/use-tasks'
 
 import { TaskKanbanColumn } from './parts/task-kanban-column'
@@ -24,7 +27,14 @@ type TaskKanbanBoardProps = {
 }
 
 export function TaskKanbanBoard({ tasks: propTasks }: TaskKanbanBoardProps) {
+  // Get filter values from Zustand store
+  const { projectId, featureId } = useTaskFiltersStore()
+
+  // Fetch tasks based on filters
   const { data: fetchedTasks, isLoading, error } = useTasks()
+  const { data: projectTasks, isLoading: isLoadingProjectTasks } = useProjectTasks(projectId || '')
+  const { data: featureTasks, isLoading: isLoadingFeatureTasks } = useFeatureTasks(featureId || '')
+
   const updateTask = useUpdateTask()
 
   // State for active drag item
@@ -39,8 +49,20 @@ export function TaskKanbanBoard({ tasks: propTasks }: TaskKanbanBoardProps) {
   // Temporary state for tasks during drag operations
   const [tempTasks, setTempTasks] = useState<Task[]>([])
 
-  // Get all tasks and update local state when data changes
-  const allTasks = useMemo(() => propTasks || fetchedTasks || [], [propTasks, fetchedTasks])
+  // Determine which tasks to display based on filters
+  const allTasks = useMemo(() => {
+    // If specific tasks are provided as props, use those
+    if (propTasks) return propTasks
+
+    // If feature filter is active, use feature tasks
+    if (featureId && featureTasks) return featureTasks
+
+    // If project filter is active, use project tasks
+    if (projectId && projectTasks) return projectTasks
+
+    // Otherwise use all tasks
+    return fetchedTasks || []
+  }, [propTasks, projectId, featureId, projectTasks, featureTasks, fetchedTasks])
 
   // Update local tasks when allTasks changes
   useEffect(() => {
@@ -72,9 +94,12 @@ export function TaskKanbanBoard({ tasks: propTasks }: TaskKanbanBoardProps) {
     )
   }, [localTasks, tempTasks, activeId])
 
-  if (isLoading && !propTasks) return <div className="p-4">Loading tasks...</div>
+  // Update the loading state to account for filter-specific loading
+  const isLoadingAny = isLoading || (projectId && isLoadingProjectTasks) || (featureId && isLoadingFeatureTasks)
+
+  if (isLoadingAny && !propTasks) return <div className="p-4">Loading tasks...</div>
   if (error && !propTasks) return <div className="p-4 text-red-500">Error loading tasks: {error.message}</div>
-  if (!localTasks?.length) return <p>No tasks yet.</p>
+  if (!localTasks?.length) return <p>No tasks found.</p>
 
   // Find the active task
   const activeTask = activeId ? localTasks.find((task) => task.id === activeId) || null : null
