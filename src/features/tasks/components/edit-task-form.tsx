@@ -12,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
+import { TextareaAutosize } from '@/components/ui/textarea'
 import type { Task, TaskStatus } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
 import { LoaderCircleIcon, SaveIcon } from 'lucide-react'
@@ -163,9 +163,10 @@ export function EditTaskForm({ task, open, onOpenChange }: EditTaskFormProps) {
                 {(field) => (
                   <>
                     <Label htmlFor="description">Description (optional)</Label>
-                    <Textarea
+                    <TextareaAutosize
+                      minRows={3}
+                      maxRows={10}
                       id="description"
-                      className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-20 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                       placeholder="Task description"
                       value={field.state.value || ''}
                       onChange={(e) => field.handleChange(e.target.value)}

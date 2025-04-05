@@ -11,7 +11,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
+import { TextareaAutosize } from '@/components/ui/textarea'
 import { type Subscription, type SubscriptionFrequency } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
 import { format } from 'date-fns'
@@ -388,7 +388,9 @@ export function AddSubscriptionForm({ open, onOpenChange, subscription }: AddSub
               {(field) => (
                 <div className="grid gap-2">
                   <Label htmlFor="description">Description (Optional)</Label>
-                  <Textarea
+                  <TextareaAutosize
+                    minRows={3}
+                    maxRows={10}
                     id="description"
                     placeholder="Add some details about this subscription..."
                     value={field.state.value}

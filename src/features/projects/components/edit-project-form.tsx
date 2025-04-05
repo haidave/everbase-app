@@ -13,7 +13,7 @@ import { IconPicker } from '@/components/ui/icon-picker'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
+import { TextareaAutosize } from '@/components/ui/textarea'
 import { PROJECT_STATUSES, type Project, type ProjectStatus } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
 import { useNavigate } from '@tanstack/react-router'
@@ -96,7 +96,9 @@ export function EditProjectForm({ project, open, onOpenChange }: EditProjectForm
               {(field) => (
                 <>
                   <Label htmlFor="description">Description (Optional)</Label>
-                  <Textarea
+                  <TextareaAutosize
+                    minRows={3}
+                    maxRows={10}
                     id="description"
                     placeholder="Describe this project"
                     value={field.state.value}

@@ -172,12 +172,13 @@ export function AddBirthdayForm({ open, onOpenChange, birthday, onDelete }: AddB
                 <>
                   <Label htmlFor="description">Notes (optional)</Label>
                   <TextareaAutosize
+                    minRows={3}
+                    maxRows={10}
                     id="description"
                     placeholder="Add some notes..."
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
-                    minRows={3}
                   />
                 </>
               )}
