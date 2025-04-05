@@ -281,13 +281,11 @@ export function ProjectKanbanBoard({ projects: propProjects }: ProjectKanbanBoar
   }
 
   return (
-    <>
-      <div className="mb-4">
-        <Button onClick={() => setIsAddDialogOpen(true)}>
-          <PlusIcon />
-          Add Project
-        </Button>
-      </div>
+    <div className="space-y-6">
+      <Button onClick={() => setIsAddDialogOpen(true)}>
+        <PlusIcon />
+        Add Project
+      </Button>
 
       <DndContext
         sensors={sensors}
@@ -314,6 +312,6 @@ export function ProjectKanbanBoard({ projects: propProjects }: ProjectKanbanBoar
       </DndContext>
 
       <AddProjectForm open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />
-    </>
+    </div>
   )
 }

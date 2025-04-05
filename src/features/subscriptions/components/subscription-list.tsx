@@ -51,7 +51,7 @@ export function SubscriptionList() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <Button onClick={() => setIsAddDialogOpen(true)}>
         <PlusIcon />
         Add Subscription

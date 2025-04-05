@@ -15,9 +15,9 @@ export const Route = createFileRoute('/_authenticated/birthdays')({
 
 function BirthdaysPage() {
   return (
-    <section className="space-y-4">
-      <AddBirthdayForm open={false} onOpenChange={() => {}} />
+    <section className="space-y-6">
       <BirthdayList />
+      <AddBirthdayForm open={false} onOpenChange={() => {}} />
     </section>
   )
 }
