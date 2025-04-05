@@ -30,7 +30,8 @@ export function useCreateProject() {
   const { user } = useAuth()
 
   return useMutation({
-    mutationFn: (project: Pick<Project, 'name' | 'status' | 'icon'>) => api.projects.create(project),
+    mutationFn: (project: { name: string; description?: string; status: Project['status']; icon: string }) =>
+      api.projects.create(project),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects', user?.id] })
     },

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DynamicIcon } from '@/components/ui/dynamic-icon'
 import { EditFeatureForm } from '@/features/projects/components/edit-feature-form'
 import { AddTaskForm } from '@/features/tasks/components/add-task-form'
@@ -60,36 +60,33 @@ function FeatureDetailPage() {
 
   return (
     <>
-      <div className="mx-auto max-w-3xl">
-        <Card className="mb-6">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <div className="flex items-center gap-2">
-              <DynamicIcon name={displayFeature.icon} className="size-4" />
-              <CardTitle className="text-xl">{displayFeature.name}</CardTitle>
-            </div>
-            {project && (
+      <div className="flex flex-col gap-8">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-0">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <DynamicIcon name={displayFeature.icon} className="size-5" />
+                <CardTitle className="text-xl">{displayFeature.name}</CardTitle>
+              </div>
               <Badge>
                 <Link to="/projects/$projectId" params={{ projectId }}>
                   {project.name}
                 </Link>
               </Badge>
-            )}
-          </CardHeader>
-          <CardContent>
-            {displayFeature.description && <p className="mb-4">{displayFeature.description}</p>}
-            <p className="text-muted-foreground text-sm">
-              Created on {new Date(displayFeature.createdAt).toLocaleDateString()}
-            </p>
-          </CardContent>
-          <CardFooter className="flex justify-end">
+            </div>
             <Button onClick={() => setEditingFeature(true)}>
               <Pencil />
               Edit
             </Button>
-          </CardFooter>
+          </CardHeader>
+          <CardContent>
+            {displayFeature.description ? (
+              <p className="text-muted-foreground mt-2 text-sm">{displayFeature.description}</p>
+            ) : null}
+          </CardContent>
         </Card>
 
-        <div className="bg-card rounded-lg border p-4">
+        <div>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-foreground-primary text-lg font-medium">Feature Tasks</h2>
             <Button onClick={() => setIsAddDialogOpen(true)} className="w-fit">
@@ -103,9 +100,9 @@ function FeatureDetailPage() {
               <LoaderCircleIcon className="text-muted-foreground h-5 w-5 animate-spin" />
             </div>
           ) : tasks && tasks.length > 0 ? (
-            <TaskKanbanBoard tasks={tasks} />
+            <TaskKanbanBoard tasks={tasks} groupBy="none" />
           ) : (
-            <p className="text-muted-foreground">No tasks assigned to this feature yet.</p>
+            <p className="text-muted-foreground text-sm">No tasks assigned to this feature yet.</p>
           )}
         </div>
       </div>
