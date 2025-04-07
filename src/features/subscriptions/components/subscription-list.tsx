@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { type Subscription } from '@/db/schema'
 import { PlusIcon } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { useDeleteSubscription, useSubscriptions } from '@/hooks/use-subscriptions'
 
@@ -47,6 +48,7 @@ export function SubscriptionList() {
     if (subscriptionToDelete) {
       deleteSubscription.mutate(subscriptionToDelete.id)
       setSubscriptionToDelete(null)
+      toast.success(`Subscription "${subscriptionToDelete.name}" was deleted.`)
     }
   }
 
