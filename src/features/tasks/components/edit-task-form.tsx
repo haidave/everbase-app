@@ -18,6 +18,7 @@ import type { Task, TaskStatus } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
 import { LoaderCircleIcon, SaveIcon } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
+import { toast } from 'sonner'
 
 import { useFeatures, useTaskFeatures } from '@/hooks/use-features'
 import { useProjects } from '@/hooks/use-projects'
@@ -88,9 +89,11 @@ export function EditTaskForm({ task, open, onOpenChange }: EditTaskFormProps) {
           newFeatureId: value.featureId || null,
         })
 
+        toast.success(`Task "${value.title}" was updated.`)
         onOpenChange(false)
       } catch (error) {
         console.error('Error updating task:', error)
+        toast.error('Failed to update task.')
       } finally {
         setIsSubmitting(false)
       }
@@ -122,6 +125,7 @@ export function EditTaskForm({ task, open, onOpenChange }: EditTaskFormProps) {
       onSuccess: () => {
         setIsDeleteDialogOpen(false)
         onOpenChange(false)
+        toast.success(`Task "${task.title}" was deleted.`)
       },
     })
   }
