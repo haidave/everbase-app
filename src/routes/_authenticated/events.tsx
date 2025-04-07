@@ -1,4 +1,3 @@
-import { AddEventForm } from '@/features/events/components/add-event-form'
 import { EventList } from '@/features/events/components/event-list'
 import { createFileRoute } from '@tanstack/react-router'
 
@@ -15,8 +14,7 @@ export const Route = createFileRoute('/_authenticated/events')({
 
 function EventsPage() {
   return (
-    <section className="space-y-4">
-      <AddEventForm open={false} onOpenChange={() => {}} />
+    <section>
       <EventList />
     </section>
   )

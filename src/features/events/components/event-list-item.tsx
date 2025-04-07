@@ -7,12 +7,7 @@ import { cn } from '@/lib/utils'
 
 import { AddEventForm } from './add-event-form'
 
-type EventListItemProps = {
-  event: Event
-  onDelete: (event: Event) => void
-}
-
-export function EventListItem({ event, onDelete }: EventListItemProps) {
+export function EventListItem({ event }: { event: Event }) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const eventDate = new Date(event.date)
   const isPastEvent = eventDate < new Date()
@@ -29,15 +24,7 @@ export function EventListItem({ event, onDelete }: EventListItemProps) {
         </div>
       </Button>
 
-      <AddEventForm
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        event={event}
-        onDelete={() => {
-          onDelete(event)
-          setIsEditDialogOpen(false)
-        }}
-      />
+      <AddEventForm open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} event={event} />
     </>
   )
 }

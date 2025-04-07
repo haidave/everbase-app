@@ -2,35 +2,21 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { type Event } from '@/db/schema'
 import { format, getMonth, isSameMonth } from 'date-fns'
 import { CalendarIcon, PlusIcon } from 'lucide-react'
 
 import { formatDateString } from '@/lib/formatters'
-import { useDeleteEvent, useEvents } from '@/hooks/use-events'
+import { useEvents } from '@/hooks/use-events'
 
 import { AddEventForm } from './add-event-form'
 import { EventListItem } from './event-list-item'
 
 export function EventList() {
   const { data: events, isLoading } = useEvents()
-  const deleteEvent = useDeleteEvent()
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [eventToDelete, setEventToDelete] = useState<Event | null>(null)
 
   if (isLoading) return <div className="p-4">Loading events...</div>
-
-  const handleDeleteEvent = (event: Event) => {
-    setEventToDelete(event)
-  }
-
-  const confirmDelete = () => {
-    if (eventToDelete) {
-      deleteEvent.mutate(eventToDelete.id)
-      setEventToDelete(null)
-    }
-  }
 
   // Group events by month
   const eventsByMonth = events?.reduce(
@@ -112,9 +98,7 @@ export function EventList() {
                     </div>
                     <div className="flex max-h-[300px] w-full flex-col gap-2 overflow-y-auto">
                       {monthEvents.length > 0 ? (
-                        monthEvents.map((event) => (
-                          <EventListItem key={event.id} event={event} onDelete={handleDeleteEvent} />
-                        ))
+                        monthEvents.map((event) => <EventListItem key={event.id} event={event} />)
                       ) : (
                         <p className="text-muted-foreground py-4 text-center">No events this month</p>
                       )}
@@ -137,15 +121,6 @@ export function EventList() {
       )}
 
       <AddEventForm open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />
-
-      <ConfirmationDialog
-        open={!!eventToDelete}
-        onOpenChange={(open) => !open && setEventToDelete(null)}
-        title="Are you sure?"
-        description={`This will permanently delete the event "${eventToDelete?.title}".`}
-        onConfirm={confirmDelete}
-        isLoading={deleteEvent.isPending}
-      />
     </div>
   )
 }
