@@ -15,6 +15,7 @@ import { type Quote } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
 import { LoaderCircleIcon, PlusIcon, SaveIcon } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
+import { toast } from 'sonner'
 
 import { useCreateQuote, useUpdateQuote } from '@/hooks/use-quotes'
 
@@ -48,6 +49,7 @@ export function AddQuoteForm({ open, onOpenChange, quote }: AddQuoteFormProps) {
             onSuccess: () => {
               form.reset()
               onOpenChange(false)
+              toast.success(`Quote was updated.`)
             },
           }
         )
@@ -61,6 +63,7 @@ export function AddQuoteForm({ open, onOpenChange, quote }: AddQuoteFormProps) {
             onSuccess: () => {
               form.reset()
               onOpenChange(false)
+              toast.success(`Quote was added.`)
             },
           }
         )

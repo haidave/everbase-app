@@ -23,7 +23,7 @@ export function QuoteListItem({ quote, onDelete, onEdit }: QuoteListItemProps) {
           <Pencil />
         </Button>
         <Button variant="ghost" size="icon" onClick={() => onDelete(quote)}>
-          <Trash2 />
+          <Trash2 className="text-destructive" />
         </Button>
       </CardFooter>
     </Card>

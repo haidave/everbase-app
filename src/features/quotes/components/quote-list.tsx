@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { type Quote } from '@/db/schema'
 import { PlusIcon, QuoteIcon } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { useDeleteQuote, useQuotes } from '@/hooks/use-quotes'
 
@@ -40,6 +41,7 @@ export function QuoteList() {
     if (quoteToDelete) {
       deleteQuote.mutate(quoteToDelete.id)
       setQuoteToDelete(null)
+      toast.success(`Quote by ${quoteToDelete.author} was deleted.`)
     }
   }
 
