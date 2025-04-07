@@ -2,36 +2,21 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { type Birthday } from '@/db/schema'
 import { format, getMonth, isSameMonth } from 'date-fns'
 import { CalendarDaysIcon, PlusIcon } from 'lucide-react'
 
 import { formatDateString } from '@/lib/formatters'
-import { useBirthdays, useDeleteBirthday } from '@/hooks/use-birthdays'
+import { useBirthdays } from '@/hooks/use-birthdays'
 
 import { AddBirthdayForm } from './add-birthday-form'
 import { BirthdayListItem } from './birthday-list-item'
 
 export function BirthdayList() {
   const { data: birthdays, isLoading } = useBirthdays()
-  const deleteBirthday = useDeleteBirthday()
-
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [birthdayToDelete, setBirthdayToDelete] = useState<Birthday | null>(null)
 
   if (isLoading) return <div className="p-4">Loading birthdays...</div>
-
-  const handleDeleteBirthday = (birthday: Birthday) => {
-    setBirthdayToDelete(birthday)
-  }
-
-  const confirmDelete = () => {
-    if (birthdayToDelete) {
-      deleteBirthday.mutate(birthdayToDelete.id)
-      setBirthdayToDelete(null)
-    }
-  }
 
   // Group birthdays by month
   const birthdaysByMonth = birthdays?.reduce(
@@ -113,7 +98,7 @@ export function BirthdayList() {
                     </div>
                     <div className="flex max-h-[300px] w-full flex-col gap-2 overflow-y-auto">
                       {monthBirthdays.map((birthday) => (
-                        <BirthdayListItem key={birthday.id} birthday={birthday} onDelete={handleDeleteBirthday} />
+                        <BirthdayListItem key={birthday.id} birthday={birthday} />
                       ))}
                     </div>
                   </div>
@@ -134,15 +119,6 @@ export function BirthdayList() {
       )}
 
       <AddBirthdayForm open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />
-
-      <ConfirmationDialog
-        open={!!birthdayToDelete}
-        onOpenChange={(open) => !open && setBirthdayToDelete(null)}
-        title="Are you sure?"
-        description={`This will permanently delete the birthday for ${birthdayToDelete?.name}.`}
-        onConfirm={confirmDelete}
-        isLoading={deleteBirthday.isPending}
-      />
     </div>
   )
 }

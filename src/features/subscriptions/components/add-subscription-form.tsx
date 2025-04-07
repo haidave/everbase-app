@@ -17,6 +17,7 @@ import { useForm } from '@tanstack/react-form'
 import { format } from 'date-fns'
 import { LoaderCircleIcon, PlusIcon, SaveIcon } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
+import { toast } from 'sonner'
 
 import { useCreateSubscription, useUpdateSubscription } from '@/hooks/use-subscriptions'
 
@@ -79,6 +80,7 @@ export function AddSubscriptionForm({ open, onOpenChange, subscription }: AddSub
             onSuccess: () => {
               form.reset()
               onOpenChange(false)
+              toast.success(`Subscription "${value.name}" was updated.`)
             },
           }
         )
@@ -99,6 +101,7 @@ export function AddSubscriptionForm({ open, onOpenChange, subscription }: AddSub
             onSuccess: () => {
               form.reset()
               onOpenChange(false)
+              toast.success(`Subscription "${value.name}" was added.`)
             },
           }
         )

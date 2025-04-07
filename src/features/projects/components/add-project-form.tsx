@@ -15,6 +15,7 @@ import { TextareaAutosize } from '@/components/ui/textarea'
 import { type ProjectStatus } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
 import { LoaderCircleIcon, PlusIcon } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { useCreateProject } from '@/hooks/use-projects'
 
@@ -43,6 +44,7 @@ export function AddProjectForm({ open, onOpenChange }: AddProjectFormProps) {
         },
         {
           onSuccess: () => {
+            toast.success(`Project "${value.name}" was added.`)
             form.reset()
             onOpenChange(false)
           },

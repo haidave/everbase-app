@@ -8,10 +8,9 @@ import { AddBirthdayForm } from './add-birthday-form'
 
 type BirthdayListItemProps = {
   birthday: Birthday
-  onDelete: (birthday: Birthday) => void
 }
 
-export function BirthdayListItem({ birthday, onDelete }: BirthdayListItemProps) {
+export function BirthdayListItem({ birthday }: BirthdayListItemProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const birthDate = new Date(birthday.birthDate)
   const nextAge = calculateNextBirthdayAge(birthday.birthDate)
@@ -28,15 +27,7 @@ export function BirthdayListItem({ birthday, onDelete }: BirthdayListItemProps) 
         </div>
       </Button>
 
-      <AddBirthdayForm
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        birthday={birthday}
-        onDelete={() => {
-          onDelete(birthday)
-          setIsEditDialogOpen(false)
-        }}
-      />
+      <AddBirthdayForm open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} birthday={birthday} />
     </>
   )
 }

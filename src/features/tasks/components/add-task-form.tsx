@@ -17,6 +17,7 @@ import type { TaskStatus } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
 import { LoaderCircleIcon, PlusIcon } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
+import { toast } from 'sonner'
 
 import { useFeatures } from '@/hooks/use-features'
 import { useProjects } from '@/hooks/use-projects'
@@ -58,10 +59,12 @@ const AddTaskForm = ({ open, onOpenChange, defaultProjectId, defaultFeatureId }:
           status: value.status as TaskStatus,
         })
 
+        toast.success(`Task "${value.title}" was added.`)
         form.reset()
         onOpenChange(false)
       } catch (error) {
         console.error('Error creating task:', error)
+        toast.error('Failed to create task.')
       } finally {
         setIsSubmitting(false)
       }

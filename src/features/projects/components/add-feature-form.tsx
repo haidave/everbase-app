@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label'
 import { TextareaAutosize } from '@/components/ui/textarea'
 import { useForm } from '@tanstack/react-form'
 import { LoaderCircleIcon, PlusIcon } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { useCreateFeature } from '@/hooks/use-features'
 
@@ -39,6 +40,7 @@ export function AddFeatureForm({ projectId, open, onOpenChange }: AddFeatureForm
           description: value.description,
           icon: value.icon,
         })
+        toast.success(`Feature "${value.name}" was added.`)
         form.reset()
         onOpenChange(false)
       } catch (error) {

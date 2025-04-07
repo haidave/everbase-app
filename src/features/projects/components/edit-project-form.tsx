@@ -18,6 +18,7 @@ import { PROJECT_STATUSES, type Project, type ProjectStatus } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
 import { useNavigate } from '@tanstack/react-router'
 import { LoaderCircleIcon } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { useDeleteProject, useUpdateProject } from '@/hooks/use-projects'
 
@@ -41,20 +42,21 @@ export function EditProjectForm({ project, open, onOpenChange }: EditProjectForm
       icon: project.icon || 'Folder',
     },
     onSubmit: async ({ value }) => {
-      updateProject.mutate(
-        {
+      try {
+        await updateProject.mutateAsync({
           id: project.id,
           name: value.name,
           description: value.description,
           status: value.status,
           icon: value.icon,
-        },
-        {
-          onSuccess: () => {
-            setTimeout(() => onOpenChange(false), 100)
-          },
-        }
-      )
+        })
+
+        onOpenChange(false)
+        toast.success(`Project "${value.name}" was updated.`)
+      } catch (error) {
+        console.error('Error updating project:', error)
+        toast.error('Failed to update project.')
+      }
     },
   })
 
@@ -64,6 +66,7 @@ export function EditProjectForm({ project, open, onOpenChange }: EditProjectForm
         setIsDeleteDialogOpen(false)
         onOpenChange(false)
         navigate({ to: '/projects' })
+        toast.success(`Project "${project.name}" was deleted.`)
       },
     })
   }
@@ -143,13 +146,9 @@ export function EditProjectForm({ project, open, onOpenChange }: EditProjectForm
             <Button variant="destructive" type="button" onClick={() => setIsDeleteDialogOpen(true)}>
               Delete Project
             </Button>
-            <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
-              {([canSubmit, isSubmitting]) => (
-                <Button type="submit" disabled={!canSubmit}>
-                  {isSubmitting ? <LoaderCircleIcon className="animate-spin" /> : 'Save Changes'}
-                </Button>
-              )}
-            </form.Subscribe>
+            <Button type="submit" disabled={updateProject.isPending} onClick={form.handleSubmit}>
+              {updateProject.isPending ? <LoaderCircleIcon className="animate-spin" /> : 'Save Changes'}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

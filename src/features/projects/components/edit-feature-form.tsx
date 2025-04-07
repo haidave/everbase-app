@@ -16,6 +16,7 @@ import { TextareaAutosize } from '@/components/ui/textarea'
 import { useForm } from '@tanstack/react-form'
 import { useNavigate } from '@tanstack/react-router'
 import { LoaderCircleIcon } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { type Feature } from '@/lib/api'
 import { useDeleteFeature, useUpdateFeature } from '@/hooks/use-features'
@@ -50,6 +51,7 @@ export function EditFeatureForm({ feature, open, onOpenChange }: EditFeatureForm
         {
           onSuccess: () => {
             onOpenChange(false)
+            toast.success(`Feature "${value.name}" was updated.`)
           },
         }
       )
@@ -65,6 +67,7 @@ export function EditFeatureForm({ feature, open, onOpenChange }: EditFeatureForm
       {
         onSuccess: () => {
           navigate({ to: '/projects/$projectId', params: { projectId: feature.projectId } })
+          toast.success(`Feature "${feature.name}" was deleted.`)
         },
       }
     )

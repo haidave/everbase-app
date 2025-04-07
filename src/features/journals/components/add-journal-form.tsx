@@ -1,7 +1,9 @@
 import { useRef, useState } from 'react'
 import { TextareaAutosize } from '@/components/ui/textarea'
 import { useForm } from '@tanstack/react-form'
+import { Link } from '@tanstack/react-router'
 import { useHotkeys } from 'react-hotkeys-hook'
+import { toast } from 'sonner'
 
 import { useCreateJournal } from '@/hooks/use-journals'
 
@@ -28,6 +30,17 @@ export function AddJournalForm({ isDashboard = false }: AddJournalFormProps) {
           content: value.content,
         })
         form.reset()
+        if (isDashboard) {
+          toast.success(
+            <p>
+              Journal was added. Visit{' '}
+              <Link to="/journal" className="underline">
+                Journal
+              </Link>{' '}
+              to view it.
+            </p>
+          )
+        }
       } finally {
         setIsSubmitting(false)
       }

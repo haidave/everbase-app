@@ -62,7 +62,7 @@ export function HabitProgress({ habit }: HabitProgressProps) {
   const disabledDays = { after: new Date() }
 
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="mt-auto flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-2">
         <div className="grid place-items-center gap-1 rounded-md border p-4">
           <span className="text-base">

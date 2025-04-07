@@ -7,6 +7,7 @@ import { type Journal } from '@/db/schema'
 import { useForm } from '@tanstack/react-form'
 import { format } from 'date-fns'
 import { XIcon } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { useDeleteJournal, useUpdateJournal } from '@/hooks/use-journals'
 
@@ -23,6 +24,7 @@ export function JournalItem({ journal }: JournalItemProps) {
   const handleDelete = () => {
     deleteJournal.mutate(journal.id)
     setIsDeleteDialogOpen(false)
+    toast.success(`Journal was deleted.`)
   }
 
   const form = useForm({
