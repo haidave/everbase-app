@@ -157,7 +157,7 @@ export function EditProjectForm({ project, open, onOpenChange }: EditProjectForm
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         title="Delete Project"
-        description="Are you sure you want to delete this project? This action cannot be undone."
+        description={`Are you sure you want to delete "${project.name}"? This action cannot be undone.`}
         onConfirm={handleDelete}
         isLoading={deleteProject.isPending}
       />
