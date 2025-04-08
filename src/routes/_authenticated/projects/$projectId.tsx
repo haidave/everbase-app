@@ -88,14 +88,16 @@ function ProjectDetailPage() {
                 <PlusIcon />
                 Add Task
               </Button>
-              <Button
-                variant="outline"
-                onClick={() => setGroupByFeatureInProjectView(!groupByFeatureInProjectView)}
-                className="text-muted-foreground flex items-center gap-1"
-              >
-                {groupByFeatureInProjectView ? <UngroupIcon /> : <GroupIcon />}
-                {groupByFeatureInProjectView ? 'Ungroup' : 'Group by Feature'}
-              </Button>
+              {relatedTasks && relatedTasks.length > 0 && (
+                <Button
+                  variant="outline"
+                  onClick={() => setGroupByFeatureInProjectView(!groupByFeatureInProjectView)}
+                  className="text-muted-foreground flex items-center gap-1"
+                >
+                  {groupByFeatureInProjectView ? <UngroupIcon /> : <GroupIcon />}
+                  {groupByFeatureInProjectView ? 'Ungroup' : 'Group by Feature'}
+                </Button>
+              )}
             </div>
           </div>
 
