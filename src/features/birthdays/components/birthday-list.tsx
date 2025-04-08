@@ -48,7 +48,7 @@ export function BirthdayList() {
       </Button>
 
       {birthdays && birthdays.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 12 }, (_, i) => {
             const monthBirthdays = birthdaysByMonth?.[i] || []
             if (monthBirthdays.length === 0) return null
@@ -69,10 +69,7 @@ export function BirthdayList() {
             return (
               <Card key={monthName}>
                 <CardHeader>
-                  <span className="text-foreground-primary flex items-center gap-2">
-                    <CalendarDaysIcon className="size-4" />
-                    {monthName}
-                  </span>
+                  <span className="text-foreground-primary">{monthName}</span>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-col gap-4 xl:flex-row">
