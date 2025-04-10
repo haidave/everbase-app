@@ -46,9 +46,11 @@ export function Combobox({
           size={size}
           role="combobox"
           aria-expanded={open}
-          className={cn('text-muted-foreground w-full justify-between', triggerClassName)}
+          className={cn('w-full justify-between', triggerClassName)}
         >
-          {value ? options.find((option) => option.value === value)?.label : placeholder}
+          <span className={value ? 'text-foreground' : 'text-muted-foreground'}>
+            {value ? options.find((option) => option.value === value)?.label : placeholder}
+          </span>
           <ChevronsUpDown className="shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
