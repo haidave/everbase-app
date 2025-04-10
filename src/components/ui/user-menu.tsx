@@ -25,7 +25,7 @@ const UserMenu = () => {
           className="h-auto w-full justify-start gap-3 data-[active=true]:font-normal"
         >
           <Avatar className="size-8 shrink-0 group-data-[collapsible=icon]:size-4">
-            <AvatarImage src={user.user_metadata.avatar_url} />
+            <AvatarImage src={user.user_metadata.picture} />
             <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col items-start overflow-hidden text-left text-xs">
