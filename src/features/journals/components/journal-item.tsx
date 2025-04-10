@@ -78,6 +78,7 @@ export function JournalItem({ journal }: JournalItemProps) {
                 }
               }}
               className="border-transparent"
+              minRows={1}
               maxRows={30}
             />
           )}
