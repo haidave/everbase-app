@@ -6,6 +6,7 @@ export type UpcomingItem = {
   id: string
   date: Date
   title: string
+  description?: string
   type: 'birthday' | 'event'
   url: string
 }
@@ -30,6 +31,7 @@ export function getFilteredUpcomingItems(
       id: birthday.id,
       date: nextBirthday,
       title: `${birthday.name}'s Birthday (${age})`,
+      description: birthday.description ?? undefined,
       type: 'birthday' as const,
       url: '/birthdays',
     }
@@ -40,6 +42,7 @@ export function getFilteredUpcomingItems(
     id: event.id,
     date: new Date(event.date),
     title: event.title,
+    description: event.description ?? undefined,
     type: 'event' as const,
     url: '/events',
   }))
