@@ -80,8 +80,8 @@ export function AddJournalForm({ isDashboard = false }: AddJournalFormProps) {
             <TextareaAutosize
               ref={textareaRef}
               placeholder="What's on your mind today?"
-              minRows={isDashboard ? 8 : 5}
-              maxRows={isDashboard ? 8 : 30}
+              minRows={isDashboard ? 6 : 5}
+              maxRows={isDashboard ? 6 : 30}
               value={field.state.value}
               onChange={(e) => field.handleChange(e.target.value)}
               disabled={isSubmitting}

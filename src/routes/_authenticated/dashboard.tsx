@@ -1,3 +1,4 @@
+import { ActiveTasks } from '@/features/dashboard/components/active-tasks'
 import { QuoteOfTheDay } from '@/features/dashboard/components/quote-of-the-day'
 import { UpcomingEvents } from '@/features/dashboard/components/upcoming-events/upcoming-events'
 import { DashboardHabits } from '@/features/habits/components/dashboard-habits'
@@ -40,9 +41,15 @@ function DashboardPage() {
         </section>
       </div>
 
-      <section className="bg-card break-inside-avoid rounded-lg border p-4 lg:col-span-1">
-        <QuoteOfTheDay />
-      </section>
+      <div className="grid grid-cols-2 gap-4 lg:col-span-2">
+        <section className="bg-card h-min break-inside-avoid rounded-lg border p-4">
+          <QuoteOfTheDay />
+        </section>
+
+        <section className="bg-card break-inside-avoid rounded-lg border p-4">
+          <ActiveTasks />
+        </section>
+      </div>
     </div>
   )
 }
