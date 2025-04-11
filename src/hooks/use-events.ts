@@ -16,6 +16,17 @@ export function useEvents() {
   })
 }
 
+// Hook for fetching a single event by ID
+export function useEvent(id: string) {
+  const { user } = useAuth()
+
+  return useQuery({
+    queryKey: ['event', id],
+    queryFn: () => (id ? api.events.getById(id) : null),
+    enabled: !!user && !!id,
+  })
+}
+
 // Hook for fetching upcoming events (next 30 days by default)
 export function useUpcomingEvents(days = 30) {
   const { user } = useAuth()

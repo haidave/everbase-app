@@ -23,13 +23,13 @@ const UpcomingEvents = () => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h2 className="text-foreground-primary text-sm">Upcoming events</h2>
         <span className="text-muted-foreground text-xs">Next 30 days</span>
       </div>
 
-      <ul className="grid gap-2">
+      <ul className="grid">
         {filteredItems.map((item) => (
           <UpcomingEventItem key={`${item.type}-${item.id}`} item={item} />
         ))}
