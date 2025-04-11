@@ -29,7 +29,7 @@ const ActiveTasks = () => {
       <h2 className="text-foreground-primary text-sm">Active Tasks</h2>
       <div className="flex flex-col gap-2">
         {inProgressTasks.map((task) => (
-          <TaskKanbanItem key={task.id} task={task} />
+          <TaskKanbanItem key={task.id} task={task} isDashboard />
         ))}
       </div>
     </div>

@@ -16,12 +16,13 @@ import { useDeleteTask } from '@/hooks/use-tasks'
 
 import { EditTaskForm } from '../../edit-task-form'
 
-type TaskKanbanItemProps = {
+interface TaskKanbanItemProps {
   task: Task
   isDragging?: boolean
+  isDashboard?: boolean
 }
 
-export function TaskKanbanItem({ task, isDragging = false }: TaskKanbanItemProps) {
+export function TaskKanbanItem({ task, isDragging = false, isDashboard = false }: TaskKanbanItemProps) {
   const {
     attributes,
     listeners,
@@ -88,10 +89,10 @@ export function TaskKanbanItem({ task, isDragging = false }: TaskKanbanItemProps
             <div
               className={cn(
                 'flex flex-wrap items-center gap-2 text-xs',
-                (currentProject && !groupByProject) || (groupByProject && currentFeature) ? 'mt-2' : ''
+                (currentProject && (isDashboard || !groupByProject)) || (groupByProject && currentFeature) ? 'mt-2' : ''
               )}
             >
-              {!groupByProject && (
+              {(isDashboard || !groupByProject) && (
                 <>
                   {isLoadingProjects ? (
                     <div className="text-muted-foreground flex animate-pulse items-center gap-1">

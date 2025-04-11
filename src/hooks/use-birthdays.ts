@@ -16,6 +16,17 @@ export function useBirthdays() {
   })
 }
 
+// Hook for fetching a single birthday by ID
+export function useBirthday(id: string) {
+  const { user } = useAuth()
+
+  return useQuery({
+    queryKey: ['birthday', id],
+    queryFn: () => (id ? api.birthdays.getById(id) : null),
+    enabled: !!user && !!id,
+  })
+}
+
 // Hook for creating a birthday
 export function useCreateBirthday() {
   const queryClient = useQueryClient()

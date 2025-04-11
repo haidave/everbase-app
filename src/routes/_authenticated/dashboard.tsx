@@ -46,7 +46,7 @@ function DashboardPage() {
           <QuoteOfTheDay />
         </section>
 
-        <section className="bg-card break-inside-avoid rounded-lg border p-4">
+        <section className="bg-card h-min break-inside-avoid rounded-lg border p-4">
           <ActiveTasks />
         </section>
       </div>
