@@ -48,6 +48,7 @@
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.40.0",
     "lucide-react": "^0.477.0",
+    "novel": "^1.0.2",
     "postgres": "^3.4.5",
     "react": "^19.0.0",
     "react-day-picker": "8.10.1",
