@@ -12,6 +12,8 @@ import { useBudgetSubItems } from '@/hooks/use-budget'
 interface BudgetTrackerTableProps {
   data: BudgetItem[]
   balance: number
+  selectedItemIds: Set<string>
+  onToggleSelectItem: (itemId: string) => void
   onEditItem: (item: BudgetItem) => void
   onDeleteItem: (item: BudgetItem) => void
   onAddSubItem: (itemId: string) => void
@@ -23,6 +25,8 @@ interface BudgetTrackerTableProps {
 export function BudgetTrackerTable({
   data,
   balance,
+  selectedItemIds,
+  onToggleSelectItem,
   onEditItem,
   onDeleteItem,
   onAddSubItem,
@@ -70,6 +74,7 @@ export function BudgetTrackerTable({
         <TableHeader>
           <TableRow>
             <TableHead className="w-[40px]"></TableHead>
+            <TableHead className="w-[40px]"></TableHead>
             <TableHead>Item</TableHead>
             <TableHead>Amount</TableHead>
             <TableHead>Amount Paid</TableHead>
@@ -81,7 +86,7 @@ export function BudgetTrackerTable({
         <TableBody>
           {sortedData.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="h-24 text-center">
+              <TableCell colSpan={8} className="h-24 text-center">
                 No budget items yet.
               </TableCell>
             </TableRow>
@@ -94,11 +99,8 @@ export function BudgetTrackerTable({
   )
 
   function BudgetItemRow({ item }: { item: BudgetItem }) {
-    // Use pre-loaded sub-items if available (from API), otherwise fetch them
-    const itemWithSubItems = item as BudgetItem & { subItems?: BudgetSubItem[] }
-    const preLoadedSubItems = itemWithSubItems.subItems
-    const { data: fetchedSubItems = [] } = useBudgetSubItems(item.id)
-    const subItems = preLoadedSubItems || fetchedSubItems
+    // Always use the hook data to ensure real-time updates
+    const { data: subItems = [] } = useBudgetSubItems(item.id)
     const hasSubItems = subItems.length > 0
     const isExpanded = expandedItems.has(item.id)
 
@@ -126,9 +128,18 @@ export function BudgetTrackerTable({
       return a.paid ? 1 : -1
     })
 
+    const isSelected = selectedItemIds.has(item.id)
+
     return (
       <>
         <TableRow className={cn({ 'opacity-50': item.paid })}>
+          <TableCell>
+            <Checkbox
+              checked={isSelected}
+              onCheckedChange={() => onToggleSelectItem(item.id)}
+              aria-label={`Select ${item.name}`}
+            />
+          </TableCell>
           <TableCell>
             {hasSubItems && (
               <Button
@@ -199,6 +210,7 @@ export function BudgetTrackerTable({
             const subItemAffordable = isAffordable(subItem.amount, subItem.amountPaid)
             return (
               <TableRow key={subItem.id} className={cn('bg-muted/30', { 'opacity-50': subItem.paid })}>
+                <TableCell></TableCell>
                 <TableCell></TableCell>
                 <TableCell className="pl-8">
                   <span className="text-muted-foreground">↳</span> {subItem.name}
