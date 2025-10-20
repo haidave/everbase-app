@@ -214,6 +214,51 @@ export const tasksRelations = relations(tasks, ({ many }) => ({
   features: many(taskFeatures),
 }))
 
+// Budget Balance table - stores the user's current money balance
+export const budgetBalance = pgTable('budget_balance', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id)
+    .unique(), // Each user has one balance record
+  amount: text('amount').notNull(), // Store as text to handle large numbers and decimals
+  currency: text('currency').default('CZK').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+})
+
+// Budget Items table - main budget items that can have sub-items
+export const budgetItems = pgTable('budget_items', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id),
+  name: text('name').notNull(),
+  amount: text('amount').default('0').notNull(), // Item's own amount (added to sub-items if any)
+  amountPaid: text('amount_paid').default('0').notNull(), // Item's own amount paid (added to sub-items if any)
+  paid: boolean('paid').default(false).notNull(), // Whether fully paid
+  note: text('note'), // Optional description/note
+  order: integer('order').default(0).notNull(), // For ordering items
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+})
+
+// Budget Sub-Items table - nested items under a parent budget item
+export const budgetSubItems = pgTable('budget_sub_items', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  budgetItemId: uuid('budget_item_id')
+    .notNull()
+    .references(() => budgetItems.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  amount: text('amount').notNull(),
+  amountPaid: text('amount_paid').default('0').notNull(),
+  paid: boolean('paid').default(false).notNull(),
+  note: text('note'),
+  order: integer('order').default(0).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+})
+
 export type Task = InferSelectModel<typeof tasks>
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number]
 export type Project = InferSelectModel<typeof projects>
@@ -229,3 +274,6 @@ export type SubscriptionFrequency = (typeof SUBSCRIPTION_FREQUENCIES)[number]
 export type Subscription = InferSelectModel<typeof subscriptions>
 export type Quote = InferSelectModel<typeof quotes>
 export type TaskStatus = (typeof TASK_STATUSES)[number]
+export type BudgetBalance = InferSelectModel<typeof budgetBalance>
+export type BudgetItem = InferSelectModel<typeof budgetItems>
+export type BudgetSubItem = InferSelectModel<typeof budgetSubItems>

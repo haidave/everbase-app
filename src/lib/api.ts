@@ -1,5 +1,8 @@
 import {
   type Birthday,
+  type BudgetBalance,
+  type BudgetItem,
+  type BudgetSubItem,
   type Event,
   type Habit,
   type HabitCompletion,
@@ -112,6 +115,9 @@ export type {
   Subscription,
   SubscriptionFrequency,
   Quote,
+  BudgetBalance,
+  BudgetItem,
+  BudgetSubItem,
 }
 
 export const api = {
@@ -1016,6 +1022,231 @@ export const api = {
 
       if (tasksError) throw tasksError
       return transformArraySnakeToCamel<Task>(tasks)
+    },
+  },
+
+  budgetBalance: {
+    get: async (): Promise<BudgetBalance | null> => {
+      const { data: userData } = await supabase.auth.getUser()
+
+      const { data, error } = await supabase
+        .from('budget_balance')
+        .select('*')
+        .eq('user_id', userData.user?.id)
+        .single()
+
+      if (error) {
+        // If no balance exists, return null
+        if (error.code === 'PGRST116') return null
+        throw error
+      }
+      return snakeToCamelCase<BudgetBalance>(data)
+    },
+
+    createOrUpdate: async (amount: string, currency = 'CZK'): Promise<BudgetBalance> => {
+      const { data: userData } = await supabase.auth.getUser()
+
+      // Try to get existing balance
+      const { data: existing } = await supabase
+        .from('budget_balance')
+        .select('*')
+        .eq('user_id', userData.user?.id)
+        .single()
+
+      if (existing) {
+        // Update existing balance
+        const { data, error } = await supabase
+          .from('budget_balance')
+          .update({ amount, currency })
+          .eq('user_id', userData.user?.id)
+          .select()
+          .single()
+
+        if (error) throw error
+        return snakeToCamelCase<BudgetBalance>(data)
+      } else {
+        // Create new balance
+        const { data, error } = await supabase
+          .from('budget_balance')
+          .insert({ user_id: userData.user?.id, amount, currency })
+          .select()
+          .single()
+
+        if (error) throw error
+        return snakeToCamelCase<BudgetBalance>(data)
+      }
+    },
+  },
+
+  budgetItems: {
+    getAll: async (): Promise<BudgetItem[]> => {
+      const { data: userData } = await supabase.auth.getUser()
+
+      // Fetch all items
+      const { data: items, error: itemsError } = await supabase
+        .from('budget_items')
+        .select('*')
+        .eq('user_id', userData.user?.id)
+        .order('order', { ascending: true })
+
+      if (itemsError) throw itemsError
+
+      // Fetch all sub-items for all items at once
+      const itemIds = items?.map((item) => item.id) || []
+      const { data: subItems, error: subItemsError } = await supabase
+        .from('budget_sub_items')
+        .select('*')
+        .in('budget_item_id', itemIds)
+        .order('order', { ascending: true })
+
+      if (subItemsError) throw subItemsError
+
+      // Transform and attach sub-items to their parent items
+      const transformedItems = transformArraySnakeToCamel<BudgetItem>(items)
+      const transformedSubItems = transformArraySnakeToCamel<BudgetSubItem>(subItems || [])
+
+      // Create a map of itemId -> subItems
+      const subItemsMap = new Map<string, BudgetSubItem[]>()
+      transformedSubItems.forEach((subItem) => {
+        const parentId = subItem.budgetItemId
+        if (!subItemsMap.has(parentId)) {
+          subItemsMap.set(parentId, [])
+        }
+        subItemsMap.get(parentId)!.push(subItem)
+      })
+
+      // Attach sub-items to items and calculate effective amounts
+      return transformedItems.map((item) => ({
+        ...item,
+        subItems: subItemsMap.get(item.id) || [],
+        _effectiveAmount:
+          parseFloat(item.amount) +
+          (subItemsMap.get(item.id) || []).reduce((sum, subItem) => sum + parseFloat(subItem.amount), 0),
+      }))
+    },
+
+    getById: async (id: string): Promise<BudgetItem> => {
+      const { data, error } = await supabase.from('budget_items').select('*').eq('id', id).single()
+
+      if (error) throw error
+      return snakeToCamelCase<BudgetItem>(data)
+    },
+
+    create: async (item: {
+      name: string
+      amount?: string
+      amountPaid?: string
+      paid?: boolean
+      note?: string
+      order?: number
+    }): Promise<BudgetItem> => {
+      const { data: userData } = await supabase.auth.getUser()
+
+      const supabaseItem = {
+        user_id: userData.user?.id,
+        name: item.name,
+        amount: item.amount || '0',
+        amount_paid: item.amountPaid || '0',
+        paid: item.paid || false,
+        note: item.note || null,
+        order: item.order || 0,
+      }
+
+      const { data, error } = await supabase.from('budget_items').insert(supabaseItem).select().single()
+
+      if (error) throw error
+      return snakeToCamelCase<BudgetItem>(data)
+    },
+
+    update: async (
+      id: string,
+      updates: Partial<Pick<BudgetItem, 'name' | 'amount' | 'amountPaid' | 'paid' | 'note' | 'order'>>
+    ): Promise<BudgetItem> => {
+      const supabaseUpdates: Record<string, unknown> = {}
+
+      if (updates.name !== undefined) supabaseUpdates.name = updates.name
+      if (updates.amount !== undefined) supabaseUpdates.amount = updates.amount
+      if (updates.amountPaid !== undefined) supabaseUpdates.amount_paid = updates.amountPaid
+      if (updates.paid !== undefined) supabaseUpdates.paid = updates.paid
+      if (updates.note !== undefined) supabaseUpdates.note = updates.note
+      if (updates.order !== undefined) supabaseUpdates.order = updates.order
+
+      const { data, error } = await supabase.from('budget_items').update(supabaseUpdates).eq('id', id).select().single()
+
+      if (error) throw error
+      return snakeToCamelCase<BudgetItem>(data)
+    },
+
+    delete: async (id: string): Promise<void> => {
+      const { error } = await supabase.from('budget_items').delete().eq('id', id)
+      if (error) throw error
+    },
+  },
+
+  budgetSubItems: {
+    getAll: async (budgetItemId: string): Promise<BudgetSubItem[]> => {
+      const { data, error } = await supabase
+        .from('budget_sub_items')
+        .select('*')
+        .eq('budget_item_id', budgetItemId)
+        .order('order', { ascending: true })
+
+      if (error) throw error
+      return transformArraySnakeToCamel<BudgetSubItem>(data)
+    },
+
+    create: async (subItem: {
+      budgetItemId: string
+      name: string
+      amount: string
+      amountPaid?: string
+      paid?: boolean
+      note?: string
+      order?: number
+    }): Promise<BudgetSubItem> => {
+      const supabaseSubItem = {
+        budget_item_id: subItem.budgetItemId,
+        name: subItem.name,
+        amount: subItem.amount,
+        amount_paid: subItem.amountPaid || '0',
+        paid: subItem.paid || false,
+        note: subItem.note || null,
+        order: subItem.order || 0,
+      }
+
+      const { data, error } = await supabase.from('budget_sub_items').insert(supabaseSubItem).select().single()
+
+      if (error) throw error
+      return snakeToCamelCase<BudgetSubItem>(data)
+    },
+
+    update: async (
+      id: string,
+      updates: Partial<Pick<BudgetSubItem, 'name' | 'amount' | 'amountPaid' | 'paid' | 'note' | 'order'>>
+    ): Promise<BudgetSubItem> => {
+      const supabaseUpdates: Record<string, unknown> = {}
+
+      if (updates.name !== undefined) supabaseUpdates.name = updates.name
+      if (updates.amount !== undefined) supabaseUpdates.amount = updates.amount
+      if (updates.amountPaid !== undefined) supabaseUpdates.amount_paid = updates.amountPaid
+      if (updates.paid !== undefined) supabaseUpdates.paid = updates.paid
+      if (updates.note !== undefined) supabaseUpdates.note = updates.note
+      if (updates.order !== undefined) supabaseUpdates.order = updates.order
+
+      const { data, error } = await supabase
+        .from('budget_sub_items')
+        .update(supabaseUpdates)
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return snakeToCamelCase<BudgetSubItem>(data)
+    },
+
+    delete: async (id: string): Promise<void> => {
+      const { error } = await supabase.from('budget_sub_items').delete().eq('id', id)
+      if (error) throw error
     },
   },
 }

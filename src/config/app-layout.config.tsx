@@ -7,6 +7,7 @@ import {
   LayoutDashboardIcon,
   ListTodoIcon,
   NotebookPenIcon,
+  PiggyBankIcon,
   QuoteIcon,
   SproutIcon,
   type LucideIcon,
@@ -49,6 +50,11 @@ export const NAVIGATION_ITEMS: NavigationRoute[] = [
     title: 'Journal',
     url: '/journal',
     icon: NotebookPenIcon,
+  },
+  {
+    title: 'Budget Tracker',
+    url: '/budget-tracker',
+    icon: PiggyBankIcon,
   },
   {
     title: 'Monthly Checklist',
