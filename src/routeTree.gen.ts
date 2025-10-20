@@ -23,6 +23,7 @@ import { Route as AuthenticatedJournalImport } from './routes/_authenticated/jou
 import { Route as AuthenticatedHabitsImport } from './routes/_authenticated/habits'
 import { Route as AuthenticatedEventsImport } from './routes/_authenticated/events'
 import { Route as AuthenticatedDashboardImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedBudgetTrackerImport } from './routes/_authenticated/budget-tracker'
 import { Route as AuthenticatedBirthdaysImport } from './routes/_authenticated/birthdays'
 import { Route as AuthenticatedProjectsIndexImport } from './routes/_authenticated/projects/index'
 import { Route as AuthenticatedProjectsProjectIdImport } from './routes/_authenticated/projects/$projectId'
@@ -105,6 +106,14 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardImport.update({
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 
+const AuthenticatedBudgetTrackerRoute = AuthenticatedBudgetTrackerImport.update(
+  {
+    id: '/budget-tracker',
+    path: '/budget-tracker',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any,
+)
+
 const AuthenticatedBirthdaysRoute = AuthenticatedBirthdaysImport.update({
   id: '/birthdays',
   path: '/birthdays',
@@ -170,6 +179,13 @@ declare module '@tanstack/react-router' {
       path: '/birthdays'
       fullPath: '/birthdays'
       preLoaderRoute: typeof AuthenticatedBirthdaysImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    '/_authenticated/budget-tracker': {
+      id: '/_authenticated/budget-tracker'
+      path: '/budget-tracker'
+      fullPath: '/budget-tracker'
+      preLoaderRoute: typeof AuthenticatedBudgetTrackerImport
       parentRoute: typeof AuthenticatedImport
     }
     '/_authenticated/dashboard': {
@@ -270,6 +286,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedBirthdaysRoute: typeof AuthenticatedBirthdaysRoute
+  AuthenticatedBudgetTrackerRoute: typeof AuthenticatedBudgetTrackerRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEventsRoute: typeof AuthenticatedEventsRoute
   AuthenticatedHabitsRoute: typeof AuthenticatedHabitsRoute
@@ -286,6 +303,7 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedBirthdaysRoute: AuthenticatedBirthdaysRoute,
+  AuthenticatedBudgetTrackerRoute: AuthenticatedBudgetTrackerRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEventsRoute: AuthenticatedEventsRoute,
   AuthenticatedHabitsRoute: AuthenticatedHabitsRoute,
@@ -311,6 +329,7 @@ export interface FileRoutesByFullPath {
   '': typeof AuthenticatedRouteWithChildren
   '/sign-in': typeof SignInRoute
   '/birthdays': typeof AuthenticatedBirthdaysRoute
+  '/budget-tracker': typeof AuthenticatedBudgetTrackerRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/events': typeof AuthenticatedEventsRoute
   '/habits': typeof AuthenticatedHabitsRoute
@@ -331,6 +350,7 @@ export interface FileRoutesByTo {
   '': typeof AuthenticatedRouteWithChildren
   '/sign-in': typeof SignInRoute
   '/birthdays': typeof AuthenticatedBirthdaysRoute
+  '/budget-tracker': typeof AuthenticatedBudgetTrackerRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/events': typeof AuthenticatedEventsRoute
   '/habits': typeof AuthenticatedHabitsRoute
@@ -352,6 +372,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/sign-in': typeof SignInRoute
   '/_authenticated/birthdays': typeof AuthenticatedBirthdaysRoute
+  '/_authenticated/budget-tracker': typeof AuthenticatedBudgetTrackerRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/events': typeof AuthenticatedEventsRoute
   '/_authenticated/habits': typeof AuthenticatedHabitsRoute
@@ -374,6 +395,7 @@ export interface FileRouteTypes {
     | ''
     | '/sign-in'
     | '/birthdays'
+    | '/budget-tracker'
     | '/dashboard'
     | '/events'
     | '/habits'
@@ -393,6 +415,7 @@ export interface FileRouteTypes {
     | ''
     | '/sign-in'
     | '/birthdays'
+    | '/budget-tracker'
     | '/dashboard'
     | '/events'
     | '/habits'
@@ -412,6 +435,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/sign-in'
     | '/_authenticated/birthdays'
+    | '/_authenticated/budget-tracker'
     | '/_authenticated/dashboard'
     | '/_authenticated/events'
     | '/_authenticated/habits'
@@ -465,6 +489,7 @@ export const routeTree = rootRoute
       "filePath": "_authenticated.tsx",
       "children": [
         "/_authenticated/birthdays",
+        "/_authenticated/budget-tracker",
         "/_authenticated/dashboard",
         "/_authenticated/events",
         "/_authenticated/habits",
@@ -484,6 +509,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/birthdays": {
       "filePath": "_authenticated/birthdays.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/budget-tracker": {
+      "filePath": "_authenticated/budget-tracker.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/dashboard": {

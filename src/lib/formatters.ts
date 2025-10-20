@@ -34,3 +34,17 @@ export function transformArraySnakeToCamel<T>(array: Record<string, unknown>[] |
 export function formatDateString(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
+
+/**
+ * Formats a number using Czech locale formatting (space as thousands separator)
+ * Example: 177216 -> "177 216"
+ */
+export function formatCzechNumber(value: number | string): string {
+  const num = typeof value === 'string' ? parseFloat(value) : value
+  if (isNaN(num)) return '0'
+
+  // Use Czech locale for formatting
+  return new Intl.NumberFormat('cs-CZ', {
+    maximumFractionDigits: 0,
+  }).format(num)
+}

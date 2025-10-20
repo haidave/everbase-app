@@ -134,6 +134,27 @@
       "when": 1743865052874,
       "tag": "0018_swift_mercury",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1760990948851,
+      "tag": "0019_fixed_power_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1760993198967,
+      "tag": "0020_mixed_tarantula",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1760994855880,
+      "tag": "0021_sad_young_avengers",
+      "breakpoints": true
     }
   ]
 }
