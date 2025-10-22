@@ -44,16 +44,55 @@ export function BudgetTrackerList() {
     name: string
   } | null>(null)
 
+  // Selected items for filtering summary calculations
+  const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set())
+
   if (isLoading) {
     return <div className="p-4">Loading budget tracker...</div>
   }
 
   const currentBalance = balance ? parseFloat(balance.amount) : 0
 
-  // Calculate total amount and total paid based on stored values
-  const totalAmount = items.reduce((sum, item) => sum + parseFloat(item.amount), 0)
-  const totalPaid = items.reduce((sum, item) => sum + parseFloat(item.amountPaid), 0)
+  // Filter items based on selection (if any items are selected, only show those)
+  const filteredItems = selectedItemIds.size > 0 ? items.filter((item) => selectedItemIds.has(item.id)) : items
+
+  // Calculate total amount and total paid using effective amounts (includes sub-items)
+  const totalAmount = filteredItems.reduce((sum, item) => {
+    const itemWithEffect = item as typeof item & { _effectiveAmount?: number }
+    return sum + (itemWithEffect._effectiveAmount || parseFloat(item.amount))
+  }, 0)
+
+  const totalPaid = filteredItems.reduce((sum, item) => {
+    const itemWithSubs = item as typeof item & { subItems?: Array<{ amountPaid: string }> }
+    const subItemsPaidTotal = (itemWithSubs.subItems || []).reduce(
+      (subSum, subItem) => subSum + parseFloat(subItem.amountPaid),
+      0
+    )
+    return sum + parseFloat(item.amountPaid) + subItemsPaidTotal
+  }, 0)
+
   const remainingToPay = totalAmount - totalPaid
+
+  // Handlers for item selection
+  const handleToggleSelectItem = (itemId: string) => {
+    setSelectedItemIds((prev) => {
+      const newSet = new Set(prev)
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId)
+      } else {
+        newSet.add(itemId)
+      }
+      return newSet
+    })
+  }
+
+  const handleSelectAll = () => {
+    if (selectedItemIds.size === items.length) {
+      setSelectedItemIds(new Set())
+    } else {
+      setSelectedItemIds(new Set(items.map((item) => item.id)))
+    }
+  }
 
   const handleEditItem = (item: BudgetItem) => {
     setEditingItem(item)
@@ -120,7 +159,16 @@ export function BudgetTrackerList() {
 
       {/* Summary Section */}
       <div>
-        <h2 className="mb-4 text-xl font-semibold">Summary</h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-semibold">
+            Summary {selectedItemIds.size > 0 && `(${selectedItemIds.size} selected)`}
+          </h2>
+          {items.length > 0 && (
+            <Button variant="outline" onClick={handleSelectAll}>
+              {selectedItemIds.size === items.length ? 'Deselect All' : 'Select All'}
+            </Button>
+          )}
+        </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="grid gap-1 rounded-md border p-4">
             <p className="text-muted-foreground text-sm">Total Budget</p>
@@ -150,6 +198,8 @@ export function BudgetTrackerList() {
         <BudgetTrackerTable
           data={items}
           balance={currentBalance}
+          selectedItemIds={selectedItemIds}
+          onToggleSelectItem={handleToggleSelectItem}
           onEditItem={handleEditItem}
           onDeleteItem={handleDeleteItem}
           onAddSubItem={handleAddSubItem}
