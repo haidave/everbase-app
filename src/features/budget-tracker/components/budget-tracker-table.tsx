@@ -156,7 +156,12 @@ export function BudgetTrackerTable({
           <TableCell className="font-medium">{item.name}</TableCell>
           <TableCell>
             <div className="flex items-center gap-2">
-              {formatCzechNumber(effectiveAmount)} CZK
+              <span>{formatCzechNumber(effectiveAmount)} CZK</span>
+              {parseFloat(effectiveAmountPaid) > 0 && !item.paid && (
+                <span className="text-muted-foreground text-sm">
+                  ({formatCzechNumber(parseFloat(effectiveAmount) - parseFloat(effectiveAmountPaid))} CZK)
+                </span>
+              )}
               {!affordable && !item.paid && <TriangleAlert className="text-destructive size-3 flex-shrink-0" />}
             </div>
           </TableCell>
@@ -217,7 +222,12 @@ export function BudgetTrackerTable({
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    {formatCzechNumber(subItem.amount)} CZK
+                    <span>{formatCzechNumber(subItem.amount)} CZK</span>
+                    {parseFloat(subItem.amountPaid) > 0 && !subItem.paid && (
+                      <span className="text-muted-foreground text-sm">
+                        ({formatCzechNumber(parseFloat(subItem.amount) - parseFloat(subItem.amountPaid))} CZK)
+                      </span>
+                    )}
                     {!subItemAffordable && !subItem.paid && (
                       <TriangleAlert className="text-destructive size-3 flex-shrink-0" />
                     )}
