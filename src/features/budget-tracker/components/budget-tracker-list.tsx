@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 import { type BudgetItem, type BudgetSubItem } from '@/db/schema'
-import { PlusIcon } from 'lucide-react'
+import { useBudgetFiltersStore } from '@/store/use-budget-filters-store'
+import { Eye, PlusIcon } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { formatCzechNumber } from '@/lib/formatters'
@@ -19,6 +20,7 @@ import { BalanceInput } from './balance-input'
 import { BudgetItemForm } from './budget-item-form'
 import { BudgetSubItemForm } from './budget-sub-item-form'
 import { BudgetTrackerTable } from './budget-tracker-table'
+import { NextMonthProjection } from './next-month-projection'
 
 export function BudgetTrackerList() {
   const { data: balance } = useBudgetBalance()
@@ -47,14 +49,23 @@ export function BudgetTrackerList() {
   // Selected items for filtering summary calculations
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set())
 
+  // Hidden items for visibility filtering (persisted via Zustand)
+  const hiddenItemIds = useBudgetFiltersStore((state) => state.hiddenItemIds)
+  const toggleHideItemStore = useBudgetFiltersStore((state) => state.toggleHideItem)
+  const showAllStore = useBudgetFiltersStore((state) => state.showAll)
+
   if (isLoading) {
     return <div className="p-4">Loading budget tracker...</div>
   }
 
   const currentBalance = balance ? parseFloat(balance.amount) : 0
 
+  // Filter out hidden items first
+  const visibleItems = items.filter((item) => !hiddenItemIds.has(item.id))
+
   // Filter items based on selection (if any items are selected, only show those)
-  const filteredItems = selectedItemIds.size > 0 ? items.filter((item) => selectedItemIds.has(item.id)) : items
+  const filteredItems =
+    selectedItemIds.size > 0 ? visibleItems.filter((item) => selectedItemIds.has(item.id)) : visibleItems
 
   // Calculate total amount and total paid using effective amounts (includes sub-items)
   const totalAmount = filteredItems.reduce((sum, item) => {
@@ -87,11 +98,27 @@ export function BudgetTrackerList() {
   }
 
   const handleSelectAll = () => {
-    if (selectedItemIds.size === items.length) {
+    if (selectedItemIds.size === visibleItems.length) {
       setSelectedItemIds(new Set())
     } else {
-      setSelectedItemIds(new Set(items.map((item) => item.id)))
+      setSelectedItemIds(new Set(visibleItems.map((item) => item.id)))
     }
+  }
+
+  const handleToggleHideItem = (itemId: string) => {
+    toggleHideItemStore(itemId)
+    // Also remove from selected if hiding
+    if (!hiddenItemIds.has(itemId)) {
+      setSelectedItemIds((selectedPrev) => {
+        const newSelected = new Set(selectedPrev)
+        newSelected.delete(itemId)
+        return newSelected
+      })
+    }
+  }
+
+  const handleShowAll = () => {
+    showAllStore()
   }
 
   const handleEditItem = (item: BudgetItem) => {
@@ -155,19 +182,30 @@ export function BudgetTrackerList() {
   return (
     <div className="space-y-6">
       {/* Balance Section */}
-      <BalanceInput />
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <BalanceInput />
+        <NextMonthProjection currentBalance={currentBalance} />
+      </div>
 
       {/* Summary Section */}
       <div>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold">
             Summary {selectedItemIds.size > 0 && `(${selectedItemIds.size} selected)`}
+            {hiddenItemIds.size > 0 && ` • ${hiddenItemIds.size} hidden`}
           </h2>
-          {items.length > 0 && (
-            <Button variant="outline" onClick={handleSelectAll}>
-              {selectedItemIds.size === items.length ? 'Deselect All' : 'Select All'}
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {hiddenItemIds.size > 0 && (
+              <Button variant="outline" onClick={handleShowAll}>
+                Show All ({items.length})
+              </Button>
+            )}
+            {visibleItems.length > 0 && (
+              <Button variant="outline" onClick={handleSelectAll}>
+                {selectedItemIds.size === visibleItems.length ? 'Deselect All' : 'Select All'}
+              </Button>
+            )}
+          </div>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="grid gap-1 rounded-md border p-4">
@@ -196,10 +234,11 @@ export function BudgetTrackerList() {
       {/* Budget Items Table */}
       {items.length > 0 ? (
         <BudgetTrackerTable
-          data={items}
+          data={visibleItems}
           balance={currentBalance}
           selectedItemIds={selectedItemIds}
           onToggleSelectItem={handleToggleSelectItem}
+          onToggleHideItem={handleToggleHideItem}
           onEditItem={handleEditItem}
           onDeleteItem={handleDeleteItem}
           onAddSubItem={handleAddSubItem}
@@ -214,6 +253,42 @@ export function BudgetTrackerList() {
             <PlusIcon />
             Add your first budget item
           </Button>
+        </div>
+      )}
+
+      {/* Hidden Items Section */}
+      {hiddenItemIds.size > 0 && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Hidden Items ({hiddenItemIds.size})</h3>
+          <div className="rounded-md border">
+            <div className="divide-y">
+              {items
+                .filter((item) => hiddenItemIds.has(item.id))
+                .map((item) => (
+                  <div key={item.id} className="flex items-center justify-between p-4">
+                    <div className="flex items-center gap-4">
+                      <span className="font-medium">{item.name}</span>
+                      <span className="text-muted-foreground text-sm">
+                        {formatCzechNumber(
+                          (item as typeof item & { _effectiveAmount?: number })._effectiveAmount ||
+                            parseFloat(item.amount)
+                        )}{' '}
+                        CZK
+                      </span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => handleToggleHideItem(item.id)}
+                      aria-label={`Show ${item.name}`}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+            </div>
+          </div>
         </div>
       )}
 
