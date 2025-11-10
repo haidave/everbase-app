@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { type BudgetItem, type BudgetSubItem } from '@/db/schema'
-import { ChevronDown, ChevronRight, Pencil, Plus, Trash2, TriangleAlert } from 'lucide-react'
+import { ChevronDown, ChevronRight, EyeOff, Pencil, Plus, Trash2, TriangleAlert } from 'lucide-react'
 
 import { formatCzechNumber } from '@/lib/formatters'
 import { cn } from '@/lib/utils'
@@ -14,6 +14,7 @@ interface BudgetTrackerTableProps {
   balance: number
   selectedItemIds: Set<string>
   onToggleSelectItem: (itemId: string) => void
+  onToggleHideItem: (itemId: string) => void
   onEditItem: (item: BudgetItem) => void
   onDeleteItem: (item: BudgetItem) => void
   onAddSubItem: (itemId: string) => void
@@ -27,6 +28,7 @@ export function BudgetTrackerTable({
   balance,
   selectedItemIds,
   onToggleSelectItem,
+  onToggleHideItem,
   onEditItem,
   onDeleteItem,
   onAddSubItem,
@@ -80,7 +82,7 @@ export function BudgetTrackerTable({
             <TableHead>Amount Paid</TableHead>
             <TableHead className="w-[80px]">Paid</TableHead>
             <TableHead>Note</TableHead>
-            <TableHead className="w-[140px]">Actions</TableHead>
+            <TableHead className="w-[180px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -156,7 +158,12 @@ export function BudgetTrackerTable({
           <TableCell className="font-medium">{item.name}</TableCell>
           <TableCell>
             <div className="flex items-center gap-2">
-              {formatCzechNumber(effectiveAmount)} CZK
+              <span>{formatCzechNumber(effectiveAmount)} CZK</span>
+              {parseFloat(effectiveAmountPaid) > 0 && !item.paid && (
+                <span className="text-muted-foreground text-sm">
+                  ({formatCzechNumber(parseFloat(effectiveAmount) - parseFloat(effectiveAmountPaid))} CZK)
+                </span>
+              )}
               {!affordable && !item.paid && <TriangleAlert className="text-destructive size-3 flex-shrink-0" />}
             </div>
           </TableCell>
@@ -173,6 +180,15 @@ export function BudgetTrackerTable({
           </TableCell>
           <TableCell>
             <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => onToggleHideItem(item.id)}
+                aria-label="Hide item"
+              >
+                <EyeOff className="h-4 w-4" />
+              </Button>
               <Button
                 variant="ghost"
                 size="icon"
@@ -217,7 +233,12 @@ export function BudgetTrackerTable({
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    {formatCzechNumber(subItem.amount)} CZK
+                    <span>{formatCzechNumber(subItem.amount)} CZK</span>
+                    {parseFloat(subItem.amountPaid) > 0 && !subItem.paid && (
+                      <span className="text-muted-foreground text-sm">
+                        ({formatCzechNumber(parseFloat(subItem.amount) - parseFloat(subItem.amountPaid))} CZK)
+                      </span>
+                    )}
                     {!subItemAffordable && !subItem.paid && (
                       <TriangleAlert className="text-destructive size-3 flex-shrink-0" />
                     )}
